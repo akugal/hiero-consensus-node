@@ -1,0 +1,9 @@
+// SPDX-License-Identifier: Apache-2.0
+module org.hiero.metrics.api {
+    exports org.hiero.metrics.api;
+    exports org.hiero.metrics.api.core;
+    exports org.hiero.metrics.api.datapoint;
+
+    requires transitive com.swirlds.base;
+    requires static transitive com.github.spotbugs.annotations;
+}
