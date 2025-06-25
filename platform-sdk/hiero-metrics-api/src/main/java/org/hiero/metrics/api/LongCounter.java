@@ -21,7 +21,8 @@ public final class LongCounter extends StatefulMetric<LongCounterDataPoint> impl
 
     @Override
     protected List<DataPointSnapshot> createSnapshots(LongCounterDataPoint datapoint, List<String> dynamicLabelValues) {
-        return List.of(createSnapshot(datapoint.getAsLong(), datapoint.getCreatedTimeMillis(), PrimitiveDataType.LONG, dynamicLabelValues));
+        return List.of(createSnapshot(
+                datapoint.getAsLong(), datapoint.getCreatedTimeMillis(), PrimitiveDataType.LONG, dynamicLabelValues));
     }
 
     @Override

@@ -41,11 +41,11 @@ public final class CompositeNumberGaugeMetricAdapter<D> extends StatefulMetric<D
         Number[] values = valuesGetter.apply(datapoint);
         if (values == null || values.length == 0) {
             throw new IllegalStateException(
-                    "Values cannot be null or empty for " + getMetadata().name());
+                    "Values cannot be null or empty for " + getMetadata().getFullName());
         }
         if (values.length != propertyNames.length) {
             throw new IllegalStateException("Values length does not match value names length for "
-                    + getMetadata().name());
+                    + getMetadata().getFullName());
         }
 
         List<DataPointSnapshot> snapshots = new ArrayList<>(values.length);

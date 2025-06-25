@@ -5,6 +5,7 @@ import com.swirlds.base.ArgumentUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -32,11 +33,17 @@ public abstract class Metric {
     }
 
     protected DataPointSnapshot createSnapshot(
-            Object value, long createdTimeMillis, PrimitiveDataType dataType, List<String> dynamicLabelValues, Label... additionalLabels) {
-        return new DataPointSnapshot(getMetadata(), createdTimeMillis, value, dataType, mergeLabels(dynamicLabelValues, additionalLabels));
+            Object value,
+            long createdTimeMillis,
+            PrimitiveDataType dataType,
+            List<String> dynamicLabelValues,
+            Label... additionalLabels) {
+        return new DataPointSnapshot(
+                getMetadata(), createdTimeMillis, value, dataType, mergeLabels(dynamicLabelValues, additionalLabels));
     }
 
     private List<Label> mergeLabels(List<String> dynamicLabelValues, Label... additionalLabels) {
+        // support no dynamic label values even when dynamic labels declared
         if (dynamicLabelValues.isEmpty()) {
             if (additionalLabels.length == 0) {
                 return List.of(constantLabels);
@@ -47,7 +54,8 @@ public abstract class Metric {
 
         if (dynamicLabelValues.size() != dynamicLabelNames.length) {
             throw new IllegalStateException("Expected " + dynamicLabelNames.length + " label values, but got "
-                    + dynamicLabelValues.size() + " for metric " + getMetadata().name() + " with dynamic labels: "
+                    + dynamicLabelValues.size() + " for metric " + getMetadata().getFullName()
+                    + " with dynamic labels: "
                     + Arrays.toString(dynamicLabelNames));
         }
 
@@ -108,7 +116,11 @@ public abstract class Metric {
         }
 
         public B withConstantLabel(Label label) {
-            constantLabels.put(label.getName(), label);
+            Objects.requireNonNull(label, "label must not be null");
+            Label existingLabel = constantLabels.put(label.getName(), label);
+            if (existingLabel != null && !existingLabel.equals(label)) {
+                throw new IllegalArgumentException(label + " conflicts with existing: " + existingLabel);
+            }
             return self();
         }
 
@@ -121,12 +133,28 @@ public abstract class Metric {
 
         public final M build() {
             for (String dynamicLabelName : dynamicLabelNames) {
-                if (constantLabels.containsKey(dynamicLabelName)) {
-                    throw new IllegalArgumentException(
-                            "Dynamic label name '" + dynamicLabelName + "' conflicts with a constant label.");
+                Label constLabel = constantLabels.get(dynamicLabelName);
+                if (constLabel != null) {
+                    throw new IllegalStateException("Dynamic label name '" + dynamicLabelName
+                            + "' conflicts with a constant label: " + constLabel);
                 }
             }
             return buildMetric();
+        }
+
+        public M register(MetricRegistry registry) {
+            for (Label globalLabel : registry.getGlobalLabels()) {
+                Label existing = constantLabels.put(globalLabel.getName(), globalLabel);
+                if (existing != null) {
+                    throw new IllegalStateException(
+                            "Global label " + globalLabel + " conflicts with a constant label: " + existing);
+                }
+            }
+            return registry.register(build());
+        }
+
+        public M register() {
+            return register(MetricRegistry.getDefault());
         }
 
         protected abstract M buildMetric();

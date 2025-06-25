@@ -28,7 +28,7 @@ public abstract class StatefulMetric<D> extends Metric {
             if (labelValues.length == 0) {
                 throw new IllegalArgumentException(getClass().getSimpleName()
                         + " "
-                        + getMetadata().category() + ":" + getMetadata().name()
+                        + getMetadata().getFullName()
                         + " was created with label names, so you must call labelValues(...)"
                         + " when using it.");
             } else {
@@ -75,7 +75,7 @@ public abstract class StatefulMetric<D> extends Metric {
         for (int i = 0; i < labelValues.length; i++) {
             if (labelValues[i] == null) {
                 throw new IllegalArgumentException("null label value for metric "
-                        + getMetadata().category() + ":" + getMetadata().name()
+                        + getMetadata().getFullName()
                         + " and label "
                         + dynamicLabelNames[i]);
             }
@@ -92,7 +92,8 @@ public abstract class StatefulMetric<D> extends Metric {
         }
 
         protected B withContainerFactory(Supplier<D> valueContainerFactory) {
-            this.valueContainerFactory = valueContainerFactory;
+            this.valueContainerFactory =
+                    Objects.requireNonNull(valueContainerFactory, "Value container factory must not be null");
             return self();
         }
     }

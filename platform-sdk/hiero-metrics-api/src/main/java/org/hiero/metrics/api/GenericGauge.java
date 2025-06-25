@@ -9,6 +9,7 @@ import java.util.function.Function;
 import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.PrimitiveDataType;
 import org.hiero.metrics.api.core.StatefulMetric;
+import org.hiero.metrics.api.core.Unit;
 import org.hiero.metrics.api.datapoint.GaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.AtomicReferenceGaugeDataPoint;
 
@@ -19,7 +20,7 @@ public final class GenericGauge<T, V> extends StatefulMetric<GaugeDataPoint<T, V
     private GenericGauge(Builder<T, V> builder) {
         super(builder);
 
-        dataType = Objects.requireNonNull(builder.dataType, "Data type must not be null");
+        dataType = Objects.requireNonNull(builder.dataType, "DataType must not be null");
     }
 
     public static <T, V> Builder<T, V> builder(String name) {
@@ -35,9 +36,10 @@ public final class GenericGauge<T, V> extends StatefulMetric<GaugeDataPoint<T, V
     }
 
     public static Builder<Duration, Double> durationBuilder(String name, ChronoUnit unit) {
-        // TODO automatically map time unit to metric unit
-        return new Builder<Duration, Double>(name).withValueConverter(Double.class, duration ->
-                (double) (duration.toNanos() / unit.getDuration().toNanos()));
+        return new Builder<Duration, Double>(name)
+                .withUnit(Unit.getUnit(unit))
+                .withValueConverter(Double.class, duration ->
+                        (double) (duration.toNanos() / unit.getDuration().toNanos()));
     }
 
     @Override
@@ -69,6 +71,9 @@ public final class GenericGauge<T, V> extends StatefulMetric<GaugeDataPoint<T, V
         }
 
         public Builder<T, V> withValueConverter(Class<V> valueType, Function<T, V> valueConverter) {
+            Objects.requireNonNull(valueType, "ValueType must not be null");
+            Objects.requireNonNull(valueConverter, "ValueConverter must not be null");
+
             dataType = PrimitiveDataType.mapDataType(valueType);
             withContainerFactory(() -> new AtomicReferenceGaugeDataPoint<>(valueConverter));
             return this;
