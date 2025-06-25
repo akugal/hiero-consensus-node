@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
-import org.hiero.metrics.api.core.MetricCallback;
 import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.Metric;
+import org.hiero.metrics.api.core.MetricCallback;
 import org.hiero.metrics.api.core.PrimitiveDataType;
 
 public final class CallbackMetric<T> extends Metric {
@@ -19,10 +18,8 @@ public final class CallbackMetric<T> extends Metric {
     private CallbackMetric(Builder<T> builder) {
         super(builder);
 
-        requireNonNull(builder.type, "Type class cannot be null");
-
-        callback = requireNonNull(builder.callback, "Callback cannot be null");
-        dataType = PrimitiveDataType.mapDataType(builder.type);
+        callback = Objects.requireNonNull(builder.callback, "Callback must not be null");
+        dataType = Objects.requireNonNull(builder.dataType, "Data type must not be null");
     }
 
     public static <T> Builder<T> builder(String name) {
@@ -32,23 +29,23 @@ public final class CallbackMetric<T> extends Metric {
     @Override
     public List<DataPointSnapshot> snapshot() {
         List<DataPointSnapshot> dataPoints = new ArrayList<>();
-        callback.accept(
-                (value, labelValues) -> dataPoints.add(createSnapshot(value, dataType, List.of(labelValues))));
+        callback.accept((value, labelValues) -> dataPoints.add(createSnapshot(value, dataType, List.of(labelValues))));
         return dataPoints;
     }
 
     public static class Builder<T> extends Metric.Builder<Builder<T>, CallbackMetric<T>> {
 
         private Consumer<MetricCallback<T>> callback;
-        private Class<T> type;
+        private PrimitiveDataType dataType;
 
         public Builder(String name) {
             super(name);
         }
 
-        public Builder<T> withCallback(Class<T> type, Consumer<MetricCallback<T>> callback) {
-            this.type = type;
-            this.callback = callback;
+        public Builder<T> withCallback(Class<T> valueType, Consumer<MetricCallback<T>> callback) {
+            Objects.requireNonNull(valueType, "Type class cannot be null");
+            this.dataType = PrimitiveDataType.mapDataType(valueType);
+            this.callback = Objects.requireNonNull(callback, "Callback consumer cannot be null");
             return this;
         }
 

@@ -21,8 +21,7 @@ public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> impl
     private DoubleGauge(Builder builder) {
         super(builder);
 
-        snapshotValueSupplier =
-                Objects.requireNonNull(builder.snapshotValueSupplier, "Snapshot value supplier must not be null");
+        snapshotValueSupplier = builder.snapshotValueSupplier;
     }
 
     public static Builder builder(String name) {
@@ -75,7 +74,7 @@ public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> impl
 
     public static class Builder extends StatefulMetric.Builder<DoubleGaugeDataPoint, Builder, DoubleGauge> {
 
-        private DoubleSupplier initializer = () -> 0L;
+        private DoubleSupplier initializer = DoubleGaugeDataPoint.DEFAULT_INIT;
         private DoubleBinaryOperator operator;
         private ToDoubleFunction<DoubleGaugeDataPoint> snapshotValueSupplier = DoubleSupplier::getAsDouble;
 
@@ -98,7 +97,7 @@ public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> impl
             return this;
         }
 
-        public Builder resetOnSnapshot() {
+        public Builder withResetOnSnapshot() {
             snapshotValueSupplier = DoubleGaugeDataPoint::getAndReset;
             return this;
         }

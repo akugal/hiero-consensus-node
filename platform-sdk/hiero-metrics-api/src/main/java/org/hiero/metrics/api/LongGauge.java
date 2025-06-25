@@ -21,8 +21,7 @@ public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implemen
     private LongGauge(Builder builder) {
         super(builder);
 
-        snapshotValueSupplier =
-                Objects.requireNonNull(builder.snapshotValueSupplier, "Snapshot value supplier must not be null");
+        snapshotValueSupplier = builder.snapshotValueSupplier;
     }
 
     public static Builder builder(String name) {
@@ -75,7 +74,7 @@ public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implemen
 
     public static class Builder extends StatefulMetric.Builder<LongGaugeDataPoint, Builder, LongGauge> {
 
-        private LongSupplier initializer = () -> 0L;
+        private LongSupplier initializer = LongGaugeDataPoint.DEFAULT_INIT;
         private LongBinaryOperator operator;
         private ToLongFunction<LongGaugeDataPoint> snapshotValueSupplier = LongSupplier::getAsLong;
 
@@ -98,7 +97,7 @@ public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implemen
             return this;
         }
 
-        public Builder resetOnSnapshot() {
+        public Builder withResetOnSnapshot() {
             snapshotValueSupplier = LongGaugeDataPoint::getAndReset;
             return this;
         }
