@@ -34,7 +34,11 @@ public final class NumberGaugeMetricAdapter<D, V extends Number> extends Statefu
 
     @Override
     protected List<DataPointSnapshot> createSnapshots(D datapoint, List<String> dynamicLabelValues) {
-        return List.of(createSnapshot(valueGetter.apply(datapoint), PrimitiveDataType.DOUBLE, dynamicLabelValues));
+        V value = valueGetter.apply(datapoint);
+        if (value == null) {
+            return List.of();
+        }
+        return List.of(createSnapshot(value, PrimitiveDataType.DOUBLE, dynamicLabelValues));
     }
 
     public static class Builder<D, V extends Number>

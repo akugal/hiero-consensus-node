@@ -13,7 +13,7 @@ public abstract class StatefulMetric<D> extends Metric {
 
     private final Supplier<D> dataPointFactory;
 
-    private final D noLabelsDataPoint;
+    private volatile D noLabelsDataPoint;
 
     private final ConcurrentHashMap<List<String>, D> labeledDataPoints = new ConcurrentHashMap<>();
 
@@ -21,7 +21,6 @@ public abstract class StatefulMetric<D> extends Metric {
         super(builder);
 
         dataPointFactory = Objects.requireNonNull(builder.valueContainerFactory, "Data point factory must not be null");
-        noLabelsDataPoint = dataPointFactory.get();
     }
 
     public final D getOrCreateLabeled(String... labelValues) {
@@ -60,6 +59,13 @@ public abstract class StatefulMetric<D> extends Metric {
     }
 
     protected final D getNoLabels() {
+        if (noLabelsDataPoint == null) {
+            synchronized (this) {
+                if (noLabelsDataPoint == null) {
+                    noLabelsDataPoint = dataPointFactory.get();
+                }
+            }
+        }
         return noLabelsDataPoint;
     }
 

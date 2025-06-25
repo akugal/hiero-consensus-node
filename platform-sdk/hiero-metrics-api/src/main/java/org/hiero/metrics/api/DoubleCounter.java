@@ -8,7 +8,9 @@ import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.DoubleCounterDataPoint;
 import org.hiero.metrics.api.datapoint.impl.DoubleAdderCounterDataPoint;
 
-public final class DoubleCounter extends StatefulMetric<DoubleCounterDataPoint> implements DoubleCounterDataPoint {
+public final class DoubleCounter
+        extends StatefulMetric<DoubleCounterDataPoint>
+        implements DoubleCounterDataPoint {
 
     private DoubleCounter(Builder builder) {
         super(builder);
@@ -21,7 +23,12 @@ public final class DoubleCounter extends StatefulMetric<DoubleCounterDataPoint> 
     @Override
     protected List<DataPointSnapshot> createSnapshots(
             DoubleCounterDataPoint datapoint, List<String> dynamicLabelValues) {
-        return List.of(createSnapshot(datapoint.getAsDouble(), PrimitiveDataType.DOUBLE, dynamicLabelValues));
+        return List.of(createSnapshot(datapoint.getAsDouble(), datapoint.getCreatedTimeMillis(), PrimitiveDataType.DOUBLE, dynamicLabelValues));
+    }
+
+    @Override
+    public long getCreatedTimeMillis() {
+        return getNoLabels().getCreatedTimeMillis();
     }
 
     @Override

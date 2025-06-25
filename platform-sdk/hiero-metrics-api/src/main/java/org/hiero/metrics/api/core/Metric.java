@@ -28,7 +28,12 @@ public abstract class Metric {
 
     protected DataPointSnapshot createSnapshot(
             Object value, PrimitiveDataType dataType, List<String> dynamicLabelValues, Label... additionalLabels) {
-        return new DataPointSnapshot(getMetadata(), value, dataType, mergeLabels(dynamicLabelValues, additionalLabels));
+        return createSnapshot(value, 0, dataType, dynamicLabelValues, additionalLabels);
+    }
+
+    protected DataPointSnapshot createSnapshot(
+            Object value, long createdTimeMillis, PrimitiveDataType dataType, List<String> dynamicLabelValues, Label... additionalLabels) {
+        return new DataPointSnapshot(getMetadata(), createdTimeMillis, value, dataType, mergeLabels(dynamicLabelValues, additionalLabels));
     }
 
     private List<Label> mergeLabels(List<String> dynamicLabelValues, Label... additionalLabels) {

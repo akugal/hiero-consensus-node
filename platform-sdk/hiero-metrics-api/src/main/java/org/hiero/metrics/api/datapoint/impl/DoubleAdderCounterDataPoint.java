@@ -6,7 +6,13 @@ import org.hiero.metrics.api.datapoint.DoubleCounterDataPoint;
 
 public final class DoubleAdderCounterDataPoint implements DoubleCounterDataPoint {
 
+    private final long createdTimeMillis = System.currentTimeMillis();
     private final DoubleAdder adder = new DoubleAdder();
+
+    @Override
+    public long getCreatedTimeMillis() {
+        return createdTimeMillis;
+    }
 
     @Override
     public void increment(double value) {
