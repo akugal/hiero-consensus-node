@@ -5,6 +5,13 @@ import org.hiero.metrics.api.datapoint.LongCounterDataPoint;
 
 public abstract class AbstractLongCounterDataPoint implements LongCounterDataPoint {
 
+    private final long createdTimeMillis = System.currentTimeMillis();
+
+    @Override
+    public long getCreatedTimeMillis() {
+        return createdTimeMillis;
+    }
+
     @Override
     public void increment(long value) {
         if (value < 0) {

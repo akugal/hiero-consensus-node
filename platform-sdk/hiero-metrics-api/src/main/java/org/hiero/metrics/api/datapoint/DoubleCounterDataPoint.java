@@ -5,6 +5,8 @@ import java.util.function.DoubleSupplier;
 
 public interface DoubleCounterDataPoint extends DoubleSupplier {
 
+    long getCreatedTimeMillis();
+
     /**
      * Increments the counter by the specified value.
      *

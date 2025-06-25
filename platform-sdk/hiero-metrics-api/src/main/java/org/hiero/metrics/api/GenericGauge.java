@@ -42,7 +42,11 @@ public final class GenericGauge<T, V> extends StatefulMetric<GaugeDataPoint<T, V
 
     @Override
     protected List<DataPointSnapshot> createSnapshots(GaugeDataPoint<T, V> datapoint, List<String> dynamicLabelValues) {
-        return List.of(createSnapshot(datapoint.get(), dataType, dynamicLabelValues));
+        V value = datapoint.get();
+        if (value == null) {
+            return List.of();
+        }
+        return List.of(createSnapshot(value, dataType, dynamicLabelValues));
     }
 
     @Override
