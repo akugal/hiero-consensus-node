@@ -1,8 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.datapoint.impl;
 
-import org.hiero.metrics.api.datapoint.DoubleCounterDataPoint;
-
 import java.util.concurrent.atomic.DoubleAdder;
+import org.hiero.metrics.api.datapoint.DoubleCounterDataPoint;
 
 public final class DoubleAdderCounterDataPoint implements DoubleCounterDataPoint {
 

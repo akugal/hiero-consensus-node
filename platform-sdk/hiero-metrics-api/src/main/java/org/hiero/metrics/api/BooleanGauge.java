@@ -1,16 +1,14 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import java.util.List;
 import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.PrimitiveDataType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.BooleanGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.AtomicBooleanGaugeDataPoint;
 
-import java.util.List;
-
-public final class BooleanGauge
-        extends StatefulMetric<BooleanGaugeDataPoint>
-        implements BooleanGaugeDataPoint {
+public final class BooleanGauge extends StatefulMetric<BooleanGaugeDataPoint> implements BooleanGaugeDataPoint {
 
     private BooleanGauge(Builder builder) {
         super(builder);
@@ -21,7 +19,8 @@ public final class BooleanGauge
     }
 
     @Override
-    protected List<DataPointSnapshot> createSnapshots(BooleanGaugeDataPoint datapoint, List<String> dynamicLabelValues) {
+    protected List<DataPointSnapshot> createSnapshots(
+            BooleanGaugeDataPoint datapoint, List<String> dynamicLabelValues) {
         return List.of(createSnapshot(datapoint.getAsBoolean(), PrimitiveDataType.BOOLEAN, dynamicLabelValues));
     }
 

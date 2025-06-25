@@ -1,9 +1,9 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.datapoint.impl;
-
-import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongSupplier;
+import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
 
 public class AtomicLongGaugeDataPoint implements LongGaugeDataPoint {
 

@@ -1,7 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.core;
 
 import com.swirlds.base.ArgumentUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,12 +41,13 @@ public abstract class Metric {
         }
 
         if (dynamicLabelValues.size() != dynamicLabelNames.length) {
-            throw new IllegalStateException(
-                    "Expected " + dynamicLabelNames.length + " label values, but got " + dynamicLabelValues.size() + " for metric "
-                            + getMetadata().name() + " with dynamic labels: " + Arrays.toString(dynamicLabelNames));
+            throw new IllegalStateException("Expected " + dynamicLabelNames.length + " label values, but got "
+                    + dynamicLabelValues.size() + " for metric " + getMetadata().name() + " with dynamic labels: "
+                    + Arrays.toString(dynamicLabelNames));
         }
 
-        List<Label> labels = new ArrayList<>(constantLabels.length + dynamicLabelNames.length + additionalLabels.length);
+        List<Label> labels =
+                new ArrayList<>(constantLabels.length + dynamicLabelNames.length + additionalLabels.length);
 
         labels.addAll(Arrays.asList(constantLabels));
 
@@ -65,7 +66,7 @@ public abstract class Metric {
 
         private String category = "";
         private String description = "";
-        private String unit =  "";
+        private String unit = "";
 
         private final TreeMap<String, Label> constantLabels = new TreeMap<>();
         private final List<String> dynamicLabelNames = new ArrayList<>();
@@ -116,7 +117,8 @@ public abstract class Metric {
         public final M build() {
             for (String dynamicLabelName : dynamicLabelNames) {
                 if (constantLabels.containsKey(dynamicLabelName)) {
-                    throw new IllegalArgumentException("Dynamic label name '" + dynamicLabelName + "' conflicts with a constant label.");
+                    throw new IllegalArgumentException(
+                            "Dynamic label name '" + dynamicLabelName + "' conflicts with a constant label.");
                 }
             }
             return buildMetric();

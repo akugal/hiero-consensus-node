@@ -1,8 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.datapoint.impl;
 
-import org.hiero.metrics.api.datapoint.BooleanGaugeDataPoint;
-
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.hiero.metrics.api.datapoint.BooleanGaugeDataPoint;
 
 public final class AtomicBooleanGaugeDataPoint implements BooleanGaugeDataPoint {
 

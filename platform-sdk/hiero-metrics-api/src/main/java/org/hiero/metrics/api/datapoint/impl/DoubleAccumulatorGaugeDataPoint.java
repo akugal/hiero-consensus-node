@@ -1,5 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.datapoint.impl;
-
 
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;

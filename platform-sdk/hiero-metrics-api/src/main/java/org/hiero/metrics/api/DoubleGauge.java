@@ -1,5 +1,11 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleSupplier;
+import java.util.function.ToDoubleFunction;
 import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.PrimitiveDataType;
 import org.hiero.metrics.api.core.StatUtils;
@@ -8,22 +14,15 @@ import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.AtomicDoubleGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.DoubleAccumulatorGaugeDataPoint;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.function.DoubleBinaryOperator;
-import java.util.function.DoubleSupplier;
-import java.util.function.ToDoubleFunction;
-
-public final class DoubleGauge
-        extends StatefulMetric<DoubleGaugeDataPoint>
-        implements DoubleGaugeDataPoint {
+public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> implements DoubleGaugeDataPoint {
 
     private final ToDoubleFunction<DoubleGaugeDataPoint> snapshotValueSupplier;
 
     private DoubleGauge(Builder builder) {
         super(builder);
 
-        snapshotValueSupplier = Objects.requireNonNull(builder.snapshotValueSupplier, "Snapshot value supplier must not be null");
+        snapshotValueSupplier =
+                Objects.requireNonNull(builder.snapshotValueSupplier, "Snapshot value supplier must not be null");
     }
 
     public static Builder builder(String name) {
@@ -31,20 +30,15 @@ public final class DoubleGauge
     }
 
     public static Builder sumBuilder(String name) {
-        return builder(name)
-                .withOperator(StatUtils.DOUBLE_SUM);
+        return builder(name).withOperator(StatUtils.DOUBLE_SUM);
     }
 
     public static Builder maxBuilder(String name) {
-        return builder(name)
-                .withOperator(StatUtils.DOUBLE_MAX)
-                .withInitValue(Double.MIN_VALUE);
+        return builder(name).withOperator(StatUtils.DOUBLE_MAX).withInitValue(Double.MIN_VALUE);
     }
 
     public static Builder minBuilder(String name) {
-        return builder(name)
-                .withOperator(StatUtils.DOUBLE_MIN)
-                .withInitValue(Double.MAX_VALUE);
+        return builder(name).withOperator(StatUtils.DOUBLE_MIN).withInitValue(Double.MAX_VALUE);
     }
 
     @Override

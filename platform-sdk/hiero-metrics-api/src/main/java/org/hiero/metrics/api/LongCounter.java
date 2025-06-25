@@ -1,17 +1,15 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import java.util.List;
 import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.PrimitiveDataType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.LongCounterDataPoint;
-import org.hiero.metrics.api.datapoint.impl.LongAdderCounterDataPoint;
 import org.hiero.metrics.api.datapoint.impl.AtomicLongCounterDataPoint;
+import org.hiero.metrics.api.datapoint.impl.LongAdderCounterDataPoint;
 
-import java.util.List;
-
-public final class LongCounter
-        extends StatefulMetric<LongCounterDataPoint>
-        implements LongCounterDataPoint {
+public final class LongCounter extends StatefulMetric<LongCounterDataPoint> implements LongCounterDataPoint {
 
     private LongCounter(Builder builder) {
         super(builder);

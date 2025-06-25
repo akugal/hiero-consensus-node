@@ -1,11 +1,9 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.datapoint.impl;
 
-import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
-
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
-import java.util.function.LongBinaryOperator;
+import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 
 public class AtomicDoubleGaugeDataPoint implements DoubleGaugeDataPoint {
 
