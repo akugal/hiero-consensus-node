@@ -1,5 +1,6 @@
 package org.hiero.metrics.api.core;
 
+import java.util.function.DoubleBinaryOperator;
 import java.util.function.LongBinaryOperator;
 
 public final class StatUtils {
@@ -19,10 +20,14 @@ public final class StatUtils {
     public static final LongBinaryOperator LONG_SUM = Long::sum;
     public static final LongBinaryOperator LONG_MIN = Long::min;
     public static final LongBinaryOperator LONG_MAX = Long::max;
-    public static final LongBinaryOperator LONG_LATEST = (prev, cur) -> cur;
 
-    public static final LongBinaryOperator LONG_AVG_DEFAULT = (prev, cur) -> (long) (prev * (1 - WEIGHT_DEFAULT) + cur * WEIGHT_DEFAULT);
-    public static final LongBinaryOperator LONG_AVG_VOLATILE = (prev, cur) -> (long) (prev * (1 - WEIGHT_VOLATILE) + cur * WEIGHT_VOLATILE);
+    public static final DoubleBinaryOperator DOUBLE_SUM = Double::sum;
+    public static final DoubleBinaryOperator DOUBLE_MIN = Double::min;
+    public static final DoubleBinaryOperator DOUBLE_MAX = Double::max;
+
+    public static final DoubleBinaryOperator DOUBLE_AVG_DEFAULT = (prev, cur) ->  prev * (1 - WEIGHT_DEFAULT) + cur * WEIGHT_DEFAULT;
+    public static final DoubleBinaryOperator DOUBLE_AVG_VOLATILE = (prev, cur) -> prev * (1 - WEIGHT_VOLATILE) + cur * WEIGHT_VOLATILE;
+    public static final DoubleBinaryOperator DOUBLE_AVG_SMOOTH = (prev, cur) -> prev * (1 - WEIGHT_SMOOTH) + cur * WEIGHT_SMOOTH;
 
     private StatUtils() {}
 }
