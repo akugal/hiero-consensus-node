@@ -1,16 +1,16 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
-import org.hiero.metrics.api.core.Callback;
-import org.hiero.metrics.api.core.DataPointSnapshot;
-import org.hiero.metrics.api.core.Metric;
-import org.hiero.metrics.api.core.PrimitiveDataType;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-
-import static java.util.Objects.requireNonNull;
+import org.hiero.metrics.api.core.Callback;
+import org.hiero.metrics.api.core.DataPointSnapshot;
+import org.hiero.metrics.api.core.Metric;
+import org.hiero.metrics.api.core.PrimitiveDataType;
 
 public final class CallbackMetric<T> extends Metric {
 
@@ -33,7 +33,8 @@ public final class CallbackMetric<T> extends Metric {
     @Override
     public List<DataPointSnapshot> snapshot() {
         List<DataPointSnapshot> dataPoints = new ArrayList<>();
-        callback.accept((value, labelValues) -> dataPoints.add(createSnapshot(value, dataType, Arrays.asList(labelValues))));
+        callback.accept(
+                (value, labelValues) -> dataPoints.add(createSnapshot(value, dataType, Arrays.asList(labelValues))));
         return dataPoints;
     }
 

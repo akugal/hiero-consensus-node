@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.core;
 
 import java.util.ArrayList;
@@ -26,12 +27,11 @@ public abstract class StatefulMetric<D> extends Metric {
     public final D getOrCreateLabeled(String... labelValues) {
         if (labelValues.length != dynamicLabelNames.length) {
             if (labelValues.length == 0) {
-                throw new IllegalArgumentException(
-                        getClass().getSimpleName()
-                                + " "
-                                + getMetadata().category() + ":" + getMetadata().name()
-                                + " was created with label names, so you must call labelValues(...)"
-                                + " when using it.");
+                throw new IllegalArgumentException(getClass().getSimpleName()
+                        + " "
+                        + getMetadata().category() + ":" + getMetadata().name()
+                        + " was created with label names, so you must call labelValues(...)"
+                        + " when using it.");
             } else {
                 throw new IllegalArgumentException(
                         "Expected " + dynamicLabelNames.length + " label values, but got " + labelValues.length + ".");
@@ -40,8 +40,7 @@ public abstract class StatefulMetric<D> extends Metric {
 
         checkNoNullLabels(labelValues);
 
-        return labeledDataPoints.computeIfAbsent(
-                Arrays.asList(labelValues), labels -> dataPointFactory.get());
+        return labeledDataPoints.computeIfAbsent(Arrays.asList(labelValues), labels -> dataPointFactory.get());
     }
 
     @Override
@@ -69,11 +68,10 @@ public abstract class StatefulMetric<D> extends Metric {
     private void checkNoNullLabels(String[] labelValues) {
         for (int i = 0; i < labelValues.length; i++) {
             if (labelValues[i] == null) {
-                throw new IllegalArgumentException(
-                        "null label value for metric "
-                                + getMetadata().category() + ":" + getMetadata().name()
-                                + " and label "
-                                + dynamicLabelNames[i]);
+                throw new IllegalArgumentException("null label value for metric "
+                        + getMetadata().category() + ":" + getMetadata().name()
+                        + " and label "
+                        + dynamicLabelNames[i]);
             }
         }
     }

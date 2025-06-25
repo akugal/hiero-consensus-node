@@ -1,16 +1,15 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
-
-import org.hiero.metrics.api.core.DataPointSnapshot;
-import org.hiero.metrics.api.core.PrimitiveDataType;
-import org.hiero.metrics.api.core.StatefulMetric;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.hiero.metrics.api.core.DataPointSnapshot;
+import org.hiero.metrics.api.core.PrimitiveDataType;
+import org.hiero.metrics.api.core.StatefulMetric;
 
-public final class NumberGaugeMetricAdapter<D, V extends Number>
-        extends StatefulMetric<D> implements Supplier<D> {
+public final class NumberGaugeMetricAdapter<D, V extends Number> extends StatefulMetric<D> implements Supplier<D> {
 
     private final Function<D, V> valueGetter;
 

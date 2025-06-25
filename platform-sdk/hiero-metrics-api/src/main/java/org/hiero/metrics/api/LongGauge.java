@@ -1,29 +1,28 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
-
-import org.hiero.metrics.api.core.DataPointSnapshot;
-import org.hiero.metrics.api.core.PrimitiveDataType;
-import org.hiero.metrics.api.core.StatefulMetric;
-import org.hiero.metrics.api.core.StatUtils;
-import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
-import org.hiero.metrics.api.datapoint.impl.AtomicLongGaugeDataPoint;
-import org.hiero.metrics.api.datapoint.impl.LongAccumulatorGaugeDataPoint;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.function.LongBinaryOperator;
 import java.util.function.LongSupplier;
 import java.util.function.ToLongFunction;
+import org.hiero.metrics.api.core.DataPointSnapshot;
+import org.hiero.metrics.api.core.PrimitiveDataType;
+import org.hiero.metrics.api.core.StatUtils;
+import org.hiero.metrics.api.core.StatefulMetric;
+import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
+import org.hiero.metrics.api.datapoint.impl.AtomicLongGaugeDataPoint;
+import org.hiero.metrics.api.datapoint.impl.LongAccumulatorGaugeDataPoint;
 
-public final class LongGauge
-        extends StatefulMetric<LongGaugeDataPoint>
-        implements LongGaugeDataPoint {
+public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implements LongGaugeDataPoint {
 
     private final ToLongFunction<LongGaugeDataPoint> snapshotValueSupplier;
 
     private LongGauge(Builder builder) {
         super(builder);
 
-        snapshotValueSupplier = Objects.requireNonNull(builder.snapshotValueSupplier, "Snapshot value supplier must not be null");
+        snapshotValueSupplier =
+                Objects.requireNonNull(builder.snapshotValueSupplier, "Snapshot value supplier must not be null");
     }
 
     public static Builder builder(String name) {
@@ -31,20 +30,15 @@ public final class LongGauge
     }
 
     public static Builder sumBuilder(String name) {
-        return builder(name)
-                .withOperator(StatUtils.LONG_SUM);
+        return builder(name).withOperator(StatUtils.LONG_SUM);
     }
 
     public static Builder maxBuilder(String name) {
-        return builder(name)
-                .withOperator(StatUtils.LONG_MAX)
-                .withInitValue(Long.MIN_VALUE);
+        return builder(name).withOperator(StatUtils.LONG_MAX).withInitValue(Long.MIN_VALUE);
     }
 
     public static Builder minBuilder(String name) {
-        return builder(name)
-                .withOperator(StatUtils.LONG_MIN)
-                .withInitValue(Long.MAX_VALUE);
+        return builder(name).withOperator(StatUtils.LONG_MIN).withInitValue(Long.MAX_VALUE);
     }
 
     @Override

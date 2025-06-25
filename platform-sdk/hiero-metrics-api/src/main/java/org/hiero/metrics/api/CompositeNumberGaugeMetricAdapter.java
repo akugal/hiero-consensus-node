@@ -1,21 +1,19 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
-import org.hiero.metrics.api.core.DataPointSnapshot;
-import org.hiero.metrics.api.core.Label;
-import org.hiero.metrics.api.core.PrimitiveDataType;
-import org.hiero.metrics.api.core.StatefulMetric;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.hiero.metrics.api.core.DataPointSnapshot;
+import org.hiero.metrics.api.core.Label;
+import org.hiero.metrics.api.core.PrimitiveDataType;
+import org.hiero.metrics.api.core.StatefulMetric;
 
-import static java.util.Objects.requireNonNull;
-
-public final class CompositeNumberGaugeMetricAdapter<D>
-        extends StatefulMetric<D>
-        implements Supplier<D> {
+public final class CompositeNumberGaugeMetricAdapter<D> extends StatefulMetric<D> implements Supplier<D> {
 
     private final String propertyLabel;
     private final String[] propertyNames;
@@ -42,22 +40,27 @@ public final class CompositeNumberGaugeMetricAdapter<D>
     protected List<DataPointSnapshot> createSnapshots(D datapoint, List<String> dynamicLabelValues) {
         Number[] values = valuesGetter.apply(datapoint);
         if (values == null || values.length == 0) {
-            throw new IllegalStateException("Values cannot be null or empty for " + getMetadata().name());
+            throw new IllegalStateException(
+                    "Values cannot be null or empty for " + getMetadata().name());
         }
         if (values.length != propertyNames.length) {
-            throw new IllegalStateException("Values length does not match value names length for " + getMetadata().name());
+            throw new IllegalStateException("Values length does not match value names length for "
+                    + getMetadata().name());
         }
 
         List<DataPointSnapshot> snapshots = new ArrayList<>(values.length);
         for (int i = 0; i < values.length; i++) {
-            snapshots.add(createSnapshot(values[i], PrimitiveDataType.DOUBLE, dynamicLabelValues, new Label(propertyLabel, propertyNames[i])));
+            snapshots.add(createSnapshot(
+                    values[i],
+                    PrimitiveDataType.DOUBLE,
+                    dynamicLabelValues,
+                    new Label(propertyLabel, propertyNames[i])));
         }
 
         return snapshots;
     }
 
-    public static class Builder<D>
-            extends StatefulMetric.Builder<D, Builder<D>, CompositeNumberGaugeMetricAdapter<D>> {
+    public static class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, CompositeNumberGaugeMetricAdapter<D>> {
 
         private String propertyLabel;
         private String[] propertyNames;
