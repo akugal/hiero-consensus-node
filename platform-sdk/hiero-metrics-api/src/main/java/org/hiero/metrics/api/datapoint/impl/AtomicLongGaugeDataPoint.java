@@ -17,11 +17,11 @@ public class AtomicLongGaugeDataPoint implements LongGaugeDataPoint {
     }
 
     public AtomicLongGaugeDataPoint(long initValue) {
-        this(() -> initValue);
+        this(initValue == 0L ? DEFAULT_INIT : () -> initValue);
     }
 
     public AtomicLongGaugeDataPoint() {
-        this(0L);
+        this(DEFAULT_INIT);
     }
 
     @Override

@@ -9,6 +9,8 @@ import java.util.function.LongBinaryOperator;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
+
+import com.swirlds.base.ArgumentUtils;
 import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.PrimitiveDataType;
@@ -22,18 +24,19 @@ import org.hiero.metrics.api.datapoint.impl.LongGaugeCompositeArrayDataPoint;
 
 public final class LongGaugeComposite extends StatefulMetric<LongGaugeCompositeDataPoint> {
 
-    private final String classifierLabel;
-    private final String[] dataPointNames;
+    private final Label[] dataPointsLabels;
     private final ToLongFunction<LongGaugeDataPoint> snapshotValueSupplier;
 
     private LongGaugeComposite(Builder builder) {
         super(builder);
 
-        classifierLabel = Objects.requireNonNull(builder.classifierLabel, "Classifier label must not be null");
-        dataPointNames = Objects.requireNonNull(builder.dataPointNames, "Data point names must not be null")
-                .toArray(new String[0]);
-        snapshotValueSupplier =
-                Objects.requireNonNull(builder.snapshotValueSupplier, "Snapshot value supplier must not be null");
+        Objects.requireNonNull(builder.classifierLabel, "Classifier label must not be null");
+        Objects.requireNonNull(builder.dataPointNames, "Data point names must not be null");
+
+        dataPointsLabels = builder.dataPointNames.stream()
+                .map(name -> new Label(builder.classifierLabel, name))
+                .toArray(Label[]::new);
+        snapshotValueSupplier = builder.snapshotValueSupplier;
     }
 
     public static Builder builder(String name) {
@@ -51,7 +54,7 @@ public final class LongGaugeComposite extends StatefulMetric<LongGaugeCompositeD
                         value,
                         PrimitiveDataType.LONG,
                         dynamicLabelValues,
-                        new Label(classifierLabel, dataPointNames[i])));
+                        dataPointsLabels[i]));
             }
         }
         return snapshots;
@@ -74,39 +77,44 @@ public final class LongGaugeComposite extends StatefulMetric<LongGaugeCompositeD
         }
 
         public Builder withClassifierLabel(String classifierLabel) {
-            this.classifierLabel = classifierLabel;
+            this.classifierLabel = ArgumentUtils.throwArgBlank(classifierLabel, "classifierLabel");
             return this;
         }
 
         public Builder withAccumulatorDataPoint(String name, LongBinaryOperator operator, long initValue) {
-            dataPointNames.add(name);
-            dataPointFactories.add(() -> new LongAccumulatorGaugeDataPoint(operator, initValue));
-            return this;
+            Objects.requireNonNull(operator, "operator must not be null");
+            return withDataPointContainerFactory(name, () -> new LongAccumulatorGaugeDataPoint(operator, initValue));
         }
 
-        public Builder withSum() {
+        public Builder withSumDataPoint() {
             return withAccumulatorDataPoint("sum", StatUtils.LONG_SUM, 0L);
         }
 
-        public Builder withMax() {
+        public Builder withMaxDataPoint() {
             return withAccumulatorDataPoint("max", StatUtils.LONG_MAX, Long.MIN_VALUE);
         }
 
-        public Builder withMin() {
+        public Builder withMinDataPoint() {
             return withAccumulatorDataPoint("min", StatUtils.LONG_MIN, Long.MAX_VALUE);
         }
 
-        public Builder withLatestDataPoint(String name) {
-            return withLatestDataPoint(name, 0L);
+        public Builder withLatestValueDataPoint(String name) {
+            return withLatestValueDataPoint(name, 0L);
         }
 
-        public Builder withLatestDataPoint(String name, long initValue) {
+        public Builder withLatestValueDataPoint(String name, long initValue) {
+            return withDataPointContainerFactory(name, () -> new AtomicLongGaugeDataPoint(initValue));
+        }
+
+        private Builder withDataPointContainerFactory(String name, Supplier<LongGaugeDataPoint> dataPointFactory) {
+            ArgumentUtils.throwArgBlank(name, "dataPointName");
+
             dataPointNames.add(name);
-            dataPointFactories.add(() -> new AtomicLongGaugeDataPoint(initValue));
+            dataPointFactories.add(dataPointFactory);
             return this;
         }
 
-        public Builder resetOnSnapshot() {
+        public Builder withResetOnSnapshot() {
             snapshotValueSupplier = LongGaugeDataPoint::getAndReset;
             return this;
         }
@@ -114,6 +122,7 @@ public final class LongGaugeComposite extends StatefulMetric<LongGaugeCompositeD
         @Override
         public LongGaugeComposite buildMetric() {
             Objects.requireNonNull(dataPointFactories, "Data point factories must not be null");
+
             if (new HashSet<>(dataPointNames).size() != dataPointFactories.size()) {
                 throw new IllegalStateException("Data point names must be unique");
             }

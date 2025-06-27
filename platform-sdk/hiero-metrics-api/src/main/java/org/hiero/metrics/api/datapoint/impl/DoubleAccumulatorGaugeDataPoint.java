@@ -15,11 +15,11 @@ public class DoubleAccumulatorGaugeDataPoint extends AtomicDoubleGaugeDataPoint 
     }
 
     public DoubleAccumulatorGaugeDataPoint(DoubleBinaryOperator operator, double initialValue) {
-        this(operator, () -> initialValue);
+        this(operator, initialValue == 0.0 ? DEFAULT_INIT : () -> initialValue);
     }
 
     public DoubleAccumulatorGaugeDataPoint(DoubleBinaryOperator operator) {
-        this(operator, 0L);
+        this(operator, DEFAULT_INIT);
     }
 
     @Override
