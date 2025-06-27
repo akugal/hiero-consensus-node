@@ -16,11 +16,11 @@ public class AtomicDoubleGaugeDataPoint implements DoubleGaugeDataPoint {
     }
 
     public AtomicDoubleGaugeDataPoint(double initialValue) {
-        this(() -> initialValue);
+        this(initialValue == 0.0 ? DEFAULT_INIT : () -> initialValue);
     }
 
     public AtomicDoubleGaugeDataPoint() {
-        this(0.0);
+        this(DEFAULT_INIT);
     }
 
     @Override

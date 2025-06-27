@@ -9,14 +9,16 @@ import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.PrimitiveDataType;
 import org.hiero.metrics.api.core.StatefulMetric;
 
-public final class NumberGaugeMetricAdapter<D, V extends Number> extends StatefulMetric<D> implements Supplier<D> {
+public final class GenericGaugeAdapter<D, V> extends StatefulMetric<D> implements Supplier<D> {
 
     private final Function<D, V> valueGetter;
+    private final PrimitiveDataType valueDataType;
 
-    private NumberGaugeMetricAdapter(Builder<D, V> builder) {
+    private GenericGaugeAdapter(Builder<D, V> builder) {
         super(builder);
 
         valueGetter = Objects.requireNonNull(builder.valueGetter, "Value getter must not be null");
+        valueDataType = PrimitiveDataType.mapDataType(builder.valueType);
     }
 
     public static <D, V extends Number> Builder<D, V> builder(String name) {
@@ -38,20 +40,22 @@ public final class NumberGaugeMetricAdapter<D, V extends Number> extends Statefu
         if (value == null) {
             return List.of();
         }
-        return List.of(createSnapshot(value, PrimitiveDataType.DOUBLE, dynamicLabelValues));
+        return List.of(createSnapshot(value, valueDataType, dynamicLabelValues));
     }
 
-    public static class Builder<D, V extends Number>
-            extends StatefulMetric.Builder<D, Builder<D, V>, NumberGaugeMetricAdapter<D, V>> {
+    public static class Builder<D, V>
+            extends StatefulMetric.Builder<D, Builder<D, V>, GenericGaugeAdapter<D, V>> {
 
+        private Class<V> valueType;
         private Function<D, V> valueGetter;
 
         private Builder(String name) {
             super(name);
         }
 
-        public Builder<D, V> withValueGetter(Function<D, V> valueGetter) {
-            this.valueGetter = valueGetter;
+        public Builder<D, V> withValueGetter(Class<V> valueType, Function<D, V> valueGetter) {
+            this.valueType = Objects.requireNonNull(valueType, "Value class must not be null");
+            this.valueGetter = Objects.requireNonNull(valueGetter, "Value getter must not be null");
             return this;
         }
 
@@ -61,8 +65,8 @@ public final class NumberGaugeMetricAdapter<D, V extends Number> extends Statefu
         }
 
         @Override
-        protected NumberGaugeMetricAdapter<D, V> buildMetric() {
-            return new NumberGaugeMetricAdapter<>(this);
+        protected GenericGaugeAdapter<D, V> buildMetric() {
+            return new GenericGaugeAdapter<>(this);
         }
 
         @Override
