@@ -26,7 +26,8 @@ public final class GenericGauge<T> extends StatefulMetric<GaugeDataPoint<T>> imp
     public static Builder<Duration> durationBuilder(String name, ChronoUnit unit) {
         return new Builder<Duration>(name)
                 .withUnit(Unit.getUnit(unit))
-                .withValueConverter(duration -> ((double) duration.toNanos() / unit.getDuration().toNanos()));
+                .withValueConverter(duration ->
+                        ((double) duration.toNanos() / unit.getDuration().toNanos()));
     }
 
     public static <E extends Enum<E>> Builder<E> enumGauge(String name) {
@@ -57,8 +58,7 @@ public final class GenericGauge<T> extends StatefulMetric<GaugeDataPoint<T>> imp
         return getNoLabels().get();
     }
 
-    public static class Builder<T>
-            extends StatefulMetric.Builder<GaugeDataPoint<T>, Builder<T>, GenericGauge<T>> {
+    public static class Builder<T> extends StatefulMetric.Builder<GaugeDataPoint<T>, Builder<T>, GenericGauge<T>> {
 
         private Builder(String name) {
             super(name);

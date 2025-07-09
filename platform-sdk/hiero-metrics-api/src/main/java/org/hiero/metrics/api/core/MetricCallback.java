@@ -2,7 +2,7 @@
 package org.hiero.metrics.api.core;
 
 @FunctionalInterface
-public interface MetricCallback<T extends Number> {
+public interface MetricCallback {
 
-    void call(T value, String... labelValues);
+    void call(double value, String... labelValues);
 }

@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.datapoint;
 
-import static org.hiero.metrics.api.core.MetricUtils.ONE;
-
 import java.util.function.DoubleSupplier;
+import org.hiero.metrics.api.core.MetricUtils;
 
 public interface DoubleCounterDataPoint extends DoubleSupplier, DataPoint {
 
@@ -20,6 +19,6 @@ public interface DoubleCounterDataPoint extends DoubleSupplier, DataPoint {
      * Increments the counter by 1.
      */
     default void increment() {
-        increment(ONE);
+        increment(MetricUtils.ONE);
     }
 }
