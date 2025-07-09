@@ -17,4 +17,9 @@ public final class AtomicBooleanGaugeDataPoint implements BooleanGaugeDataPoint 
     public boolean getAsBoolean() {
         return container.get();
     }
+
+    @Override
+    public void reset() {
+        container.set(false);
+    }
 }

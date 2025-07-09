@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.datapoint.impl;
 
+import static org.hiero.metrics.api.core.MetricUtils.ZERO;
+
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
@@ -16,7 +18,7 @@ public class AtomicDoubleGaugeDataPoint implements DoubleGaugeDataPoint {
     }
 
     public AtomicDoubleGaugeDataPoint(double initialValue) {
-        this(initialValue == 0.0 ? DEFAULT_INIT : () -> initialValue);
+        this(initialValue == ZERO ? DEFAULT_INIT : () -> initialValue);
     }
 
     public AtomicDoubleGaugeDataPoint() {
@@ -49,5 +51,10 @@ public class AtomicDoubleGaugeDataPoint implements DoubleGaugeDataPoint {
 
     protected double toDouble(long value) {
         return Double.longBitsToDouble(value);
+    }
+
+    @Override
+    public void reset() {
+        container.set(fromDouble(getInitValue()));
     }
 }

@@ -2,6 +2,7 @@
 package org.hiero.metrics.api.core;
 
 import com.swirlds.base.ArgumentUtils;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,30 +17,31 @@ public abstract class Metric {
     protected final String[] dynamicLabelNames;
 
     protected Metric(Builder<?, ?> builder) {
-        metadata = new MetricMetadata(builder.category, builder.name, builder.description, builder.unit);
+        metadata = new MetricMetadata(
+                builder.getType(), builder.category, builder.name, builder.description, builder.unit);
         constantLabels = builder.constantLabels.values().toArray(new Label[0]);
         dynamicLabelNames = builder.dynamicLabelNames.toArray(new String[0]);
     }
 
-    public MetricMetadata getMetadata() {
+    @NonNull
+    public final MetricMetadata getMetadata() {
         return metadata;
     }
 
+    public abstract void reset();
+
+    @NonNull
     public abstract List<DataPointSnapshot> snapshot();
 
-    protected DataPointSnapshot createSnapshot(
-            Object value, PrimitiveDataType dataType, List<String> dynamicLabelValues, Label... additionalLabels) {
-        return createSnapshot(value, 0, dataType, dynamicLabelValues, additionalLabels);
+    @NonNull
+    protected final DataPointSnapshot createSnapshot(
+            double value, List<String> dynamicLabelValues, Label... additionalLabels) {
+        return createSnapshot(value, 0, dynamicLabelValues, additionalLabels);
     }
 
     protected DataPointSnapshot createSnapshot(
-            Object value,
-            long createdTimeMillis,
-            PrimitiveDataType dataType,
-            List<String> dynamicLabelValues,
-            Label... additionalLabels) {
-        return new DataPointSnapshot(
-                getMetadata(), createdTimeMillis, value, dataType, mergeLabels(dynamicLabelValues, additionalLabels));
+            double value, long createdTimeMillis, List<String> dynamicLabelValues, Label... additionalLabels) {
+        return new DataPointSnapshot(createdTimeMillis, value, mergeLabels(dynamicLabelValues, additionalLabels));
     }
 
     private List<Label> mergeLabels(List<String> dynamicLabelValues, Label... additionalLabels) {
@@ -87,6 +89,8 @@ public abstract class Metric {
         protected Builder(String name) {
             this.name = ArgumentUtils.throwArgBlank(name, "name");
         }
+
+        protected abstract MetricType getType();
 
         public B withCategory(String category) {
             this.category = ArgumentUtils.throwArgBlank(category, "category");

@@ -7,7 +7,7 @@ import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
 import java.util.function.ToDoubleFunction;
 import org.hiero.metrics.api.core.DataPointSnapshot;
-import org.hiero.metrics.api.core.PrimitiveDataType;
+import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatUtils;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
@@ -41,6 +41,11 @@ public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> impl
     }
 
     @Override
+    protected void reset(DoubleGaugeDataPoint dataPoint) {
+        dataPoint.reset();
+    }
+
+    @Override
     protected List<DataPointSnapshot> createSnapshots(DoubleGaugeDataPoint datapoint, List<String> dynamicLabelValues) {
         double value = snapshotValueSupplier.applyAsDouble(datapoint);
         if (Double.MAX_VALUE == value || Double.MIN_VALUE == value) {
@@ -49,7 +54,7 @@ public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> impl
             // but they should not be reported as actual metric values.
             return List.of();
         }
-        return List.of(createSnapshot(value, PrimitiveDataType.DOUBLE, dynamicLabelValues));
+        return List.of(createSnapshot(value, dynamicLabelValues));
     }
 
     @Override
@@ -80,6 +85,11 @@ public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> impl
 
         private Builder(String name) {
             super(name);
+        }
+
+        @Override
+        protected MetricType getType() {
+            return MetricType.GAUGE;
         }
 
         public Builder withInitializer(DoubleSupplier initializer) {

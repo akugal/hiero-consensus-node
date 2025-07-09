@@ -7,48 +7,44 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import org.hiero.metrics.api.core.DataPointSnapshot;
-import org.hiero.metrics.api.core.PrimitiveDataType;
+import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.core.Unit;
 import org.hiero.metrics.api.datapoint.GaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.AtomicReferenceGaugeDataPoint;
 
-public final class GenericGauge<T, V> extends StatefulMetric<GaugeDataPoint<T, V>> implements GaugeDataPoint<T, V> {
+public final class GenericGauge<T> extends StatefulMetric<GaugeDataPoint<T>> implements GaugeDataPoint<T> {
 
-    private final PrimitiveDataType dataType;
-
-    private GenericGauge(Builder<T, V> builder) {
+    private GenericGauge(Builder<T> builder) {
         super(builder);
-
-        dataType = Objects.requireNonNull(builder.dataType, "DataType must not be null");
     }
 
-    public static <T, V> Builder<T, V> builder(String name) {
+    public static <T, V extends Number> Builder<T> builder(String name) {
         return new Builder<>(name);
     }
 
-    public static Builder<String, String> infoBuilder(String name) {
-        return new Builder<String, String>(name).withValueConverter(String.class, Function.identity());
-    }
-
-    public static <E extends Enum<E>> Builder<E, String> enumBuilder(String name) {
-        return new Builder<E, String>(name).withValueConverter(String.class, Enum::name);
-    }
-
-    public static Builder<Duration, Double> durationBuilder(String name, ChronoUnit unit) {
-        return new Builder<Duration, Double>(name)
+    public static Builder<Duration> durationBuilder(String name, ChronoUnit unit) {
+        return new Builder<Duration>(name)
                 .withUnit(Unit.getUnit(unit))
-                .withValueConverter(Double.class, duration ->
-                        (double) (duration.toNanos() / unit.getDuration().toNanos()));
+                .withValueConverter(duration -> ((double) duration.toNanos() / unit.getDuration().toNanos()));
+    }
+
+    public static <E extends Enum<E>> Builder<E> enumGauge(String name) {
+        return new Builder<E>(name).withValueConverter(Enum::ordinal);
     }
 
     @Override
-    protected List<DataPointSnapshot> createSnapshots(GaugeDataPoint<T, V> datapoint, List<String> dynamicLabelValues) {
-        V value = datapoint.get();
+    protected void reset(GaugeDataPoint<T> dataPoint) {
+        dataPoint.reset();
+    }
+
+    @Override
+    protected List<DataPointSnapshot> createSnapshots(GaugeDataPoint<T> datapoint, List<String> dynamicLabelValues) {
+        Number value = datapoint.get();
         if (value == null) {
             return List.of();
         }
-        return List.of(createSnapshot(value, dataType, dynamicLabelValues));
+        return List.of(createSnapshot(value.doubleValue(), dynamicLabelValues));
     }
 
     @Override
@@ -57,35 +53,35 @@ public final class GenericGauge<T, V> extends StatefulMetric<GaugeDataPoint<T, V
     }
 
     @Override
-    public V get() {
+    public Number get() {
         return getNoLabels().get();
     }
 
-    public static class Builder<T, V>
-            extends StatefulMetric.Builder<GaugeDataPoint<T, V>, Builder<T, V>, GenericGauge<T, V>> {
-
-        private PrimitiveDataType dataType;
+    public static class Builder<T>
+            extends StatefulMetric.Builder<GaugeDataPoint<T>, Builder<T>, GenericGauge<T>> {
 
         private Builder(String name) {
             super(name);
         }
 
-        public Builder<T, V> withValueConverter(Class<V> valueType, Function<T, V> valueConverter) {
-            Objects.requireNonNull(valueType, "ValueType must not be null");
-            Objects.requireNonNull(valueConverter, "ValueConverter must not be null");
+        @Override
+        protected MetricType getType() {
+            return MetricType.GAUGE;
+        }
 
-            dataType = PrimitiveDataType.mapDataType(valueType);
+        public Builder<T> withValueConverter(Function<T, Number> valueConverter) {
+            Objects.requireNonNull(valueConverter, "ValueConverter must not be null");
             withContainerFactory(() -> new AtomicReferenceGaugeDataPoint<>(valueConverter));
             return this;
         }
 
         @Override
-        public GenericGauge<T, V> buildMetric() {
+        public GenericGauge<T> buildMetric() {
             return new GenericGauge<>(this);
         }
 
         @Override
-        protected Builder<T, V> self() {
+        protected Builder<T> self() {
             return this;
         }
     }

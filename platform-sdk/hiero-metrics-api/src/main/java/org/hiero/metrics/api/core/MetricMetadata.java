@@ -6,6 +6,7 @@ import java.util.Objects;
 // TODO format?
 public final class MetricMetadata {
 
+    private final MetricType metricType;
     private final String category;
     private final String name;
     private final String description;
@@ -14,7 +15,8 @@ public final class MetricMetadata {
     private final String fullName;
     private final int hashCode;
 
-    public MetricMetadata(String category, String name, String description, String unit) {
+    public MetricMetadata(MetricType metricType, String category, String name, String description, String unit) {
+        this.metricType = metricType;
         this.category = category == null ? "" : category.trim();
         this.name = Objects.requireNonNull(name, "name must not be null").trim();
         this.description = description == null ? "" : description.trim();
@@ -29,12 +31,16 @@ public final class MetricMetadata {
         }
     }
 
-    public MetricMetadata(String name) {
-        this("", name, "", "");
+    public MetricMetadata(MetricType metricType, String name) {
+        this(metricType, "", name, "", "");
     }
 
-    public MetricMetadata(String category, String name) {
-        this(category, name, "", "");
+    public MetricMetadata(MetricType metricType, String category, String name) {
+        this(metricType, category, name, "", "");
+    }
+
+    public MetricType getMetricType() {
+        return metricType;
     }
 
     public String getCategory() {
@@ -71,12 +77,11 @@ public final class MetricMetadata {
 
     @Override
     public String toString() {
-        return "MetricMetadata{" + "category='"
+        return "MetricMetadata{" + "metricType="
+                + metricType + ", category='"
                 + category + '\'' + ", name='"
                 + name + '\'' + ", description='"
                 + description + '\'' + ", unit='"
-                + unit + '\'' + ", fullName='"
-                + fullName + '\'' + ", hashCode="
-                + hashCode + '}';
+                + unit + '\'' + '}';
     }
 }

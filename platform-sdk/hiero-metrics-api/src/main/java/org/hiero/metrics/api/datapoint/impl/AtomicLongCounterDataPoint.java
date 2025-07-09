@@ -5,15 +5,20 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public final class AtomicLongCounterDataPoint extends AbstractLongCounterDataPoint {
 
-    private final AtomicLong atomicLong = new AtomicLong();
+    private final AtomicLong container = new AtomicLong();
 
     @Override
     protected void safeIncrement(long value) {
-        atomicLong.addAndGet(value);
+        container.addAndGet(value);
     }
 
     @Override
     public long getAsLong() {
-        return atomicLong.get();
+        return container.get();
+    }
+
+    @Override
+    public void reset() {
+        container.set(0);
     }
 }

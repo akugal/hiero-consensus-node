@@ -7,7 +7,7 @@ import java.util.function.LongBinaryOperator;
 import java.util.function.LongSupplier;
 import java.util.function.ToLongFunction;
 import org.hiero.metrics.api.core.DataPointSnapshot;
-import org.hiero.metrics.api.core.PrimitiveDataType;
+import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatUtils;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
@@ -41,6 +41,11 @@ public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implemen
     }
 
     @Override
+    protected void reset(LongGaugeDataPoint dataPoint) {
+        dataPoint.reset();
+    }
+
+    @Override
     protected List<DataPointSnapshot> createSnapshots(LongGaugeDataPoint datapoint, List<String> dynamicLabelValues) {
         long value = snapshotValueSupplier.applyAsLong(datapoint);
         if (Long.MAX_VALUE == value || Long.MIN_VALUE == value) {
@@ -49,7 +54,7 @@ public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implemen
             // but they should not be reported as actual metric values.
             return List.of();
         }
-        return List.of(createSnapshot(value, PrimitiveDataType.LONG, dynamicLabelValues));
+        return List.of(createSnapshot(value, dynamicLabelValues));
     }
 
     @Override
@@ -80,6 +85,11 @@ public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implemen
 
         private Builder(String name) {
             super(name);
+        }
+
+        @Override
+        protected MetricType getType() {
+            return MetricType.GAUGE;
         }
 
         public Builder withInitializer(LongSupplier initializer) {
