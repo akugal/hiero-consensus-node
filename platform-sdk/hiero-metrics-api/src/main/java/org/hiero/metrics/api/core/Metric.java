@@ -39,9 +39,27 @@ public abstract class Metric {
         return createSnapshot(value, 0, dynamicLabelValues, additionalLabels);
     }
 
+    @NonNull
+    protected final DataPointSnapshot createSnapshot(
+            String classifier, double value, List<String> dynamicLabelValues, Label... additionalLabels) {
+        return createSnapshot(classifier, value, 0, dynamicLabelValues, additionalLabels);
+    }
+
+    @NonNull
     protected DataPointSnapshot createSnapshot(
             double value, long createdTimeMillis, List<String> dynamicLabelValues, Label... additionalLabels) {
-        return new DataPointSnapshot(createdTimeMillis, value, mergeLabels(dynamicLabelValues, additionalLabels));
+        return createSnapshot(null, value, createdTimeMillis, dynamicLabelValues, additionalLabels);
+    }
+
+    @NonNull
+    protected DataPointSnapshot createSnapshot(
+            String classifier,
+            double value,
+            long createdTimeMillis,
+            List<String> dynamicLabelValues,
+            Label... additionalLabels) {
+        return new DataPointSnapshot(
+                classifier, createdTimeMillis, value, mergeLabels(dynamicLabelValues, additionalLabels));
     }
 
     private List<Label> mergeLabels(List<String> dynamicLabelValues, Label... additionalLabels) {

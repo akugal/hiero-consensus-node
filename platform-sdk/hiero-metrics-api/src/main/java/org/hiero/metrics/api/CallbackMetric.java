@@ -11,18 +11,18 @@ import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricCallback;
 import org.hiero.metrics.api.core.MetricType;
 
-public final class CallbackMetric<T extends Number> extends Metric {
+public final class CallbackMetric extends Metric {
 
-    private final Consumer<MetricCallback<T>> callback;
+    private final Consumer<MetricCallback> callback;
 
-    private CallbackMetric(Builder<T> builder) {
+    private CallbackMetric(Builder builder) {
         super(builder);
 
         callback = Objects.requireNonNull(builder.callback, "Callback must not be null");
     }
 
-    public static <T extends Number> Builder<T> builder(String name) {
-        return new Builder<>(name);
+    public static Builder builder(String name) {
+        return new Builder(name);
     }
 
     @Override
@@ -34,14 +34,13 @@ public final class CallbackMetric<T extends Number> extends Metric {
     @Override
     public List<DataPointSnapshot> snapshot() {
         List<DataPointSnapshot> dataPoints = new ArrayList<>();
-        callback.accept(
-                (value, labelValues) -> dataPoints.add(createSnapshot(value.doubleValue(), List.of(labelValues))));
+        callback.accept((value, labelValues) -> dataPoints.add(createSnapshot(value, List.of(labelValues))));
         return dataPoints;
     }
 
-    public static class Builder<T extends Number> extends Metric.Builder<Builder<T>, CallbackMetric<T>> {
+    public static class Builder extends Metric.Builder<Builder, CallbackMetric> {
 
-        private Consumer<MetricCallback<T>> callback;
+        private Consumer<MetricCallback> callback;
 
         public Builder(String name) {
             super(name);
@@ -52,18 +51,18 @@ public final class CallbackMetric<T extends Number> extends Metric {
             return MetricType.GAUGE;
         }
 
-        public Builder<T> withCallback(Consumer<MetricCallback<T>> callback) {
+        public Builder withCallback(Consumer<MetricCallback> callback) {
             this.callback = Objects.requireNonNull(callback, "Callback consumer cannot be null");
             return this;
         }
 
         @Override
-        protected CallbackMetric<T> buildMetric() {
-            return new CallbackMetric<>(this);
+        protected CallbackMetric buildMetric() {
+            return new CallbackMetric(this);
         }
 
         @Override
-        protected Builder<T> self() {
+        protected Builder self() {
             return this;
         }
     }

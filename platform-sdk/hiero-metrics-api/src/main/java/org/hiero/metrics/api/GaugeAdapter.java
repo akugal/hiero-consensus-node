@@ -45,8 +45,7 @@ public final class GaugeAdapter<D> extends StatefulMetric<D> implements Supplier
         return List.of(createSnapshot(value.doubleValue(), dynamicLabelValues));
     }
 
-    public static class Builder<D>
-            extends StatefulMetric.Builder<D, Builder<D>, GaugeAdapter<D>> {
+    public static class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, GaugeAdapter<D>> {
 
         private Function<D, Number> snapshotGetter;
         private Consumer<D> reset;
