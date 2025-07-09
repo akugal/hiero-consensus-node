@@ -3,7 +3,7 @@ package org.hiero.metrics.api;
 
 import java.util.List;
 import org.hiero.metrics.api.core.DataPointSnapshot;
-import org.hiero.metrics.api.core.PrimitiveDataType;
+import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.LongCounterDataPoint;
 import org.hiero.metrics.api.datapoint.impl.AtomicLongCounterDataPoint;
@@ -20,9 +20,13 @@ public final class LongCounter extends StatefulMetric<LongCounterDataPoint> impl
     }
 
     @Override
+    protected void reset(LongCounterDataPoint dataPoint) {
+        dataPoint.reset();
+    }
+
+    @Override
     protected List<DataPointSnapshot> createSnapshots(LongCounterDataPoint datapoint, List<String> dynamicLabelValues) {
-        return List.of(createSnapshot(
-                datapoint.getAsLong(), datapoint.getCreatedTimeMillis(), PrimitiveDataType.LONG, dynamicLabelValues));
+        return List.of(createSnapshot(datapoint.getAsLong(), datapoint.getCreatedTimeMillis(), dynamicLabelValues));
     }
 
     @Override
@@ -45,6 +49,11 @@ public final class LongCounter extends StatefulMetric<LongCounterDataPoint> impl
         private Builder(String name) {
             super(name);
             withContainerFactory(LongAdderCounterDataPoint::new);
+        }
+
+        @Override
+        protected MetricType getType() {
+            return MetricType.COUNTER;
         }
 
         public Builder withLowContentionUpdates() {

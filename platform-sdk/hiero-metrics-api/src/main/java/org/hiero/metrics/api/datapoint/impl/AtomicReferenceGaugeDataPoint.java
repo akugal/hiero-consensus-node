@@ -5,12 +5,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import org.hiero.metrics.api.datapoint.GaugeDataPoint;
 
-public final class AtomicReferenceGaugeDataPoint<T, V> implements GaugeDataPoint<T, V> {
+public final class AtomicReferenceGaugeDataPoint<T> implements GaugeDataPoint<T> {
 
-    private final Function<T, V> valueConverter;
+    private final Function<T, Number> valueConverter;
     private final AtomicReference<T> container = new AtomicReference<>();
 
-    public AtomicReferenceGaugeDataPoint(Function<T, V> valueConverter) {
+    public AtomicReferenceGaugeDataPoint(Function<T, Number> valueConverter) {
         this.valueConverter = valueConverter;
     }
 
@@ -20,7 +20,12 @@ public final class AtomicReferenceGaugeDataPoint<T, V> implements GaugeDataPoint
     }
 
     @Override
-    public V get() {
+    public Number get() {
         return valueConverter.apply(container.get());
+    }
+
+    @Override
+    public void reset() {
+        container.set(null);
     }
 }

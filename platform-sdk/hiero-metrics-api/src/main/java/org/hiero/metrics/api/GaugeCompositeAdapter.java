@@ -3,32 +3,29 @@ package org.hiero.metrics.api;
 
 import static java.util.Objects.requireNonNull;
 
+import com.swirlds.base.ArgumentUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import com.swirlds.base.ArgumentUtils;
 import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.Label;
-import org.hiero.metrics.api.core.PrimitiveDataType;
+import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 
-public final class GenericGaugeCompositeAdapter<D> extends StatefulMetric<D> implements Supplier<D> {
+public final class GaugeCompositeAdapter<D> extends StatefulMetric<D> implements Supplier<D> {
 
     private final Label[] propertyLabels;
-    private final PrimitiveDataType[] propertyTypes;
-    private final Function<D, Object>[] propertyGetters;
+    private final Function<D, Number>[] propertyGetters;
 
-    private GenericGaugeCompositeAdapter(Builder<D> builder) {
+    private GaugeCompositeAdapter(Builder<D> builder) {
         super(builder);
 
         requireNonNull(builder.propertyLabel, "Property label must not be null");
         requireNonNull(builder.propertyNames, "Property names must not be null");
 
-        propertyTypes = requireNonNull(builder.propertyTypes, "Property types must not be null").toArray(new PrimitiveDataType[0]);
         propertyGetters = requireNonNull(builder.propertyGetters, "Property getters must not be null")
                 .toArray(new Function[0]);
         propertyLabels = builder.propertyNames.stream()
@@ -51,31 +48,36 @@ public final class GenericGaugeCompositeAdapter<D> extends StatefulMetric<D> imp
     }
 
     @Override
+    protected void reset(D dataPoint) {
+        // TODO
+    }
+
+    @Override
     protected List<DataPointSnapshot> createSnapshots(D datapoint, List<String> dynamicLabelValues) {
         List<DataPointSnapshot> snapshots = new ArrayList<>(propertyGetters.length);
         for (int i = 0; i < propertyGetters.length; i++) {
-            Object value = propertyGetters[i].apply(datapoint);
+            Number value = propertyGetters[i].apply(datapoint);
             if (value != null) {
-                snapshots.add(createSnapshot(
-                        value,
-                        propertyTypes[i],
-                        dynamicLabelValues,
-                        propertyLabels[i]));
+                snapshots.add(createSnapshot(value.doubleValue(), dynamicLabelValues, propertyLabels[i]));
             }
         }
 
         return snapshots;
     }
 
-    public static class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, GenericGaugeCompositeAdapter<D>> {
+    public static class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, GaugeCompositeAdapter<D>> {
 
         private String propertyLabel;
         private final List<String> propertyNames = new ArrayList<>();
-        private final List<PrimitiveDataType> propertyTypes = new ArrayList<>();
         private final List<Function<D, ?>> propertyGetters = new ArrayList<>();
 
         private Builder(String name) {
             super(name);
+        }
+
+        @Override
+        protected MetricType getType() {
+            return MetricType.GAUGE;
         }
 
         public Builder<D> withPropertyLabel(String propertyLabel) {
@@ -83,9 +85,8 @@ public final class GenericGaugeCompositeAdapter<D> extends StatefulMetric<D> imp
             return this;
         }
 
-        public <V> Builder<D> withProperty(String name, Class<V> valueType, Function<D, V> valueGetter) {
+        public <V> Builder<D> withProperty(String name, Function<D, V> valueGetter) {
             propertyNames.add(ArgumentUtils.throwArgBlank(name, "propertyName"));
-            propertyTypes.add(PrimitiveDataType.mapDataType(valueType));
             propertyGetters.add(Objects.requireNonNull(valueGetter, "Value getter must not be null"));
             return this;
         }
@@ -96,12 +97,12 @@ public final class GenericGaugeCompositeAdapter<D> extends StatefulMetric<D> imp
         }
 
         @Override
-        protected GenericGaugeCompositeAdapter<D> buildMetric() {
+        protected GaugeCompositeAdapter<D> buildMetric() {
             if (new HashSet<>(propertyNames).size() != propertyGetters.size()) {
                 throw new IllegalStateException("Property names must be unique");
             }
 
-            return new GenericGaugeCompositeAdapter<>(this);
+            return new GaugeCompositeAdapter<>(this);
         }
 
         @Override

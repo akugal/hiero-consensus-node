@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import com.swirlds.base.ArgumentUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,11 +10,9 @@ import java.util.function.LongBinaryOperator;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
-
-import com.swirlds.base.ArgumentUtils;
 import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.Label;
-import org.hiero.metrics.api.core.PrimitiveDataType;
+import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatUtils;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.LongGaugeCompositeDataPoint;
@@ -44,17 +43,18 @@ public final class LongGaugeComposite extends StatefulMetric<LongGaugeCompositeD
     }
 
     @Override
+    protected void reset(LongGaugeCompositeDataPoint dataPoint) {
+        // TODO
+    }
+
+    @Override
     protected List<DataPointSnapshot> createSnapshots(
             LongGaugeCompositeDataPoint datapoint, List<String> dynamicLabelValues) {
         List<DataPointSnapshot> snapshots = new ArrayList<>(datapoint.size());
         for (int i = 0; i < datapoint.size(); i++) {
             long value = snapshotValueSupplier.applyAsLong(datapoint.get(i));
             if (Long.MAX_VALUE != value && Long.MIN_VALUE != value) {
-                snapshots.add(createSnapshot(
-                        value,
-                        PrimitiveDataType.LONG,
-                        dynamicLabelValues,
-                        dataPointsLabels[i]));
+                snapshots.add(createSnapshot(value, dynamicLabelValues, dataPointsLabels[i]));
             }
         }
         return snapshots;
@@ -74,6 +74,11 @@ public final class LongGaugeComposite extends StatefulMetric<LongGaugeCompositeD
 
         private Builder(String name) {
             super(name);
+        }
+
+        @Override
+        protected MetricType getType() {
+            return MetricType.GAUGE;
         }
 
         public Builder withClassifierLabel(String classifierLabel) {

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.core;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +24,17 @@ public abstract class StatefulMetric<D> extends Metric {
         dataPointFactory = Objects.requireNonNull(builder.valueContainerFactory, "Data point factory must not be null");
     }
 
+    protected abstract void reset(D dataPoint);
+
+    @Override
+    public final void reset() {
+        if (noLabelsDataPoint != null) {
+            reset(noLabelsDataPoint);
+        }
+
+        labeledDataPoints.values().stream().parallel().forEach(this::reset);
+    }
+
     public final D getOrCreateLabeled(String... labelValues) {
         if (labelValues.length != dynamicLabelNames.length) {
             if (labelValues.length == 0) {
@@ -42,6 +54,7 @@ public abstract class StatefulMetric<D> extends Metric {
         return labeledDataPoints.computeIfAbsent(Arrays.asList(labelValues), labels -> dataPointFactory.get());
     }
 
+    @NonNull
     @Override
     public final List<DataPointSnapshot> snapshot() {
         if (labeledDataPoints.isEmpty()) {

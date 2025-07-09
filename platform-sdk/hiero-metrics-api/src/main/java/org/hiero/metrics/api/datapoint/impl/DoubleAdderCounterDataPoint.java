@@ -7,7 +7,7 @@ import org.hiero.metrics.api.datapoint.DoubleCounterDataPoint;
 public final class DoubleAdderCounterDataPoint implements DoubleCounterDataPoint {
 
     private final long createdTimeMillis = System.currentTimeMillis();
-    private final DoubleAdder adder = new DoubleAdder();
+    private final DoubleAdder container = new DoubleAdder();
 
     @Override
     public long getCreatedTimeMillis() {
@@ -19,16 +19,21 @@ public final class DoubleAdderCounterDataPoint implements DoubleCounterDataPoint
         if (value < 0) {
             throw new IllegalArgumentException("Increment value must be non-negative, but was: " + value);
         }
-        adder.add(value);
+        container.add(value);
     }
 
     @Override
     public void increment() {
-        adder.add(1);
+        container.add(1);
     }
 
     @Override
     public double getAsDouble() {
-        return adder.sum();
+        return container.sum();
+    }
+
+    @Override
+    public void reset() {
+        container.reset();
     }
 }

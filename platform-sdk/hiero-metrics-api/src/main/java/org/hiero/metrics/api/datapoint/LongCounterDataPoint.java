@@ -3,7 +3,7 @@ package org.hiero.metrics.api.datapoint;
 
 import java.util.function.LongSupplier;
 
-public interface LongCounterDataPoint extends LongSupplier {
+public interface LongCounterDataPoint extends LongSupplier, DataPoint {
 
     long getCreatedTimeMillis();
 

@@ -43,4 +43,9 @@ public class AtomicLongGaugeDataPoint implements LongGaugeDataPoint {
     public long getAsLong() {
         return container.get();
     }
+
+    @Override
+    public void reset() {
+        container.set(getInitValue());
+    }
 }
