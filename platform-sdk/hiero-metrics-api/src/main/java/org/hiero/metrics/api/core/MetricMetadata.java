@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.core;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
+
 import java.util.Objects;
 
-// TODO format?
 public final class MetricMetadata {
+
+    private static final String EMPTY = "";
 
     private final MetricType metricType;
     private final String category;
@@ -15,12 +19,13 @@ public final class MetricMetadata {
     private final String fullName;
     private final int hashCode;
 
-    public MetricMetadata(MetricType metricType, String category, String name, String description, String unit) {
-        this.metricType = metricType;
-        this.category = category == null ? "" : category.trim();
+    public MetricMetadata(@NonNull MetricType metricType, @Nullable String category, @NonNull String name,
+                          @Nullable String description, @Nullable String unit ) {
+        this.metricType = Objects.requireNonNull(metricType, "metricType must not be null");
+        this.category = category == null ? EMPTY : category.trim();
         this.name = Objects.requireNonNull(name, "name must not be null").trim();
-        this.description = description == null ? "" : description.trim();
-        this.unit = unit == null ? "" : unit.trim();
+        this.description = description == null ? EMPTY : description.trim();
+        this.unit = unit == null ? EMPTY : unit.trim();
 
         if (this.category.isEmpty()) {
             fullName = this.name;
@@ -32,33 +37,38 @@ public final class MetricMetadata {
     }
 
     public MetricMetadata(MetricType metricType, String name) {
-        this(metricType, "", name, "", "");
+        this(metricType, null, name, null, null);
     }
 
     public MetricMetadata(MetricType metricType, String category, String name) {
-        this(metricType, category, name, "", "");
+        this(metricType, category, name, null, null);
     }
 
     public MetricType getMetricType() {
         return metricType;
     }
 
+    @NonNull
     public String getCategory() {
         return category;
     }
 
+    @NonNull
     public String getName() {
         return name;
     }
 
+    @NonNull
     public String getDescription() {
         return description;
     }
 
+    @NonNull
     public String getUnit() {
         return unit;
     }
 
+    @NonNull
     public String getFullName() {
         return fullName;
     }

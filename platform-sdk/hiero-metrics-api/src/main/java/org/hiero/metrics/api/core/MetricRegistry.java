@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.core;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +27,10 @@ public class MetricRegistry {
         }
     }
 
+    public void reset() {
+        metrics.values().parallelStream().forEach(Metric::reset);
+    }
+
     public static MetricRegistry getDefault() {
         return Holder.INSTANCE;
     }
@@ -34,9 +39,10 @@ public class MetricRegistry {
         return globalLabels;
     }
 
-    public List<DataPointSnapshot> snapshot() {
-        return metrics.values().stream()
-                .flatMap(metric -> metric.snapshot().stream())
+    public List<MetricSnapshot> snapshot() {
+        return metrics.values().parallelStream()
+                .map(metric -> new MetricSnapshot(metric.getMetadata(), metric.snapshot()))
+                .sorted(Comparator.comparing(snapshot -> snapshot.metadata().getFullName()))
                 .collect(Collectors.toList());
     }
 

@@ -6,8 +6,6 @@ import org.hiero.metrics.api.core.MetricUtils;
 
 public interface DoubleCounterDataPoint extends DoubleSupplier, DataPoint {
 
-    long getCreatedTimeMillis();
-
     /**
      * Increments the counter by the specified value.
      *

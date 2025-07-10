@@ -26,12 +26,7 @@ public final class DoubleCounter extends StatefulMetric<DoubleCounterDataPoint> 
     @Override
     protected List<DataPointSnapshot> createSnapshots(
             DoubleCounterDataPoint datapoint, List<String> dynamicLabelValues) {
-        return List.of(createSnapshot(datapoint.getAsDouble(), datapoint.getCreatedTimeMillis(), dynamicLabelValues));
-    }
-
-    @Override
-    public long getCreatedTimeMillis() {
-        return getNoLabels().getCreatedTimeMillis();
+        return List.of(createSnapshot(datapoint.getAsDouble(), dynamicLabelValues));
     }
 
     @Override
