@@ -27,7 +27,7 @@ public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Sup
 
         requireNonNull(builder.statNames, "Property names must not be null");
 
-        reset = builder.reset != null ? builder.reset : container -> {};
+        reset = builder.reset != null ? builder.reset : container -> {}; // no-op reset if no specified
         statSnapshotGetters = builder.statSnapshotGetters.toArray(new Function[0]);
         statNames = builder.statNames.toArray(new String[0]);
     }

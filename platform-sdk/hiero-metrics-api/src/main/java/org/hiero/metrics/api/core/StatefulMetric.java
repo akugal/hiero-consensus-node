@@ -2,6 +2,8 @@
 package org.hiero.metrics.api.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +16,8 @@ public abstract class StatefulMetric<D> extends Metric {
 
     private final Supplier<D> dataPointFactory;
 
-    private volatile D noLabelsDataPoint;
+    @Nullable
+    private final D noLabelsDataPoint;
 
     private final ConcurrentHashMap<List<String>, D> labeledDataPoints = new ConcurrentHashMap<>();
 
@@ -22,6 +25,12 @@ public abstract class StatefulMetric<D> extends Metric {
         super(builder);
 
         dataPointFactory = Objects.requireNonNull(builder.valueContainerFactory, "Data point factory must not be null");
+
+        if (dynamicLabelNames.length == 0) {
+            noLabelsDataPoint = dataPointFactory.get();
+        } else {
+            noLabelsDataPoint = null;
+        }
     }
 
     protected abstract void reset(D dataPoint);
@@ -57,27 +66,23 @@ public abstract class StatefulMetric<D> extends Metric {
     @NonNull
     @Override
     public final List<DataPointSnapshot> snapshot() {
-        if (labeledDataPoints.isEmpty()) {
+        if (noLabelsDataPoint != null) {
             return createSnapshots(noLabelsDataPoint, List.of());
+        } else if (labeledDataPoints.isEmpty()) {
+            return List.of();
+        } else {
+            List<DataPointSnapshot> snapshots = new ArrayList<>();
+            for (Map.Entry<List<String>, D> entry : labeledDataPoints.entrySet()) {
+                snapshots.addAll(createSnapshots(entry.getValue(), entry.getKey()));
+            }
+            return snapshots;
         }
-
-        List<DataPointSnapshot> snapshots = new ArrayList<>(labeledDataPoints.size() + 1);
-        snapshots.addAll(createSnapshots(noLabelsDataPoint, List.of()));
-
-        for (Map.Entry<List<String>, D> entry : labeledDataPoints.entrySet()) {
-            snapshots.addAll(createSnapshots(entry.getValue(), entry.getKey()));
-        }
-
-        return snapshots;
     }
 
+    @NonNull
     protected final D getNoLabels() {
         if (noLabelsDataPoint == null) {
-            synchronized (this) {
-                if (noLabelsDataPoint == null) {
-                    noLabelsDataPoint = dataPointFactory.get();
-                }
-            }
+            throw new IllegalStateException("This metric has dynamic labels, so you must call getOrCreateLabeled()");
         }
         return noLabelsDataPoint;
     }

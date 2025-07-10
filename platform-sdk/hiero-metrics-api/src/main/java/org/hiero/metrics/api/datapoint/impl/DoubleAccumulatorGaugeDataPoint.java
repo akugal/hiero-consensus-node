@@ -5,17 +5,19 @@ import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
 import java.util.function.LongBinaryOperator;
 
+import static org.hiero.metrics.api.core.MetricUtils.ZERO;
+
 public class DoubleAccumulatorGaugeDataPoint extends AtomicDoubleGaugeDataPoint {
 
     private final LongBinaryOperator operator;
 
     public DoubleAccumulatorGaugeDataPoint(DoubleBinaryOperator operator, DoubleSupplier initializer) {
         super(initializer);
-        this.operator = (prev, cur) -> fromDouble(operator.applyAsDouble(toDouble(prev), cur));
+        this.operator = (prev, cur) -> fromDouble(operator.applyAsDouble(toDouble(prev), toDouble(cur)));
     }
 
     public DoubleAccumulatorGaugeDataPoint(DoubleBinaryOperator operator, double initialValue) {
-        this(operator, initialValue == 0.0 ? DEFAULT_INIT : () -> initialValue);
+        this(operator, initialValue == ZERO ? DEFAULT_INIT : () -> initialValue);
     }
 
     public DoubleAccumulatorGaugeDataPoint(DoubleBinaryOperator operator) {

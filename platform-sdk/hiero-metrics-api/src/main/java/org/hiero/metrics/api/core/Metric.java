@@ -34,32 +34,18 @@ public abstract class Metric {
     public abstract List<DataPointSnapshot> snapshot();
 
     @NonNull
-    protected final DataPointSnapshot createSnapshot(
-            double value, List<String> dynamicLabelValues, Label... additionalLabels) {
-        return createSnapshot(value, 0, dynamicLabelValues, additionalLabels);
-    }
-
-    @NonNull
-    protected final DataPointSnapshot createSnapshot(
-            String classifier, double value, List<String> dynamicLabelValues, Label... additionalLabels) {
-        return createSnapshot(classifier, value, 0, dynamicLabelValues, additionalLabels);
-    }
-
-    @NonNull
     protected DataPointSnapshot createSnapshot(
-            double value, long createdTimeMillis, List<String> dynamicLabelValues, Label... additionalLabels) {
-        return createSnapshot(null, value, createdTimeMillis, dynamicLabelValues, additionalLabels);
+            double value, List<String> dynamicLabelValues, Label... additionalLabels) {
+        return createSnapshot(null, value, dynamicLabelValues, additionalLabels);
     }
 
     @NonNull
     protected DataPointSnapshot createSnapshot(
             String classifier,
             double value,
-            long createdTimeMillis,
             List<String> dynamicLabelValues,
             Label... additionalLabels) {
-        return new DataPointSnapshot(
-                classifier, createdTimeMillis, value, mergeLabels(dynamicLabelValues, additionalLabels));
+        return new DataPointSnapshot(classifier, value, mergeLabels(dynamicLabelValues, additionalLabels));
     }
 
     private List<Label> mergeLabels(List<String> dynamicLabelValues, Label... additionalLabels) {
@@ -97,9 +83,9 @@ public abstract class Metric {
 
         protected final String name;
 
-        private String category = "";
-        private String description = "";
-        private String unit = "";
+        private String category;
+        private String description;
+        private String unit;
 
         private final TreeMap<String, Label> constantLabels = new TreeMap<>();
         private final List<String> dynamicLabelNames = new ArrayList<>();

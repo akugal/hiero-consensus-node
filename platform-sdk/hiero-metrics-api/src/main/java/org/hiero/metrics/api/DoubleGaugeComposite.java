@@ -19,7 +19,10 @@ import org.hiero.metrics.api.datapoint.impl.AtomicDoubleGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.DoubleAccumulatorGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.DoubleGaugeCompositeArrayDataPoint;
 
-public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompositeDataPoint> {
+import static org.hiero.metrics.api.core.MetricUtils.ZERO;
+
+public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompositeDataPoint>
+        implements DoubleGaugeCompositeDataPoint {
 
     private final String[] statNames;
     private final ToDoubleFunction<DoubleGaugeDataPoint> snapshotValueSupplier;
@@ -55,8 +58,19 @@ public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompos
         return snapshots;
     }
 
-    public void update(long value) {
+    @Override
+    public void update(double value) {
         getNoLabels().update(value);
+    }
+
+    @Override
+    public int size() {
+        return getNoLabels().size();
+    }
+
+    @Override
+    public DoubleGaugeDataPoint get(int index) {
+        return getNoLabels().get(index);
     }
 
     public static class Builder
@@ -75,13 +89,17 @@ public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompos
             return MetricType.GAUGE;
         }
 
+        public Builder withAccumulatorStat(String name, DoubleBinaryOperator operator) {
+            return withAccumulatorStat(name, operator, ZERO);
+        }
+
         public Builder withAccumulatorStat(String name, DoubleBinaryOperator operator, double initValue) {
             Objects.requireNonNull(operator, "operator must not be null");
             return withStatContainerFactory(name, () -> new DoubleAccumulatorGaugeDataPoint(operator, initValue));
         }
 
         public Builder withSumStat() {
-            return withAccumulatorStat("sum", StatUtils.DOUBLE_SUM, 0L);
+            return withAccumulatorStat("sum", StatUtils.DOUBLE_SUM, ZERO);
         }
 
         public Builder withMaxStat() {
@@ -93,10 +111,10 @@ public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompos
         }
 
         public Builder withLatestValueStat() {
-            return withLatestValueStat(0L);
+            return withLatestValueStat(ZERO);
         }
 
-        public Builder withLatestValueStat(long initValue) {
+        public Builder withLatestValueStat(double initValue) {
             return withStatContainerFactory("latest", () -> new AtomicDoubleGaugeDataPoint(initValue));
         }
 
@@ -120,7 +138,7 @@ public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompos
             }
 
             if (new HashSet<>(statNames).size() != dataPointFactories.size()) {
-                throw new IllegalStateException("Data point names must be unique");
+                throw new IllegalArgumentException("Stat names must be unique");
             }
 
             withContainerFactory(() -> new DoubleGaugeCompositeArrayDataPoint(dataPointFactories));

@@ -2,7 +2,17 @@
 package org.hiero.metrics.api.core;
 
 public enum MetricType {
-    COUNTER,
-    GAUGE,
-    INFO
+    COUNTER("counter"),
+    GAUGE("gauge"),
+    INFO("info");
+
+    private final String name;
+
+    MetricType(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

@@ -5,8 +5,6 @@ import java.util.function.LongSupplier;
 
 public interface LongCounterDataPoint extends LongSupplier, DataPoint {
 
-    long getCreatedTimeMillis();
-
     /**
      * Increments the counter by the specified value.
      *
