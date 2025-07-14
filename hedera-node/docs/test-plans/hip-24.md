@@ -59,7 +59,7 @@ Some deliverables above depend on others (e.g., a complete positive functional
 EET needs helpers to validate state changes). Next we list the
 deliverables in the order they should be implemented.
 
-Note the prepatory EET framework items, which make it easier for the functional
+Note the prepatory EET framework valueItems, which make it easier for the functional
 tests to validate state changes via queries.
 
 Tests should validate both fungible and non-fungible-unique token types.

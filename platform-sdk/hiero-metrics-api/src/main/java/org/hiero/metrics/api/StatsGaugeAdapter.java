@@ -4,6 +4,7 @@ package org.hiero.metrics.api;
 import static java.util.Objects.requireNonNull;
 
 import com.swirlds.base.ArgumentUtils;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -11,9 +12,9 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
+import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 
 public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Supplier<D> {
 
@@ -46,17 +47,18 @@ public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Sup
         reset.accept(dataPoint);
     }
 
+    @NonNull
     @Override
-    protected List<DataPointSnapshot> createSnapshots(D datapoint, List<String> dynamicLabelValues) {
-        List<DataPointSnapshot> snapshots = new ArrayList<>(statSnapshotGetters.length);
+    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(D datapoint) {
+        List<DataPointSnapshot.ValueItem> valueItems = new ArrayList<>(statSnapshotGetters.length);
         for (int i = 0; i < statSnapshotGetters.length; i++) {
             Number value = statSnapshotGetters[i].apply(datapoint);
             if (value != null) {
-                snapshots.add(createSnapshot(statNames[i], value.doubleValue(), dynamicLabelValues));
+                valueItems.add(new DataPointSnapshot.ValueItem(statNames[i], value.doubleValue()));
             }
         }
 
-        return snapshots;
+        return valueItems;
     }
 
     public static class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, StatsGaugeAdapter<D>> {

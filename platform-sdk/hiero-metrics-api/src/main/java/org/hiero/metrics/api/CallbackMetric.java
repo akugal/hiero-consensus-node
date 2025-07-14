@@ -3,13 +3,14 @@ package org.hiero.metrics.api;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricCallback;
 import org.hiero.metrics.api.core.MetricType;
+import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 
 public final class CallbackMetric extends Metric {
 
@@ -32,9 +33,10 @@ public final class CallbackMetric extends Metric {
 
     @NonNull
     @Override
-    public List<DataPointSnapshot> snapshot() {
+    public List<DataPointSnapshot> snapshotDataPoints() {
         List<DataPointSnapshot> dataPoints = new ArrayList<>();
-        callback.accept((value, labelValues) -> dataPoints.add(createSnapshot(value, List.of(labelValues))));
+        callback.accept((value, labelValues) ->
+                dataPoints.add(new DataPointSnapshot(createDataPointLabels(Arrays.asList(labelValues)), value)));
         return dataPoints;
     }
 

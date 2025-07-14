@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
 import java.util.function.ToDoubleFunction;
-import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatUtils;
 import org.hiero.metrics.api.core.StatefulMetric;
+import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.AtomicDoubleGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.DoubleAccumulatorGaugeDataPoint;
@@ -45,8 +46,9 @@ public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> impl
         dataPoint.reset();
     }
 
+    @NonNull
     @Override
-    protected List<DataPointSnapshot> createSnapshots(DoubleGaugeDataPoint datapoint, List<String> dynamicLabelValues) {
+    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(DoubleGaugeDataPoint datapoint) {
         double value = snapshotValueSupplier.applyAsDouble(datapoint);
         if (Double.MAX_VALUE == value || Double.MIN_VALUE == value) {
             // This is a safeguard against using double extreme values as a valid metric value.
@@ -54,7 +56,7 @@ public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> impl
             // but they should not be reported as actual metric values.
             return List.of();
         }
-        return List.of(createSnapshot(value, dynamicLabelValues));
+        return List.of(new DataPointSnapshot.ValueItem(datapoint.getAsDouble()));
     }
 
     @Override

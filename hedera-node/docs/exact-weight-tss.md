@@ -54,7 +54,7 @@ from the ledger id with each transition in the derivation having valid Schnorr s
 of the weight in the source roster.
 
 The node software combines these services to achieve TSS by setting the metadata in the `HistoryService` proof
-for each roster to the concatenation of two items:
+for each roster to the concatenation of two valueItems:
 1. The verification key computed by the `HintsService` for that roster.
 2. The minimum threshold weight that a verifier should accept for a signature by this
 verification key; in particular, 1/3 of the total weight in the roster, which is _not_ necessarily 1/3 of
@@ -108,7 +108,7 @@ But these optimizations were not necessary in the first release of Hiero TSS.
 
 We first map the `HintsService` to the `RCS` abstraction. Its **primary state** for each roster is a
 **hinTS construction** with everything needed for deterministic progress toward the hinTS scheme for that roster.
-The main features of a hinTS construction are items such as,
+The main features of a hinTS construction are valueItems such as,
 1. A unique numeric id $c$ for the construction to help connect related hinTS state like votes to the construction.
 2. The source roster hash.
 3. The target roster hash (needed by a reconnecting node to recover weight information for nodes, and hence parties,
@@ -128,7 +128,7 @@ would not require any change to the structure of a `HistoryService` proof constr
 
 The `HintsService` **secondary state** is everything else needed to facilitate deterministic progress on a
 construction; in particular, for nodes that reconnect during the construction. Main types of secondary state are
-items such as,
+valueItems such as,
 1. _Per construction size `M = 2^k`_ : For as many parties as possible, for a party with id $i \in [0, M)$, the
 party's hinTS key; the node id that submitted that hinTS key; the consensus time the hinTS key was adopted in the
 ongoing construction; and, if applicable, a revised hinTS key the same node wishes to use in subsequent constructions
@@ -163,7 +163,7 @@ signature for a set of partial signatures whose parties are nodes with at least 
 Next we map the `HistoryService` to the `RosterCompanionService` abstraction. Its **primary state** has one global
 entry, the ledger id. Its roster-scoped primary state is a **proof construction** with everything needed for
 deterministic progress toward the proof that this roster extends the chain of trust, incorporating any requested
-metadata for the roster. The main features of a proof construction are items such as,
+metadata for the roster. The main features of a proof construction are valueItems such as,
 1. An id $c$ for the construction to help connect related proof state like votes to the construction.
 2. The source roster hash; and if this is not the ledger id, the proof from the ledger id to the source roster.
 3. The target roster hash.
@@ -175,7 +175,7 @@ metadata for the roster. The main features of a proof construction are items suc
 7. If the construction is complete, the proof extending the chain of trust to the target roster and metadata.
 
 The **secondary state** of the `HistoryService` is everything needed to facilitate deterministic progress on a
-construction; in particular, for nodes that reconnect during the construction. This includes items such as,
+construction; in particular, for nodes that reconnect during the construction. This includes valueItems such as,
 1. _Per node id `i`_ : The node's Schnorr key; the node's consensus time for the Schnorr key; and, if applicable, a
 revised Schnorr key the same node wishes to use in subsequent constructions.
 2. _Per construction id `c`_ : For a subset of node ids $\{ i_1, \ldots, i_n \}$ in the source roster of construction

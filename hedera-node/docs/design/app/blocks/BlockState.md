@@ -12,11 +12,11 @@
 ## Abstract
 
 `BlockState` encapsulates the state of a single block created by the Consensus Node that is eventually sent to a Block
-Node. This wrapper around the block data is used to associate items and requests to the block, along with tracking state
+Node. This wrapper around the block data is used to associate valueItems and requests to the block, along with tracking state
 changes such as if the block proof has been sent.
 
-A block itself is made up of many items including, but not limited to: one block header, transactions, and one block
-proof. These items will get batched into one or more requests that get sent to a Block Node.
+A block itself is made up of many valueItems including, but not limited to: one block header, transactions, and one block
+proof. These valueItems will get batched into one or more requests that get sent to a Block Node.
 
 ## Definitions
 
@@ -29,7 +29,7 @@ proof. These items will get batched into one or more requests that get sent to a
 
 - Maintain the block number this instance represents.
 - Store all BlockItems associated with the block.
-- Create PublishStreamRequests in batches from the items.
+- Create PublishStreamRequests in batches from the valueItems.
 - Track whether all necessary requests for the block have been created.
 - Record the timestamp when the block is considered closed/completed.
 - Expose read-only access to block contents and state.
@@ -55,7 +55,7 @@ sequenceDiagram
 
 ## Error Handling
 
-- If invalid input is passed (e.g., empty items during forced request creation), the method exits early.
+- If invalid input is passed (e.g., empty valueItems during forced request creation), the method exits early.
 - Ensures the batch size is a minimum of 1.
 
 ```mermaid

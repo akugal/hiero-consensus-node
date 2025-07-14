@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.datapoint.impl;
 
+import static org.hiero.metrics.api.core.MetricUtils.ZERO;
+
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
 import java.util.function.LongBinaryOperator;
-
-import static org.hiero.metrics.api.core.MetricUtils.ZERO;
 
 public class DoubleAccumulatorGaugeDataPoint extends AtomicDoubleGaugeDataPoint {
 

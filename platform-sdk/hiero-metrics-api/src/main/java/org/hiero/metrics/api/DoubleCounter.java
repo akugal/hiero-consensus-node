@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
-import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
+import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.datapoint.DoubleCounterDataPoint;
 import org.hiero.metrics.api.datapoint.impl.DoubleAdderCounterDataPoint;
 
@@ -23,10 +24,10 @@ public final class DoubleCounter extends StatefulMetric<DoubleCounterDataPoint> 
         dataPoint.reset();
     }
 
+    @NonNull
     @Override
-    protected List<DataPointSnapshot> createSnapshots(
-            DoubleCounterDataPoint datapoint, List<String> dynamicLabelValues) {
-        return List.of(createSnapshot(datapoint.getAsDouble(), dynamicLabelValues));
+    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(DoubleCounterDataPoint datapoint) {
+        return List.of(new DataPointSnapshot.ValueItem(datapoint.getAsDouble()));
     }
 
     @Override

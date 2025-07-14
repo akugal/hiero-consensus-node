@@ -1,10 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.export;
-
-import org.hiero.metrics.api.core.DataPointSnapshot;
-import org.hiero.metrics.api.core.Label;
-import org.hiero.metrics.api.core.MetricMetadata;
-import org.hiero.metrics.api.core.MetricSnapshot;
-import org.hiero.metrics.api.core.MetricType;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -12,12 +7,27 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.function.Predicate;
+import org.hiero.metrics.api.core.Label;
+import org.hiero.metrics.api.core.MetricMetadata;
+import org.hiero.metrics.api.core.MetricType;
+import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.core.snapshot.MetricSnapshot;
 
 public class OpenMetricsExporter extends AbstractMetricsExporter {
 
+    private static final EnumMap<MetricType, String> METRIC_TYPES = new EnumMap<>(MetricType.class);
+
+    static {
+        METRIC_TYPES.put(MetricType.GAUGE, "gauge");
+        METRIC_TYPES.put(MetricType.COUNTER, "counter");
+        METRIC_TYPES.put(MetricType.INFO, "info");
+    }
+
     private static final String COUNTER_SUFFIX = "_total";
+    private static final String INFO_SUFFIX = "_info";
 
     public OpenMetricsExporter(Predicate<MetricMetadata> filterMetrics, String decimalFormat) {
         super(filterMetrics, decimalFormat);
@@ -29,6 +39,14 @@ public class OpenMetricsExporter extends AbstractMetricsExporter {
 
     public OpenMetricsExporter() {
         super();
+    }
+
+    private String getMetricTypeName(MetricType metricType) {
+        String typeName = METRIC_TYPES.get(metricType);
+        if (typeName == null) {
+            throw new IllegalArgumentException("Unsupported metric type: " + metricType);
+        }
+        return typeName;
     }
 
     @Override
@@ -50,7 +68,7 @@ public class OpenMetricsExporter extends AbstractMetricsExporter {
                 metricName += '_' + metricUnit;
             }
 
-            writeMetadataLine(writer, "# TYPE ", metricName, metadata.getMetricType().getName());
+            writeMetadataLine(writer, "# TYPE ", metricName, getMetricTypeName(metadata.getMetricType()));
             if (!metadata.getUnit().isEmpty()) {
                 writeMetadataLine(writer, "# UNIT ", metricName, metricUnit);
             }
@@ -59,24 +77,24 @@ public class OpenMetricsExporter extends AbstractMetricsExporter {
             }
 
             for (DataPointSnapshot dataPoint : snapshot.dataPoints()) {
-                writer.write(metricName);
-                if (dataPoint.classifier() != null) {
-                    writer.write('_');
-                    writer.write(fix(dataPoint.classifier()));
-                }
+                for (DataPointSnapshot.ValueItem valueItem : dataPoint.valueItems()) {
+                    writer.write(metricName);
+                    if (metadata.getMetricType() == MetricType.COUNTER) {
+                        writer.write(COUNTER_SUFFIX);
+                    }
+                    if (metadata.getMetricType() == MetricType.INFO) {
+                        writer.write(INFO_SUFFIX);
+                    } else if (valueItem.classifier() != null) {
+                        writer.write('_');
+                        writer.write(fix(valueItem.classifier()));
+                    }
 
-                if (metadata.getMetricType() == MetricType.COUNTER) {
-                    writer.write(COUNTER_SUFFIX);
-                }
-
-                writer.write(' ');
-                if (!dataPoint.labels().isEmpty()) {
                     writeLabels(writer, dataPoint.labels());
                     writer.write(' ');
-                }
 
-                writeDouble(writer, dataPoint.value());
-                writer.write('\n');
+                    writeDouble(writer, valueItem.value());
+                    writer.write('\n');
+                }
             }
         }
 
@@ -103,6 +121,9 @@ public class OpenMetricsExporter extends AbstractMetricsExporter {
     }
 
     private void writeLabels(Writer writer, List<Label> labels) throws IOException {
+        if (labels.isEmpty()) {
+            return;
+        }
         writer.write('{');
         for (int i = 0; i < labels.size(); i++) {
             if (i > 0) {

@@ -102,7 +102,7 @@ The VirtualTreePath class cannot be instantiated, it only contains helper method
 The above diagram shows what a virtual merkle looks like in reality. Of the 7 leaves in this tree, three of them have
 been modified. The purple nodes were modified and the green node was added. For clarity in the diagram the keys are
 simple alphabet letters and the values are numbers. The "Virtual Map" table shows what conceptually exists in the map,
-although only the items in the Dirty Leaf Cache are actually in memory. All other reads go directly to the memory
+although only the valueItems in the Dirty Leaf Cache are actually in memory. All other reads go directly to the memory
 mapped files that are represented by "Leaves on Disk". No branch or unmodified leaf is in memory.
 
 #### Accessing a Key/Value Pair

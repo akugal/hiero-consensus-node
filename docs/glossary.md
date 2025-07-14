@@ -165,7 +165,7 @@ network. These signatures will also be used for Invalid State Detection.
 **Block Stream**: A fully verifiable stream of data consisting of individual blocks corresponding to
 consensus rounds. Each block contains all events, transactions, and state changes that occurred
 within one consensus round. A block is transmitted from consensus node to block nodes as a stream of
-individual block items, which form a merkle tree that is verified by a Block Signature. Each block
+individual block valueItems, which form a merkle tree that is verified by a Block Signature. Each block
 is connected to the previous block by a Block Hash which, together form a block chain.
 
 ---

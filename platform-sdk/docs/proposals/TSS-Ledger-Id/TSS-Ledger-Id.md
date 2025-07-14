@@ -817,7 +817,7 @@ Responsibilities:
        `TssMessageTransactions` to the network.
    - Give/Send/Set the active roster in the PlatformBuilder before building the platform.
 2. Handle `TssMessageTransaction` system transactions.
-   - Handle items in consensus order.
+   - Handle valueItems in consensus order.
    - Determine the next sequence number to use for the `TssMessageMap` key.
    - Insert into the `TssMessageMap` if it is correct to do so.
      - Don’t insert multiple messages for the same share index.

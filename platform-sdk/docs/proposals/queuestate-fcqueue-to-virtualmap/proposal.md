@@ -111,8 +111,8 @@ All provided by `VirtualMap`.
 
 ### Data serialization and deserialization
 
-`FCQueue` today stores all data items in memory. When the queue is written to a snapshot, all
-items are serialized as `SelfSerializable`. To store items in `VirtualMap`, key and value
+`FCQueue` today stores all data valueItems in memory. When the queue is written to a snapshot, all
+valueItems are serialized as `SelfSerializable`. To store valueItems in `VirtualMap`, key and value
 serializers are to be provided. The key serializer will be trivial, as keys are longs. The value
 serializer will be implemented using the codec provided by `QueueNode`, similar to how key/value
 states work.

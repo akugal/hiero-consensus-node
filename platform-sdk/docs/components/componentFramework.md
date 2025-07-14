@@ -173,7 +173,7 @@ wire if the predicate passes.
 **Wire Transformer:** A function that operates on the data type of the output wire. Data produced by the wire
 transformer and forwarded on its output wire may be a different type than the input.
 
-**Wire List Splitter:** A function that operates on a list of data and streams the individual items on the output wire.
+**Wire List Splitter:** A function that operates on a list of data and streams the individual valueItems on the output wire.
 
 ### Backpressure
 

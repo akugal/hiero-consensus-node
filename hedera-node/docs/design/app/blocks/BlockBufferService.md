@@ -11,7 +11,7 @@
 
 ## Abstract
 
-The `BlockBufferService` is responsible for maintaining the most recent blocks, along with their items and requests,
+The `BlockBufferService` is responsible for maintaining the most recent blocks, along with their valueItems and requests,
 produced by a given consensus node in an ordered manner.
 
 ## Component Responsibilities
@@ -33,7 +33,7 @@ produced by a given consensus node in an ordered manner.
 
 ## Component Interaction
 
-- New blocks and their items are received from `GrpcBlockItemWriter`.
+- New blocks and their valueItems are received from `GrpcBlockItemWriter`.
 - Bi-directional communication with `BlockNodeConnectionManager` to notify new blocks available and receive updates on
   when new blocks are acknowledged by the block node(s).
 - Applies back pressure via `HandleWorkflow`.
@@ -48,7 +48,7 @@ This ensures system stability and prevents the accumulation of unacknowledged bl
 
 The system maintains a buffer of block states in `BlockBufferService` with the following characteristics:
 
-- Each block state contains the block items and requests for a specific block number.
+- Each block state contains the block valueItems and requests for a specific block number.
 - The buffer tracks acknowledgment status as a single high watermark.
 - Entries remain in the buffer until acknowledged and expired, according to a configurable TTL (Time To Live).
 - A periodic pruning mechanism removes acknowledged and expired entries.
@@ -169,7 +169,7 @@ sequenceDiagram
     participant Conn as BlockNodeConnection
     participant BN as BlockNode
 
-    Writer ->> Buffer: Open block, add items, etc...
+    Writer ->> Buffer: Open block, add valueItems, etc...
     Buffer ->> ConnMan: Notify new block available
     ConnMan ->> Buffer: Get block, create requests
     ConnMan ->> Conn: Send block requests

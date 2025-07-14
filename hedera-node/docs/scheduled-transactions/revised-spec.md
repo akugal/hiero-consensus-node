@@ -206,7 +206,7 @@ message ScheduleGetInfoResponse {
 ## Records of scheduled transactions
 
 Just as an ordinary transaction, a scheduled transaction that achieves execution has a unique consensus timestamp.
-It also has a record in the record stream. However, there _are_ two items that distinguish the record of a 
+It also has a record in the record stream. However, there _are_ two valueItems that distinguish the record of a 
 scheduled transaction.
   1. Its `TransactionID` will contain the new `scheduled=true` flag.
   2. It will have a new `scheduleRef` field with the `ScheduleID` of the schedule that managed its execution.

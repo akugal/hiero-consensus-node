@@ -1886,7 +1886,7 @@ contract KittyCore is KittyMinting {
     //
     //      - KittyBase: This is where we define the most fundamental code shared throughout the core
     //             functionality. This includes our main data storage, constants and data types, plus
-    //             internal functions for managing these items.
+    //             internal functions for managing these valueItems.
     //
     //      - KittyAccessControl: This contract manages the various addresses and constraints for operations
     //             that can be executed only by specific roles. Namely CEO, CFO and COO.
