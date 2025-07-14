@@ -1,9 +1,9 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.export;
-
-import org.hiero.metrics.api.core.MetricMetadata;
 
 import java.text.DecimalFormat;
 import java.util.function.Predicate;
+import org.hiero.metrics.api.core.MetricMetadata;
 
 public abstract class AbstractMetricsExporter implements MetricsExporter {
 

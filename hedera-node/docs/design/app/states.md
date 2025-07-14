@@ -101,7 +101,7 @@ From the `ReadableKVState` a service implementation can:
 - get an iterator over all keys in the state
 
 This last capability, iterating over all keys in the state, is only supported for in-memory `ReadableKVState`s, and
-should generally be avoided. It should be removed in a future release. As the number of items in the map increases,
+should generally be avoided. It should be removed in a future release. As the number of valueItems in the map increases,
 the time it takes to iterate also increases. While we require this functionality for now for migration purposes,
 in a future revision we will eliminate this requirement since it does not scale well to billions of records.
 

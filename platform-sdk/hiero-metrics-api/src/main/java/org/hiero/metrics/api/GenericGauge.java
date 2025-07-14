@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.core.Unit;
+import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.datapoint.GaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.AtomicReferenceGaugeDataPoint;
 
@@ -39,13 +40,14 @@ public final class GenericGauge<T> extends StatefulMetric<GaugeDataPoint<T>> imp
         dataPoint.reset();
     }
 
+    @NonNull
     @Override
-    protected List<DataPointSnapshot> createSnapshots(GaugeDataPoint<T> datapoint, List<String> dynamicLabelValues) {
+    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(GaugeDataPoint<T> datapoint) {
         Number value = datapoint.get();
         if (value == null) {
             return List.of();
         }
-        return List.of(createSnapshot(value.doubleValue(), dynamicLabelValues));
+        return List.of(new DataPointSnapshot.ValueItem(value.doubleValue()));
     }
 
     @Override

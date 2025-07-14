@@ -36,7 +36,7 @@ Each message frame creates a new `FollowingSavepoint` in the stack.
 When commit is called by `HandleWorkflow` on the `SavepointStackImpl`, all the state changes of that particular stack
 are committed to the parent stack. The record builders are also pushed to a `BuilderSink` based on the type of savepoint.
 - If the savepoint is of type `FirstRootSavepoint` all the final record builders are stored in the `BuilderSink` of user
-`SavepointStackImpl`, since there is no parent stack for the user stack. The stream items are exactly what is produced
+`SavepointStackImpl`, since there is no parent stack for the user stack. The stream valueItems are exactly what is produced
 by these builders in order.
 - If the savepoint is of type `FirstChildSavepoint`, the builders are flushed to either the preceding or following
 builder list of the savepoint at the top of the parent stack. The choice of list depends on the type of transaction
@@ -48,7 +48,7 @@ builders list.
 
 When `commitFullStack()` is called by `HandleWorkflow` on the `SavepointStackImpl`, commit is called on all the
 savepoints. All the state changes of all the stacks are committed to root state. If the stack is the root stack, this
-is when stream builders are also pushed to `BuilderSink` that contains the final stream items produced by the user
+is when stream builders are also pushed to `BuilderSink` that contains the final stream valueItems produced by the user
 transaction. At the end of `commitFullStack()` a new first savepoint is created as appropriate.
 
 ![Committing a SavepointStack](images/savepoint-stack.png)

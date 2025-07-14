@@ -50,7 +50,7 @@ The initialization flow includes:
      streaming is NOT enabled.
 2. If streaming is enabled:
    - The connection manager singleton (`BlockNodeConnectionManager`) is retrieved and the startup method is invoked.
-   - A background "worker thread" is started whose eventual job is to process block items and send them to the actively
+   - A background "worker thread" is started whose eventual job is to process block valueItems and send them to the actively
      connected Block Node.
    - Finally, a Block Node is selected to be the active connection. Once this selection process is complete, an asynchronous
      task is created and executed immediately to attempt the connection process. Note: The actual connection process is

@@ -1,5 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.export;
 
+import java.io.IOException;
 import org.hiero.metrics.api.BooleanGauge;
 import org.hiero.metrics.api.CallbackMetric;
 import org.hiero.metrics.api.LongCounter;
@@ -8,8 +10,6 @@ import org.hiero.metrics.api.StatsGaugeAdapter;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
 
 public class OpenMetricsExporterTest {
 
@@ -22,9 +22,8 @@ public class OpenMetricsExporterTest {
                 .register();
         booleanGauge.update(true);
 
-        LongCounter longCounter = LongCounter.builder("test_long_counter")
-                .withUnit("requests")
-                .register();
+        LongCounter longCounter =
+                LongCounter.builder("test_long_counter").withUnit("requests").register();
         longCounter.increment(42);
 
         CallbackMetric.builder("test_callback_metric")
@@ -46,7 +45,6 @@ public class OpenMetricsExporterTest {
                 .register();
         statGauge.get().update(3);
         statGauge.get().update(5);
-
 
         // Use System.out directly without BufferedOutputStream wrapper
         exporter.export(MetricRegistry.getDefault().snapshot(), System.out);

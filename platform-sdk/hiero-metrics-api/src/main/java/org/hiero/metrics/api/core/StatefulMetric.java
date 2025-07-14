@@ -3,7 +3,6 @@ package org.hiero.metrics.api.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 
 public abstract class StatefulMetric<D> extends Metric {
 
@@ -65,15 +65,23 @@ public abstract class StatefulMetric<D> extends Metric {
 
     @NonNull
     @Override
-    public final List<DataPointSnapshot> snapshot() {
+    public final List<DataPointSnapshot> snapshotDataPoints() {
         if (noLabelsDataPoint != null) {
-            return createSnapshots(noLabelsDataPoint, List.of());
+            List<DataPointSnapshot.ValueItem> valueItems = snapshotDataPoint(noLabelsDataPoint);
+            if (valueItems.isEmpty()) {
+                return List.of();
+            } else {
+                return List.of(new DataPointSnapshot(List.of(), valueItems));
+            }
         } else if (labeledDataPoints.isEmpty()) {
             return List.of();
         } else {
-            List<DataPointSnapshot> snapshots = new ArrayList<>();
+            List<DataPointSnapshot> snapshots = new ArrayList<>(labeledDataPoints.size());
             for (Map.Entry<List<String>, D> entry : labeledDataPoints.entrySet()) {
-                snapshots.addAll(createSnapshots(entry.getValue(), entry.getKey()));
+                List<DataPointSnapshot.ValueItem> valueItems = snapshotDataPoint(entry.getValue());
+                if (!valueItems.isEmpty()) {
+                    snapshots.add(new DataPointSnapshot(createDataPointLabels(entry.getKey()), valueItems));
+                }
             }
             return snapshots;
         }
@@ -87,7 +95,8 @@ public abstract class StatefulMetric<D> extends Metric {
         return noLabelsDataPoint;
     }
 
-    protected abstract List<DataPointSnapshot> createSnapshots(D datapoint, List<String> dynamicLabelValues);
+    @NonNull
+    protected abstract List<DataPointSnapshot.ValueItem> snapshotDataPoint(D datapoint);
 
     private void checkNoNullLabels(String[] labelValues) {
         for (int i = 0; i < labelValues.length; i++) {

@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.LongBinaryOperator;
 import java.util.function.LongSupplier;
 import java.util.function.ToLongFunction;
-import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatUtils;
 import org.hiero.metrics.api.core.StatefulMetric;
+import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.AtomicLongGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.LongAccumulatorGaugeDataPoint;
@@ -45,8 +46,9 @@ public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implemen
         dataPoint.reset();
     }
 
+    @NonNull
     @Override
-    protected List<DataPointSnapshot> createSnapshots(LongGaugeDataPoint datapoint, List<String> dynamicLabelValues) {
+    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(LongGaugeDataPoint datapoint) {
         long value = snapshotValueSupplier.applyAsLong(datapoint);
         if (Long.MAX_VALUE == value || Long.MIN_VALUE == value) {
             // This is a safeguard against using long extreme values as a valid metric value.
@@ -54,7 +56,7 @@ public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implemen
             // but they should not be reported as actual metric values.
             return List.of();
         }
-        return List.of(createSnapshot(value, dynamicLabelValues));
+        return List.of(new DataPointSnapshot.ValueItem(value));
     }
 
     @Override

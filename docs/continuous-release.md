@@ -87,7 +87,7 @@ Release Version` workflow).
 
 **Beginning with release 0.61**:
 
-- The following items will be restricted:
+- The following valueItems will be restricted:
   - Creating release branches in Hedera-Services (like release/0.61)
   - Creating versioned tags like (v0.61.*)
 - The following workflows will be added:

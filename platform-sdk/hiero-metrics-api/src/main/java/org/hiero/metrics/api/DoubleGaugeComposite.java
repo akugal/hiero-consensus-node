@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import static org.hiero.metrics.api.core.MetricUtils.ZERO;
+
 import com.swirlds.base.ArgumentUtils;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,17 +12,15 @@ import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
-import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatUtils;
 import org.hiero.metrics.api.core.StatefulMetric;
+import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.datapoint.DoubleGaugeCompositeDataPoint;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.AtomicDoubleGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.DoubleAccumulatorGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.impl.DoubleGaugeCompositeArrayDataPoint;
-
-import static org.hiero.metrics.api.core.MetricUtils.ZERO;
 
 public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompositeDataPoint>
         implements DoubleGaugeCompositeDataPoint {
@@ -45,17 +46,17 @@ public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompos
         dataPoint.reset();
     }
 
+    @NonNull
     @Override
-    protected List<DataPointSnapshot> createSnapshots(
-            DoubleGaugeCompositeDataPoint datapoint, List<String> dynamicLabelValues) {
-        List<DataPointSnapshot> snapshots = new ArrayList<>(datapoint.size());
+    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(DoubleGaugeCompositeDataPoint datapoint) {
+        List<DataPointSnapshot.ValueItem> valueItems = new ArrayList<>(datapoint.size());
         for (int i = 0; i < datapoint.size(); i++) {
             double value = snapshotValueSupplier.applyAsDouble(datapoint.get(i));
-            if (Long.MAX_VALUE != value && Long.MIN_VALUE != value) {
-                snapshots.add(createSnapshot(statNames[i], value, dynamicLabelValues));
+            if (Double.MAX_VALUE != value && Double.MIN_VALUE != value) {
+                valueItems.add(new DataPointSnapshot.ValueItem(statNames[i], value));
             }
         }
-        return snapshots;
+        return valueItems;
     }
 
     @Override

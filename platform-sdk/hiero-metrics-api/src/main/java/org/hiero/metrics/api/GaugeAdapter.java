@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import org.hiero.metrics.api.core.DataPointSnapshot;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
+import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 
 public final class GaugeAdapter<D> extends StatefulMetric<D> implements Supplier<D> {
 
@@ -36,13 +37,14 @@ public final class GaugeAdapter<D> extends StatefulMetric<D> implements Supplier
         reset.accept(dataPoint);
     }
 
+    @NonNull
     @Override
-    protected List<DataPointSnapshot> createSnapshots(D datapoint, List<String> dynamicLabelValues) {
+    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(D datapoint) {
         Number value = snapshotGetter.apply(datapoint);
         if (value == null) {
             return List.of();
         }
-        return List.of(createSnapshot(value.doubleValue(), dynamicLabelValues));
+        return List.of(new DataPointSnapshot.ValueItem(value.doubleValue()));
     }
 
     public static class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, GaugeAdapter<D>> {

@@ -141,7 +141,7 @@ The overall high level steps are as follows:
 
 1. Calls `BlockRecordManager` to update the new consensus time for the user transaction, puts the lastBlockInfo in state if needed.
 2. `UserTxnWorkflow` is called to handle the transaction and provide record stream
-3. Externalizes the record stream items
+3. Externalizes the record stream valueItems
 4. Update metrics for the handled user transaction
 
 #### UserTxnWorkflow overview:

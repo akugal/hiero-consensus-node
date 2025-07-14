@@ -14,7 +14,7 @@ Accept: application/text
 #   "minimumStockLevel": 10,
 #   "category": "Example Category"
 # }
-POST http://{{server}}:{{port}}/swirlds/store/items
+POST http://{{server}}:{{port}}/swirlds/store/valueItems
 Content-Type: application/json
 
 {
@@ -24,13 +24,13 @@ Content-Type: application/json
   "category": "Example Category"
 }
 
-### GET request to retrieve all items
-# This request retrieves all items.
-GET http://{{server}}:{{port}}/swirlds/store/items
+### GET request to retrieve all valueItems
+# This request retrieves all valueItems.
+GET http://{{server}}:{{port}}/swirlds/store/valueItems
 
 ###  GET request to retrieve an item by ID
 # This request retrieves an item by its ID.
-GET http://{{server}}:{{port}}/swirlds/store/items/{{itemId}}
+GET http://{{server}}:{{port}}/swirlds/store/valueItems/{{itemId}}
 
 ###  GET request to retrieve detailed inventory
 # This request retrieves detailed inventory information by its item id

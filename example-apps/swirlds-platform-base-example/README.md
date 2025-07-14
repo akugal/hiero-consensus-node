@@ -9,7 +9,7 @@ layers. See [base](../platform-sdk/docs/base/base.md)
 ## Overview
 
 This project consists of a simple inventory management application that provides a REST API to
-handle items, inventories, and operations. The application utilizes an Undertow HTTP server to
+handle valueItems, inventories, and operations. The application utilizes an Undertow HTTP server to
 listen to connections on the configured port and limited 3rd party dependencies.
 
 ![base-sample.drawio.png](./doc/base-example.drawio.png)
