@@ -6,6 +6,8 @@ import java.util.function.LongBinaryOperator;
 
 public final class StatUtils {
 
+    public static final String DEFAULT_STAT_LABEL = "stat";
+
     /**
      * changes average very slowly
      */

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.core;
 
-import static org.hiero.metrics.api.core.MetricUtils.EMPTY_LABELS;
-
 import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
@@ -16,7 +14,7 @@ import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 public abstract class Metric {
 
     private final MetricMetadata metadata;
-    protected final Label[] constantLabels;
+    protected final List<Label> constantLabels;
     protected final String[] dynamicLabelNames;
 
     protected Metric(Builder<?, ?> builder) {
@@ -24,17 +22,14 @@ public abstract class Metric {
                 builder.getType(), builder.category, builder.name, builder.description, builder.unit);
 
         if (builder.globalLabels.isEmpty() && builder.constantLabels.isEmpty()) {
-            constantLabels = EMPTY_LABELS;
+            constantLabels = List.of();
         } else {
             // combine global labels and constant labels
-            constantLabels = new Label[builder.constantLabels.size() + builder.globalLabels.size()];
-            int i = 0;
-            for (Label globalLabel : builder.globalLabels) {
-                constantLabels[i++] = globalLabel;
-            }
-            for (Label constantLabel : builder.constantLabels.values()) {
-                constantLabels[i++] = constantLabel;
-            }
+            List<Label> constantLabels = new ArrayList<>(builder.constantLabels.size() + builder.globalLabels.size());
+            constantLabels.addAll(builder.globalLabels);
+            constantLabels.addAll(builder.constantLabels.values());
+
+            this.constantLabels = List.copyOf(constantLabels);
         }
 
         dynamicLabelNames = builder.dynamicLabelNames.toArray(new String[0]);
@@ -58,8 +53,12 @@ public abstract class Metric {
                     + Arrays.toString(dynamicLabelNames));
         }
 
-        List<Label> labels = new ArrayList<>(constantLabels.length + dynamicLabelNames.length);
-        labels.addAll(Arrays.asList(constantLabels));
+        if (constantLabels.isEmpty() && dynamicLabelValues.isEmpty()) {
+            return List.of();
+        }
+
+        List<Label> labels = new ArrayList<>(constantLabels.size() + dynamicLabelNames.length);
+        labels.addAll(constantLabels);
         for (int i = 0; i < dynamicLabelValues.size(); i++) {
             labels.add(new Label(dynamicLabelNames[i], dynamicLabelValues.get(i)));
         }
@@ -75,8 +74,8 @@ public abstract class Metric {
         private String unit;
 
         private List<Label> globalLabels = List.of(); // will be set if registered in the registry
-        private final TreeMap<String, Label> constantLabels = new TreeMap<>();
-        private final List<String> dynamicLabelNames = new ArrayList<>();
+        protected final TreeMap<String, Label> constantLabels = new TreeMap<>();
+        protected final List<String> dynamicLabelNames = new ArrayList<>();
 
         protected Builder(String name) {
             this.name = ArgumentUtils.throwArgBlank(name, "name");

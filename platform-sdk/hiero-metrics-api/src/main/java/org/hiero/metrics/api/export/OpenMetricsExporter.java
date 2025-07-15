@@ -84,12 +84,9 @@ public class OpenMetricsExporter extends AbstractMetricsExporter {
                     }
                     if (metadata.getMetricType() == MetricType.INFO) {
                         writer.write(INFO_SUFFIX);
-                    } else if (valueItem.classifier() != null) {
-                        writer.write('_');
-                        writer.write(fix(valueItem.classifier()));
                     }
 
-                    writeLabels(writer, dataPoint.labels());
+                    writeLabels(writer, dataPoint.labels(), valueItem.labels());
                     writer.write(' ');
 
                     writeDouble(writer, valueItem.value());
@@ -120,17 +117,18 @@ public class OpenMetricsExporter extends AbstractMetricsExporter {
                 .replaceAll("[^\\w:]", "");
     }
 
-    private void writeLabels(Writer writer, List<Label> labels) throws IOException {
-        if (labels.isEmpty()) {
+    private void writeLabels(Writer writer, List<Label> labels, List<Label> itemLabels) throws IOException {
+        int totalLabels = labels.size() + itemLabels.size();
+        if (totalLabels == 0) {
             return;
         }
         writer.write('{');
-        for (int i = 0; i < labels.size(); i++) {
+        for (int i = 0; i < totalLabels; i++) {
             if (i > 0) {
                 writer.write(",");
             }
 
-            Label label = labels.get(i);
+            Label label = i < labels.size() ? labels.get(i) : itemLabels.get(i - labels.size());
 
             writeEscaped(writer, fix(label.getName()));
             writer.write('=');

@@ -2,6 +2,7 @@
 package org.hiero.metrics.api;
 
 import static org.hiero.metrics.api.core.MetricUtils.ZERO;
+import static org.hiero.metrics.api.core.StatUtils.DEFAULT_STAT_LABEL;
 
 import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -12,6 +13,7 @@ import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
+import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatUtils;
 import org.hiero.metrics.api.core.StatefulMetric;
@@ -25,7 +27,7 @@ import org.hiero.metrics.api.datapoint.impl.DoubleGaugeCompositeArrayDataPoint;
 public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompositeDataPoint>
         implements DoubleGaugeCompositeDataPoint {
 
-    private final String[] statNames;
+    private final Label[] statLabels;
     private final ToDoubleFunction<DoubleGaugeDataPoint> snapshotValueSupplier;
 
     private DoubleGaugeComposite(Builder builder) {
@@ -33,8 +35,11 @@ public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompos
 
         Objects.requireNonNull(builder.statNames, "Data point names must not be null");
 
-        statNames = builder.statNames.toArray(new String[0]);
         snapshotValueSupplier = builder.snapshotValueSupplier;
+        statLabels = new Label[builder.statNames.size()];
+        for (int i = 0; i < statLabels.length; i++) {
+            statLabels[i] = new Label(builder.statLabel, builder.statNames.get(i));
+        }
     }
 
     public static Builder builder(String name) {
@@ -53,7 +58,7 @@ public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompos
         for (int i = 0; i < datapoint.size(); i++) {
             double value = snapshotValueSupplier.applyAsDouble(datapoint.get(i));
             if (Double.MAX_VALUE != value && Double.MIN_VALUE != value) {
-                valueItems.add(new DataPointSnapshot.ValueItem(statNames[i], value));
+                valueItems.add(new DataPointSnapshot.ValueItem(value, statLabels[i]));
             }
         }
         return valueItems;
@@ -77,6 +82,7 @@ public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompos
     public static class Builder
             extends StatefulMetric.Builder<DoubleGaugeCompositeDataPoint, Builder, DoubleGaugeComposite> {
 
+        private String statLabel = DEFAULT_STAT_LABEL;
         private final List<String> statNames = new ArrayList<>();
         private final List<Supplier<DoubleGaugeDataPoint>> dataPointFactories = new ArrayList<>();
         private ToDoubleFunction<DoubleGaugeDataPoint> snapshotValueSupplier = DoubleGaugeDataPoint::getAsDouble;
@@ -88,6 +94,11 @@ public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompos
         @Override
         protected MetricType getType() {
             return MetricType.GAUGE;
+        }
+
+        public Builder withStatLabel(String statLabel) {
+            this.statLabel = ArgumentUtils.throwArgBlank(statLabel, "stat label");
+            return this;
         }
 
         public Builder withAccumulatorStat(String name, DoubleBinaryOperator operator) {
