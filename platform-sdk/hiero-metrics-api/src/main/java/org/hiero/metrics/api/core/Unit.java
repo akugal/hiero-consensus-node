@@ -12,6 +12,8 @@ public final class Unit {
     /**
      * Unit of nanoseconds.
      */
+    public static final String OPS_UNIT = "ops";
+
     public static final String NANOSECOND_UNIT = "ns";
 
     /**

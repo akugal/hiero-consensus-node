@@ -7,22 +7,35 @@ import org.hiero.metrics.api.core.Label;
 
 public record DataPointSnapshot(@NonNull List<Label> labels, @NonNull List<ValueItem> valueItems) {
 
+    public DataPointSnapshot(@NonNull List<Label> labels, @NonNull List<ValueItem> valueItems) {
+        this.labels = List.copyOf(labels);
+        this.valueItems = List.copyOf(valueItems);
+        if (valueItems.isEmpty()) {
+            throw new IllegalArgumentException("DataPointSnapshot must have at least one value item");
+        }
+    }
+
     public DataPointSnapshot(ValueItem... valueItems) {
         this(List.of(), List.of(valueItems));
     }
 
-    public DataPointSnapshot(List<Label> labels, double value) {
+    public DataPointSnapshot(@NonNull List<Label> labels, double value) {
         this(labels, List.of(new ValueItem(value)));
     }
 
-    public record ValueItem(String classifier, double value, List<Label> labels) {
+    public record ValueItem(double value, @NonNull List<Label> labels) {
 
-        public ValueItem(double value) {
-            this(null, value, List.of());
+        public ValueItem(double value, @NonNull List<Label> labels) {
+            this.value = value;
+            this.labels = List.copyOf(labels);
         }
 
-        public ValueItem(String classifier, double value) {
-            this(classifier, value, List.of());
+        public ValueItem(double value) {
+            this(value, List.of());
+        }
+
+        public ValueItem(double value, Label... labels) {
+            this(value, List.of(labels));
         }
     }
 }

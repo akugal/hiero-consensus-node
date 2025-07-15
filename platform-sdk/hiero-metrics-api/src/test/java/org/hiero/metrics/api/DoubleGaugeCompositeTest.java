@@ -3,8 +3,10 @@ package org.hiero.metrics.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.hiero.metrics.api.core.StatUtils.DEFAULT_STAT_LABEL;
 
 import java.util.List;
+import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +44,9 @@ public class DoubleGaugeCompositeTest {
 
         List<DataPointSnapshot> snapshot = metric.snapshotDataPoints();
         assertThat(snapshot.size()).isEqualTo(1);
-        assertThat(snapshot.get(0)).isEqualTo(new DataPointSnapshot(new DataPointSnapshot.ValueItem("sum", 1.3)));
+        assertThat(snapshot.get(0))
+                .isEqualTo(new DataPointSnapshot(
+                        new DataPointSnapshot.ValueItem(1.3, new Label(DEFAULT_STAT_LABEL, "sum"))));
 
         // given
         metric.update(1.7);
@@ -52,7 +56,9 @@ public class DoubleGaugeCompositeTest {
 
         snapshot = metric.snapshotDataPoints();
         assertThat(snapshot.size()).isEqualTo(1);
-        assertThat(snapshot.get(0)).isEqualTo(new DataPointSnapshot(new DataPointSnapshot.ValueItem("sum", 3.0)));
+        assertThat(snapshot.get(0))
+                .isEqualTo(new DataPointSnapshot(
+                        new DataPointSnapshot.ValueItem(3.0, new Label(DEFAULT_STAT_LABEL, "sum"))));
     }
 
     // TODO other stats tests
@@ -76,8 +82,8 @@ public class DoubleGaugeCompositeTest {
         List<DataPointSnapshot> snapshot = metric.snapshotDataPoints();
         assertThat(snapshot)
                 .isEqualTo(List.of(new DataPointSnapshot(
-                        new DataPointSnapshot.ValueItem("sum", 1.3),
-                        new DataPointSnapshot.ValueItem("sumPlusOne", 2.3))));
+                        new DataPointSnapshot.ValueItem(1.3, new Label(DEFAULT_STAT_LABEL, "sum")),
+                        new DataPointSnapshot.ValueItem(2.3, new Label(DEFAULT_STAT_LABEL, "sumPlusOne")))));
 
         // given
         metric.update(1.7);
@@ -89,7 +95,7 @@ public class DoubleGaugeCompositeTest {
         snapshot = metric.snapshotDataPoints();
         assertThat(snapshot)
                 .isEqualTo(List.of(new DataPointSnapshot(
-                        new DataPointSnapshot.ValueItem("sum", 3.0),
-                        new DataPointSnapshot.ValueItem("sumPlusOne", 5.0))));
+                        new DataPointSnapshot.ValueItem(3.0, new Label(DEFAULT_STAT_LABEL, "sum")),
+                        new DataPointSnapshot.ValueItem(5.0, new Label(DEFAULT_STAT_LABEL, "sumPlusOne")))));
     }
 }

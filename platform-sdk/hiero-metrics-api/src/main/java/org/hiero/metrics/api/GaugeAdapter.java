@@ -23,7 +23,7 @@ public final class GaugeAdapter<D> extends StatefulMetric<D> implements Supplier
         reset = builder.reset != null ? builder.reset : container -> {};
     }
 
-    public static <D, V extends Number> Builder<D> builder(String name) {
+    public static <D> Builder<D> builder(String name) {
         return new Builder<>(name);
     }
 

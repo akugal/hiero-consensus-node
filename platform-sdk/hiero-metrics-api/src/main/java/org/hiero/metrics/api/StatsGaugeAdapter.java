@@ -2,6 +2,7 @@
 package org.hiero.metrics.api;
 
 import static java.util.Objects.requireNonNull;
+import static org.hiero.metrics.api.core.StatUtils.DEFAULT_STAT_LABEL;
 
 import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -12,13 +13,14 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 
 public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Supplier<D> {
 
-    private final String[] statNames;
+    private final Label[] statLabels;
     private final Function<D, Number>[] statSnapshotGetters;
     private final Consumer<D> reset;
 
@@ -30,7 +32,10 @@ public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Sup
 
         reset = builder.reset != null ? builder.reset : container -> {}; // no-op reset if no specified
         statSnapshotGetters = builder.statSnapshotGetters.toArray(new Function[0]);
-        statNames = builder.statNames.toArray(new String[0]);
+        statLabels = new Label[builder.statNames.size()];
+        for (int i = 0; i < statLabels.length; i++) {
+            statLabels[i] = new Label(builder.statLabel, builder.statNames.get(i));
+        }
     }
 
     public static <D> Builder<D> builder(String name) {
@@ -54,7 +59,7 @@ public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Sup
         for (int i = 0; i < statSnapshotGetters.length; i++) {
             Number value = statSnapshotGetters[i].apply(datapoint);
             if (value != null) {
-                valueItems.add(new DataPointSnapshot.ValueItem(statNames[i], value.doubleValue()));
+                valueItems.add(new DataPointSnapshot.ValueItem(value.doubleValue(), statLabels[i]));
             }
         }
 
@@ -63,6 +68,7 @@ public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Sup
 
     public static class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, StatsGaugeAdapter<D>> {
 
+        private String statLabel = DEFAULT_STAT_LABEL;
         private final List<String> statNames = new ArrayList<>();
         private final List<Function<D, Number>> statSnapshotGetters = new ArrayList<>();
         private Consumer<D> reset;
@@ -78,6 +84,11 @@ public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Sup
 
         public Builder<D> withReset(Consumer<D> reset) {
             this.reset = Objects.requireNonNull(reset, "Container stats reset must not be null");
+            return this;
+        }
+
+        public Builder<D> withStatLabel(String statLabel) {
+            this.statLabel = ArgumentUtils.throwArgBlank(statLabel, "stat label");
             return this;
         }
 
@@ -100,6 +111,15 @@ public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Sup
             }
             if (new HashSet<>(statNames).size() != statSnapshotGetters.size()) {
                 throw new IllegalStateException("Stat names must be unique");
+            }
+
+            if (constantLabels.containsKey(statLabel)) {
+                throw new IllegalStateException("Stat label '" + statLabel + "' conflicts with a constant label");
+            }
+            for (String dynamicLabelName : dynamicLabelNames) {
+                if (dynamicLabelName.equals(statLabel)) {
+                    throw new IllegalStateException("Stat label '" + statLabel + "' conflicts with a dynamic label");
+                }
             }
 
             return new StatsGaugeAdapter<>(this);
