@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.api.export;
+package org.hiero.metrics.api.export.writer;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.core.snapshot.MetricSnapshot;
 
-public class OpenMetricsExporter extends AbstractMetricsExporter {
+public class OpenMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
 
     private static final EnumMap<MetricType, String> METRIC_TYPES = new EnumMap<>(MetricType.class);
 
@@ -29,15 +29,15 @@ public class OpenMetricsExporter extends AbstractMetricsExporter {
     private static final String COUNTER_SUFFIX = "_total";
     private static final String INFO_SUFFIX = "_info";
 
-    public OpenMetricsExporter(Predicate<MetricMetadata> filterMetrics, String decimalFormat) {
+    public OpenMetricsSnapshotsWriter(Predicate<MetricMetadata> filterMetrics, String decimalFormat) {
         super(filterMetrics, decimalFormat);
     }
 
-    public OpenMetricsExporter(String doubleFormat) {
+    public OpenMetricsSnapshotsWriter(String doubleFormat) {
         super(doubleFormat);
     }
 
-    public OpenMetricsExporter() {
+    public OpenMetricsSnapshotsWriter() {
         super();
     }
 

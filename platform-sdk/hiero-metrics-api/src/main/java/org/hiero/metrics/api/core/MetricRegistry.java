@@ -42,7 +42,7 @@ public class MetricRegistry {
     }
 
     public List<MetricSnapshot> snapshot() {
-        return metrics.values().parallelStream()
+        return metrics.values().stream()
                 .map(metric -> new MetricSnapshot(metric.getMetadata(), metric.snapshotDataPoints()))
                 .sorted(MetricSnapshot.COMPARATOR)
                 .collect(Collectors.toList());
