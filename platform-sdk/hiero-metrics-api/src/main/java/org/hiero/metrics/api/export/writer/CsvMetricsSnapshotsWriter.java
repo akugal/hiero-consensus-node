@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.api.export;
+package org.hiero.metrics.api.export.writer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,17 +8,17 @@ import java.util.function.Predicate;
 import org.hiero.metrics.api.core.MetricMetadata;
 import org.hiero.metrics.api.core.snapshot.MetricSnapshot;
 
-public class CsvMetricsExporter extends AbstractMetricsExporter {
+public class CsvMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
 
-    public CsvMetricsExporter(Predicate<MetricMetadata> filterMetrics, String decimalFormat) {
+    public CsvMetricsSnapshotsWriter(Predicate<MetricMetadata> filterMetrics, String decimalFormat) {
         super(filterMetrics, decimalFormat);
     }
 
-    public CsvMetricsExporter(String doubleFormat) {
+    public CsvMetricsSnapshotsWriter(String doubleFormat) {
         super(doubleFormat);
     }
 
-    public CsvMetricsExporter() {
+    public CsvMetricsSnapshotsWriter() {
         super();
     }
 

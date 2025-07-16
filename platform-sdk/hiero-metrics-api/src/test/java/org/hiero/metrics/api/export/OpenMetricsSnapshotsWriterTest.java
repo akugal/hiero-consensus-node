@@ -9,11 +9,12 @@ import org.hiero.metrics.api.StatContainer;
 import org.hiero.metrics.api.StatsGaugeAdapter;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
+import org.hiero.metrics.api.export.writer.OpenMetricsSnapshotsWriter;
 import org.junit.jupiter.api.Test;
 
-public class OpenMetricsExporterTest {
+public class OpenMetricsSnapshotsWriterTest {
 
-    private final OpenMetricsExporter exporter = new OpenMetricsExporter();
+    private final OpenMetricsSnapshotsWriter exporter = new OpenMetricsSnapshotsWriter();
 
     @Test
     public void export() throws IOException {
