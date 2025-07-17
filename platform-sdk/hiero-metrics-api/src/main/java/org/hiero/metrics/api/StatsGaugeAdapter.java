@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
-import static java.util.Objects.requireNonNull;
-import static org.hiero.metrics.api.core.StatUtils.DEFAULT_STAT_LABEL;
+import static org.hiero.metrics.api.utils.StatUtils.DEFAULT_STAT_LABEL;
 
 import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -13,73 +12,46 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
-import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
+import org.hiero.metrics.internal.DefaultStatsGaugeAdapter;
 
-public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Supplier<D> {
+public interface StatsGaugeAdapter<D> extends StatefulMetric<D>, Supplier<D> {
 
-    private final Label[] statLabels;
-    private final Function<D, Number>[] statSnapshotGetters;
-    private final Consumer<D> reset;
-
-    @SuppressWarnings("unchecked")
-    private StatsGaugeAdapter(Builder<D> builder) {
-        super(builder);
-
-        requireNonNull(builder.statNames, "Property names must not be null");
-
-        reset = builder.reset != null ? builder.reset : container -> {}; // no-op reset if no specified
-        statSnapshotGetters = builder.statSnapshotGetters.toArray(new Function[0]);
-        statLabels = new Label[builder.statNames.size()];
-        for (int i = 0; i < statLabels.length; i++) {
-            statLabels[i] = new Label(builder.statLabel, builder.statNames.get(i));
-        }
+    static <D> Builder<D> builder(String name, @NonNull Supplier<D> valueContainerFactory) {
+        return new Builder<>(name, valueContainerFactory);
     }
 
-    public static <D> Builder<D> builder(String name) {
-        return new Builder<>(name);
-    }
-
-    @Override
-    public D get() {
-        return getNoLabels();
-    }
-
-    @Override
-    protected void reset(D dataPoint) {
-        reset.accept(dataPoint);
-    }
-
-    @NonNull
-    @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(D datapoint) {
-        List<DataPointSnapshot.ValueItem> valueItems = new ArrayList<>(statSnapshotGetters.length);
-        for (int i = 0; i < statSnapshotGetters.length; i++) {
-            Number value = statSnapshotGetters[i].apply(datapoint);
-            if (value != null) {
-                valueItems.add(new DataPointSnapshot.ValueItem(value.doubleValue(), statLabels[i]));
-            }
-        }
-
-        return valueItems;
-    }
-
-    public static class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, StatsGaugeAdapter<D>> {
+    final class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, StatsGaugeAdapter<D>> {
 
         private String statLabel = DEFAULT_STAT_LABEL;
         private final List<String> statNames = new ArrayList<>();
         private final List<Function<D, Number>> statSnapshotGetters = new ArrayList<>();
         private Consumer<D> reset;
 
-        private Builder(String name) {
-            super(name);
+        private Builder(String name, @NonNull Supplier<D> valueContainerFactory) {
+            super(name, Objects.requireNonNull(valueContainerFactory, "container factory must not be null"));
         }
 
         @Override
-        protected MetricType getType() {
+        public MetricType getType() {
             return MetricType.GAUGE;
+        }
+
+        public String getStatLabel() {
+            return statLabel;
+        }
+
+        public List<String> getStatNames() {
+            return statNames;
+        }
+
+        public List<Function<D, Number>> getStatSnapshotGetters() {
+            return statSnapshotGetters;
+        }
+
+        public Consumer<D> getReset() {
+            return reset;
         }
 
         public Builder<D> withReset(Consumer<D> reset) {
@@ -100,11 +72,6 @@ public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Sup
         }
 
         @Override
-        public Builder<D> withContainerFactory(Supplier<D> valueContainerFactory) {
-            return super.withContainerFactory(valueContainerFactory);
-        }
-
-        @Override
         protected StatsGaugeAdapter<D> buildMetric() {
             if (statSnapshotGetters.isEmpty()) {
                 throw new IllegalStateException("At least one stat must be defined");
@@ -116,13 +83,13 @@ public final class StatsGaugeAdapter<D> extends StatefulMetric<D> implements Sup
             if (constantLabels.containsKey(statLabel)) {
                 throw new IllegalStateException("Stat label '" + statLabel + "' conflicts with a constant label");
             }
-            for (String dynamicLabelName : dynamicLabelNames) {
+            for (String dynamicLabelName : getDynamicLabelNames()) {
                 if (dynamicLabelName.equals(statLabel)) {
                     throw new IllegalStateException("Stat label '" + statLabel + "' conflicts with a dynamic label");
                 }
             }
 
-            return new StatsGaugeAdapter<>(this);
+            return new DefaultStatsGaugeAdapter<>(this);
         }
 
         @Override

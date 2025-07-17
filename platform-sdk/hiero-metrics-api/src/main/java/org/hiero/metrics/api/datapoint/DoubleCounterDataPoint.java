@@ -2,7 +2,7 @@
 package org.hiero.metrics.api.datapoint;
 
 import java.util.function.DoubleSupplier;
-import org.hiero.metrics.api.core.MetricUtils;
+import org.hiero.metrics.api.utils.MetricUtils;
 
 public interface DoubleCounterDataPoint extends DoubleSupplier, DataPoint {
 

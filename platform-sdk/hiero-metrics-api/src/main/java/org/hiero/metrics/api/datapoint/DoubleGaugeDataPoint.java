@@ -2,7 +2,7 @@
 package org.hiero.metrics.api.datapoint;
 
 import java.util.function.DoubleSupplier;
-import org.hiero.metrics.api.core.MetricUtils;
+import org.hiero.metrics.api.utils.MetricUtils;
 
 public interface DoubleGaugeDataPoint extends DoubleSupplier, DataPoint {
 
@@ -13,9 +13,4 @@ public interface DoubleGaugeDataPoint extends DoubleSupplier, DataPoint {
     void update(double value);
 
     double getAndReset();
-
-    @Override
-    default void reset() {
-        getAndReset();
-    }
 }

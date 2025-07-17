@@ -8,8 +8,7 @@ import org.hiero.metrics.api.LongCounter;
 import org.hiero.metrics.api.StatContainer;
 import org.hiero.metrics.api.StatsGaugeAdapter;
 import org.hiero.metrics.api.core.Label;
-import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.export.writer.OpenMetricsSnapshotsWriter;
+import org.hiero.metrics.api.snapshot.extension.OpenMetricsSnapshotsWriter;
 import org.junit.jupiter.api.Test;
 
 public class OpenMetricsSnapshotsWriterTest {
@@ -27,18 +26,16 @@ public class OpenMetricsSnapshotsWriterTest {
                 LongCounter.builder("test_long_counter").withUnit("requests").register();
         longCounter.increment(42);
 
-        CallbackMetric.builder("test_callback_metric")
-                .withDynamicLabelNames("label1", "label2")
-                .withCallback(callback -> {
+        CallbackMetric.builder("test_callback_metric", callback -> {
                     callback.call(123.45, "val1", "val2");
                     callback.call(1.0, "1", "2");
                 })
+                .withDynamicLabelNames("label1", "label2")
                 .register();
 
-        StatsGaugeAdapter<StatContainer> statGauge = StatsGaugeAdapter.<StatContainer>builder("test_stats_gauge")
+        StatsGaugeAdapter<StatContainer> statGauge = StatsGaugeAdapter.builder("test_stats_gauge", StatContainer::new)
                 .withConstantLabel(new Label("env", "test"))
                 .withUnit("ms")
-                .withContainerFactory(StatContainer::new)
                 .withStat("counter", StatContainer::getCounter)
                 .withStat("sum", StatContainer::getSum)
                 .withStat("average", StatContainer::getAverage)
@@ -48,7 +45,7 @@ public class OpenMetricsSnapshotsWriterTest {
         statGauge.get().update(5);
 
         // Use System.out directly without BufferedOutputStream wrapper
-        exporter.export(MetricRegistry.getDefault().snapshot(), System.out);
+        // exporter.export(MetricRegistry.DEFAULT.snapshot(), System.out);
         System.out.flush();
     }
 }

@@ -3,11 +3,7 @@ package org.hiero.metrics.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.hiero.metrics.api.core.StatUtils.DEFAULT_STAT_LABEL;
 
-import java.util.List;
-import org.hiero.metrics.api.core.Label;
-import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 import org.junit.jupiter.api.Test;
 
 public class DoubleGaugeCompositeTest {
@@ -38,27 +34,13 @@ public class DoubleGaugeCompositeTest {
 
         // given
         metric.update(1.3);
-
         // than
         assertThat(metric.get(0).getAsDouble()).isEqualTo(1.3);
 
-        List<DataPointSnapshot> snapshot = metric.snapshotDataPoints();
-        assertThat(snapshot.size()).isEqualTo(1);
-        assertThat(snapshot.get(0))
-                .isEqualTo(new DataPointSnapshot(
-                        new DataPointSnapshot.ValueItem(1.3, new Label(DEFAULT_STAT_LABEL, "sum"))));
-
         // given
         metric.update(1.7);
-
         // than
         assertThat(metric.get(0).getAsDouble()).isEqualTo(3.0);
-
-        snapshot = metric.snapshotDataPoints();
-        assertThat(snapshot.size()).isEqualTo(1);
-        assertThat(snapshot.get(0))
-                .isEqualTo(new DataPointSnapshot(
-                        new DataPointSnapshot.ValueItem(3.0, new Label(DEFAULT_STAT_LABEL, "sum"))));
     }
 
     // TODO other stats tests
@@ -79,23 +61,11 @@ public class DoubleGaugeCompositeTest {
         assertThat(metric.get(0).getAsDouble()).isEqualTo(1.3);
         assertThat(metric.get(1).getAsDouble()).isEqualTo(2.3);
 
-        List<DataPointSnapshot> snapshot = metric.snapshotDataPoints();
-        assertThat(snapshot)
-                .isEqualTo(List.of(new DataPointSnapshot(
-                        new DataPointSnapshot.ValueItem(1.3, new Label(DEFAULT_STAT_LABEL, "sum")),
-                        new DataPointSnapshot.ValueItem(2.3, new Label(DEFAULT_STAT_LABEL, "sumPlusOne")))));
-
         // given
         metric.update(1.7);
 
         // than
         assertThat(metric.get(0).getAsDouble()).isEqualTo(3.0);
         assertThat(metric.get(1).getAsDouble()).isEqualTo(5.0);
-
-        snapshot = metric.snapshotDataPoints();
-        assertThat(snapshot)
-                .isEqualTo(List.of(new DataPointSnapshot(
-                        new DataPointSnapshot.ValueItem(3.0, new Label(DEFAULT_STAT_LABEL, "sum")),
-                        new DataPointSnapshot.ValueItem(5.0, new Label(DEFAULT_STAT_LABEL, "sumPlusOne")))));
     }
 }

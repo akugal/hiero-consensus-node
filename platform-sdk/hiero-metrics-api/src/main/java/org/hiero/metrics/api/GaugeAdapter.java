@@ -2,68 +2,45 @@
 package org.hiero.metrics.api;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.List;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
-import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
+import org.hiero.metrics.internal.DefaultGaugeAdapter;
 
-public final class GaugeAdapter<D> extends StatefulMetric<D> implements Supplier<D> {
+public interface GaugeAdapter<D> extends StatefulMetric<D>, Supplier<D> {
 
-    private final Function<D, Number> snapshotGetter;
-    private final Consumer<D> reset;
-
-    private GaugeAdapter(Builder<D> builder) {
-        super(builder);
-
-        snapshotGetter = Objects.requireNonNull(builder.snapshotGetter, "Snapshot getter must not be null");
-        reset = builder.reset != null ? builder.reset : container -> {};
+    static <D> Builder<D> builder(
+            String name, @NonNull Supplier<D> valueContainerFactory, @NonNull Function<D, Number> snapshotGetter) {
+        return new Builder<>(name, valueContainerFactory, snapshotGetter);
     }
 
-    public static <D> Builder<D> builder(String name) {
-        return new Builder<>(name);
-    }
+    final class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, GaugeAdapter<D>> {
 
-    @Override
-    public D get() {
-        return getNoLabels();
-    }
-
-    @Override
-    protected void reset(D dataPoint) {
-        reset.accept(dataPoint);
-    }
-
-    @NonNull
-    @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(D datapoint) {
-        Number value = snapshotGetter.apply(datapoint);
-        if (value == null) {
-            return List.of();
-        }
-        return List.of(new DataPointSnapshot.ValueItem(value.doubleValue()));
-    }
-
-    public static class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, GaugeAdapter<D>> {
-
-        private Function<D, Number> snapshotGetter;
+        private final Function<D, Number> snapshotGetter;
         private Consumer<D> reset;
 
-        private Builder(String name) {
-            super(name);
+        private Builder(
+                String name, @NonNull Supplier<D> valueContainerFactory, @NonNull Function<D, Number> snapshotGetter) {
+            super(name, valueContainerFactory);
+            this.snapshotGetter = Objects.requireNonNull(snapshotGetter, "Snapshot getter must not be null");
+        }
+
+        public Function<D, Number> getSnapshotGetter() {
+            return snapshotGetter;
+        }
+
+        @Nullable
+        public Consumer<D> getReset() {
+            return reset;
         }
 
         @Override
-        protected MetricType getType() {
+        public MetricType getType() {
             return MetricType.GAUGE;
-        }
-
-        public Builder<D> withSnapshotGetter(Function<D, Number> snapshotGetter) {
-            this.snapshotGetter = Objects.requireNonNull(snapshotGetter, "Snapshot getter must not be null");
-            return this;
         }
 
         public Builder<D> withReset(Consumer<D> reset) {
@@ -72,13 +49,8 @@ public final class GaugeAdapter<D> extends StatefulMetric<D> implements Supplier
         }
 
         @Override
-        public Builder<D> withContainerFactory(Supplier<D> valueContainerFactory) {
-            return super.withContainerFactory(valueContainerFactory);
-        }
-
-        @Override
         protected GaugeAdapter<D> buildMetric() {
-            return new GaugeAdapter<>(this);
+            return new DefaultGaugeAdapter<>(this);
         }
 
         @Override

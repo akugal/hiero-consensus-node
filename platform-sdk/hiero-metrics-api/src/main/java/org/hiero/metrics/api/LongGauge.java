@@ -1,97 +1,55 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.LongBinaryOperator;
 import java.util.function.LongSupplier;
-import java.util.function.ToLongFunction;
 import org.hiero.metrics.api.core.MetricType;
-import org.hiero.metrics.api.core.StatUtils;
 import org.hiero.metrics.api.core.StatefulMetric;
-import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
-import org.hiero.metrics.api.datapoint.impl.AtomicLongGaugeDataPoint;
-import org.hiero.metrics.api.datapoint.impl.LongAccumulatorGaugeDataPoint;
+import org.hiero.metrics.api.utils.StatUtils;
+import org.hiero.metrics.internal.DefaultLongGauge;
+import org.hiero.metrics.internal.datapoint.AtomicLongGaugeDataPoint;
+import org.hiero.metrics.internal.datapoint.LongAccumulatorGaugeDataPoint;
 
-public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implements LongGaugeDataPoint {
+public interface LongGauge extends StatefulMetric<LongGaugeDataPoint>, LongGaugeDataPoint {
 
-    private final ToLongFunction<LongGaugeDataPoint> snapshotValueSupplier;
-
-    private LongGauge(Builder builder) {
-        super(builder);
-
-        snapshotValueSupplier = builder.snapshotValueSupplier;
-    }
-
-    public static Builder builder(String name) {
+    static Builder builder(String name) {
         return new Builder(name);
     }
 
-    public static Builder sumBuilder(String name) {
-        return builder(name).withOperator(StatUtils.LONG_SUM);
+    static Builder sumBuilder(String name, boolean resetOnSnapshot) {
+        return builder(name).withOperator(StatUtils.LONG_SUM, resetOnSnapshot);
     }
 
-    public static Builder maxBuilder(String name) {
-        return builder(name).withOperator(StatUtils.LONG_MAX).withInitValue(Long.MIN_VALUE);
+    static Builder maxBuilder(String name, boolean resetOnSnapshot) {
+        return builder(name).withOperator(StatUtils.LONG_MAX, resetOnSnapshot).withInitValue(Long.MIN_VALUE);
     }
 
-    public static Builder minBuilder(String name) {
-        return builder(name).withOperator(StatUtils.LONG_MIN).withInitValue(Long.MAX_VALUE);
-    }
-
-    @Override
-    protected void reset(LongGaugeDataPoint dataPoint) {
-        dataPoint.reset();
-    }
-
-    @NonNull
-    @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(LongGaugeDataPoint datapoint) {
-        long value = snapshotValueSupplier.applyAsLong(datapoint);
-        if (Long.MAX_VALUE == value || Long.MIN_VALUE == value) {
-            // This is a safeguard against using long extreme values as a valid metric value.
-            // MAX_VALUE or MIN_VALUE could be initial values for min or max statistics,
-            // but they should not be reported as actual metric values.
-            return List.of();
-        }
-        return List.of(new DataPointSnapshot.ValueItem(value));
+    static Builder minBuilder(String name, boolean resetOnSnapshot) {
+        return builder(name).withOperator(StatUtils.LONG_MIN, resetOnSnapshot).withInitValue(Long.MAX_VALUE);
     }
 
     @Override
-    public long getInitValue() {
-        return getNoLabels().getInitValue();
-    }
+    void reset();
 
-    @Override
-    public void update(long value) {
-        getNoLabels().update(value);
-    }
-
-    @Override
-    public long getAndReset() {
-        return getNoLabels().getAndReset();
-    }
-
-    @Override
-    public long getAsLong() {
-        return getNoLabels().getAsLong();
-    }
-
-    public static class Builder extends StatefulMetric.Builder<LongGaugeDataPoint, Builder, LongGauge> {
+    final class Builder extends StatefulMetric.Builder<LongGaugeDataPoint, Builder, LongGauge> {
 
         private LongSupplier initializer = LongGaugeDataPoint.DEFAULT_INIT;
         private LongBinaryOperator operator;
-        private ToLongFunction<LongGaugeDataPoint> snapshotValueSupplier = LongSupplier::getAsLong;
+        private boolean resetOnSnapshot = false;
 
         private Builder(String name) {
-            super(name);
+            super(name, () -> new AtomicLongGaugeDataPoint(LongGaugeDataPoint.DEFAULT_INIT));
         }
 
         @Override
-        protected MetricType getType() {
+        public MetricType getType() {
             return MetricType.GAUGE;
+        }
+
+        public boolean isResetOnSnapshot() {
+            return resetOnSnapshot;
         }
 
         public Builder withInitializer(LongSupplier initializer) {
@@ -104,13 +62,9 @@ public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implemen
             return this;
         }
 
-        public Builder withOperator(LongBinaryOperator operator) {
+        public Builder withOperator(LongBinaryOperator operator, boolean resetOnSnapshot) {
             this.operator = Objects.requireNonNull(operator, "Operator must not be null");
-            return this;
-        }
-
-        public Builder withResetOnSnapshot() {
-            snapshotValueSupplier = LongGaugeDataPoint::getAndReset;
+            this.resetOnSnapshot = resetOnSnapshot;
             return this;
         }
 
@@ -122,7 +76,7 @@ public final class LongGauge extends StatefulMetric<LongGaugeDataPoint> implemen
                 withContainerFactory(() -> new AtomicLongGaugeDataPoint(initializer));
             }
 
-            return new LongGauge(this);
+            return new DefaultLongGauge(this);
         }
 
         @Override
