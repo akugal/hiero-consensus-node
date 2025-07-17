@@ -1,97 +1,53 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
-import java.util.function.ToDoubleFunction;
 import org.hiero.metrics.api.core.MetricType;
-import org.hiero.metrics.api.core.StatUtils;
 import org.hiero.metrics.api.core.StatefulMetric;
-import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
-import org.hiero.metrics.api.datapoint.impl.AtomicDoubleGaugeDataPoint;
-import org.hiero.metrics.api.datapoint.impl.DoubleAccumulatorGaugeDataPoint;
+import org.hiero.metrics.api.utils.MetricUtils;
+import org.hiero.metrics.api.utils.StatUtils;
+import org.hiero.metrics.internal.DefaultDoubleGauge;
+import org.hiero.metrics.internal.datapoint.AtomicDoubleGaugeDataPoint;
+import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
 
-public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> implements DoubleGaugeDataPoint {
+public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint>, DoubleGaugeDataPoint {
 
-    private final ToDoubleFunction<DoubleGaugeDataPoint> snapshotValueSupplier;
-
-    private DoubleGauge(Builder builder) {
-        super(builder);
-
-        snapshotValueSupplier = builder.snapshotValueSupplier;
-    }
-
-    public static Builder builder(String name) {
+    static Builder builder(String name) {
         return new Builder(name);
     }
 
-    public static Builder sumBuilder(String name) {
-        return builder(name).withOperator(StatUtils.DOUBLE_SUM);
+    static Builder sumBuilder(String name, boolean resetOnSnapshot) {
+        return builder(name).withOperator(StatUtils.DOUBLE_SUM, resetOnSnapshot);
     }
 
-    public static Builder maxBuilder(String name) {
-        return builder(name).withOperator(StatUtils.DOUBLE_MAX).withInitValue(Double.MIN_VALUE);
+    static Builder maxBuilder(String name, boolean resetOnSnapshot) {
+        return builder(name).withOperator(StatUtils.DOUBLE_MAX, resetOnSnapshot).withInitValue(Double.MIN_VALUE);
     }
 
-    public static Builder minBuilder(String name) {
-        return builder(name).withOperator(StatUtils.DOUBLE_MIN).withInitValue(Double.MAX_VALUE);
+    static Builder minBuilder(String name, boolean resetOnSnapshot) {
+        return builder(name).withOperator(StatUtils.DOUBLE_MIN, resetOnSnapshot).withInitValue(Double.MAX_VALUE);
     }
 
-    @Override
-    protected void reset(DoubleGaugeDataPoint dataPoint) {
-        dataPoint.reset();
-    }
-
-    @NonNull
-    @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(DoubleGaugeDataPoint datapoint) {
-        double value = snapshotValueSupplier.applyAsDouble(datapoint);
-        if (Double.MAX_VALUE == value || Double.MIN_VALUE == value) {
-            // This is a safeguard against using double extreme values as a valid metric value.
-            // MAX_VALUE or MIN_VALUE could be initial values for min or max statistics,
-            // but they should not be reported as actual metric values.
-            return List.of();
-        }
-        return List.of(new DataPointSnapshot.ValueItem(datapoint.getAsDouble()));
-    }
-
-    @Override
-    public double getInitValue() {
-        return getNoLabels().getInitValue();
-    }
-
-    @Override
-    public void update(double value) {
-        getNoLabels().update(value);
-    }
-
-    @Override
-    public double getAndReset() {
-        return getNoLabels().getAndReset();
-    }
-
-    @Override
-    public double getAsDouble() {
-        return getNoLabels().getAsDouble();
-    }
-
-    public static class Builder extends StatefulMetric.Builder<DoubleGaugeDataPoint, Builder, DoubleGauge> {
+    final class Builder extends StatefulMetric.Builder<DoubleGaugeDataPoint, Builder, DoubleGauge> {
 
         private DoubleSupplier initializer = DoubleGaugeDataPoint.DEFAULT_INIT;
         private DoubleBinaryOperator operator;
-        private ToDoubleFunction<DoubleGaugeDataPoint> snapshotValueSupplier = DoubleSupplier::getAsDouble;
+        private boolean resetOnSnapshot = false;
 
         private Builder(String name) {
-            super(name);
+            super(name, () -> new AtomicDoubleGaugeDataPoint(DoubleGaugeDataPoint.DEFAULT_INIT));
         }
 
         @Override
-        protected MetricType getType() {
+        public MetricType getType() {
             return MetricType.GAUGE;
+        }
+
+        public boolean isResetOnSnapshot() {
+            return resetOnSnapshot;
         }
 
         public Builder withInitializer(DoubleSupplier initializer) {
@@ -100,7 +56,11 @@ public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> impl
         }
 
         public Builder withInitValue(double initValue) {
-            this.initializer = () -> initValue;
+            if (initValue == MetricUtils.ZERO) {
+                initializer = DoubleGaugeDataPoint.DEFAULT_INIT;
+            } else {
+                this.initializer = () -> initValue;
+            }
             return this;
         }
 
@@ -109,8 +69,9 @@ public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> impl
             return this;
         }
 
-        public Builder withResetOnSnapshot() {
-            snapshotValueSupplier = DoubleGaugeDataPoint::getAndReset;
+        public Builder withOperator(DoubleBinaryOperator operator, boolean resetOnSnapshot) {
+            withOperator(operator);
+            this.resetOnSnapshot = resetOnSnapshot;
             return this;
         }
 
@@ -122,7 +83,7 @@ public final class DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> impl
                 withContainerFactory(() -> new AtomicDoubleGaugeDataPoint(initializer));
             }
 
-            return new DoubleGauge(this);
+            return new DefaultDoubleGauge(this);
         }
 
         @Override

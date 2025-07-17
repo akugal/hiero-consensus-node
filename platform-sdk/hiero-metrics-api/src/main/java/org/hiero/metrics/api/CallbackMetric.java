@@ -2,65 +2,46 @@
 package org.hiero.metrics.api;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricCallback;
 import org.hiero.metrics.api.core.MetricType;
-import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
+import org.hiero.metrics.internal.DefaultCallbackMetric;
 
-public final class CallbackMetric extends Metric {
-
-    private final Consumer<MetricCallback> callback;
-
-    private CallbackMetric(Builder builder) {
-        super(builder);
-
-        callback = Objects.requireNonNull(builder.callback, "Callback must not be null");
-    }
-
-    public static Builder builder(String name) {
-        return new Builder(name);
-    }
+public interface CallbackMetric extends Metric {
 
     @Override
-    public void reset() {
+    default void reset() {
         // no op
     }
 
-    @NonNull
-    @Override
-    public List<DataPointSnapshot> snapshotDataPoints() {
-        List<DataPointSnapshot> dataPoints = new ArrayList<>();
-        callback.accept((value, labelValues) ->
-                dataPoints.add(new DataPointSnapshot(createDataPointLabels(Arrays.asList(labelValues)), value)));
-        return dataPoints;
+    static Builder builder(String name, Consumer<MetricCallback> callback) {
+        return new Builder(name, callback);
     }
 
-    public static class Builder extends Metric.Builder<Builder, CallbackMetric> {
+    final class Builder extends Metric.Builder<Builder, CallbackMetric> {
 
-        private Consumer<MetricCallback> callback;
+        private final Consumer<MetricCallback> callback;
 
-        public Builder(String name) {
+        private Builder(String name, Consumer<MetricCallback> callback) {
             super(name);
+            this.callback = Objects.requireNonNull(callback, "Callback consumer cannot be null");
+        }
+
+        @NonNull
+        public Consumer<MetricCallback> getCallback() {
+            return callback;
         }
 
         @Override
-        protected MetricType getType() {
+        public MetricType getType() {
             return MetricType.GAUGE;
-        }
-
-        public Builder withCallback(Consumer<MetricCallback> callback) {
-            this.callback = Objects.requireNonNull(callback, "Callback consumer cannot be null");
-            return this;
         }
 
         @Override
         protected CallbackMetric buildMetric() {
-            return new CallbackMetric(this);
+            return new DefaultCallbackMetric(this);
         }
 
         @Override

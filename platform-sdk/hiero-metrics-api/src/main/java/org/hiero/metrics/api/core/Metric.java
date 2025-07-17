@@ -5,86 +5,62 @@ import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 
-public abstract class Metric {
-
-    private final MetricMetadata metadata;
-    protected final List<Label> constantLabels;
-    protected final String[] dynamicLabelNames;
-
-    protected Metric(Builder<?, ?> builder) {
-        metadata = new MetricMetadata(
-                builder.getType(), builder.category, builder.name, builder.description, builder.unit);
-
-        if (builder.globalLabels.isEmpty() && builder.constantLabels.isEmpty()) {
-            constantLabels = List.of();
-        } else {
-            // combine global labels and constant labels
-            List<Label> constantLabels = new ArrayList<>(builder.constantLabels.size() + builder.globalLabels.size());
-            constantLabels.addAll(builder.globalLabels);
-            constantLabels.addAll(builder.constantLabels.values());
-
-            this.constantLabels = List.copyOf(constantLabels);
-        }
-
-        dynamicLabelNames = builder.dynamicLabelNames.toArray(new String[0]);
-    }
+public interface Metric {
 
     @NonNull
-    public final MetricMetadata getMetadata() {
-        return metadata;
-    }
-
-    public abstract void reset();
+    MetricMetadata getMetadata();
 
     @NonNull
-    protected abstract List<DataPointSnapshot> snapshotDataPoints();
+    List<Label> getConstantLabels();
 
-    protected List<Label> createDataPointLabels(List<String> dynamicLabelValues) {
-        if (dynamicLabelValues.size() != dynamicLabelNames.length) {
-            throw new IllegalStateException("Expected " + dynamicLabelNames.length + " label values, but got "
-                    + dynamicLabelValues.size() + " for metric " + getMetadata().getFullName()
-                    + " with dynamic labels: "
-                    + Arrays.toString(dynamicLabelNames));
-        }
+    @NonNull
+    List<String> getDynamicLabelNames();
 
-        if (constantLabels.isEmpty() && dynamicLabelValues.isEmpty()) {
-            return List.of();
-        }
+    void reset();
 
-        List<Label> labels = new ArrayList<>(constantLabels.size() + dynamicLabelNames.length);
-        labels.addAll(constantLabels);
-        for (int i = 0; i < dynamicLabelValues.size(); i++) {
-            labels.add(new Label(dynamicLabelNames[i], dynamicLabelValues.get(i)));
-        }
-        return labels;
-    }
+    abstract class Builder<B extends Builder<B, M>, M extends Metric> {
 
-    protected abstract static class Builder<B extends Builder<B, M>, M extends Metric> {
-
-        protected final String name;
-
-        private String category;
+        private String name;
         private String description;
         private String unit;
 
-        private List<Label> globalLabels = List.of(); // will be set if registered in the registry
         protected final TreeMap<String, Label> constantLabels = new TreeMap<>();
-        protected final List<String> dynamicLabelNames = new ArrayList<>();
+        private final List<String> dynamicLabelNames = new ArrayList<>();
 
         protected Builder(String name) {
-            this.name = ArgumentUtils.throwArgBlank(name, "name");
+            withName(name);
         }
 
-        protected abstract MetricType getType();
+        public abstract MetricType getType();
 
-        public final B withCategory(String category) {
-            this.category = ArgumentUtils.throwArgBlank(category, "category");
+        public String getName() {
+            return name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getUnit() {
+            return unit;
+        }
+
+        public Collection<Label> getConstantLabels() {
+            return constantLabels.values();
+        }
+
+        public List<String> getDynamicLabelNames() {
+            return dynamicLabelNames;
+        }
+
+        public final B withName(String name) {
+            this.name = ArgumentUtils.throwArgBlank(name, "name");
             return self();
         }
 
@@ -119,11 +95,15 @@ public abstract class Metric {
             return self();
         }
 
-        public final B withConstantLabels(Label... labels) {
+        public final B withConstantLabels(Collection<Label> labels) {
             for (Label label : labels) {
                 withConstantLabel(label);
             }
             return self();
+        }
+
+        public final B withConstantLabels(Label... labels) {
+            return withConstantLabels(Arrays.asList(labels));
         }
 
         public final M build() {
@@ -138,19 +118,11 @@ public abstract class Metric {
         }
 
         public final M register(MetricRegistry registry) {
-            globalLabels = registry.getGlobalLabels();
-            for (Label globalLabel : globalLabels) {
-                Label existing = constantLabels.get(globalLabel.getName());
-                if (existing != null) {
-                    throw new IllegalStateException(
-                            "Global label " + globalLabel + " conflicts with a constant label: " + existing);
-                }
-            }
-            return registry.register(build());
+            return registry.register(this);
         }
 
         public final M register() {
-            return register(MetricRegistry.getDefault());
+            return register(MetricRegistry.DEFAULT);
         }
 
         protected abstract M buildMetric();

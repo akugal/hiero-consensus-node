@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
-import static org.hiero.metrics.api.core.MetricUtils.ZERO;
-import static org.hiero.metrics.api.core.StatUtils.DEFAULT_STAT_LABEL;
+import static org.hiero.metrics.api.utils.MetricUtils.ZERO;
+import static org.hiero.metrics.api.utils.StatUtils.DEFAULT_STAT_LABEL;
 
 import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -12,88 +12,59 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.Supplier;
-import java.util.function.ToDoubleFunction;
-import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricType;
-import org.hiero.metrics.api.core.StatUtils;
 import org.hiero.metrics.api.core.StatefulMetric;
-import org.hiero.metrics.api.core.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.datapoint.DoubleGaugeCompositeDataPoint;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
-import org.hiero.metrics.api.datapoint.impl.AtomicDoubleGaugeDataPoint;
-import org.hiero.metrics.api.datapoint.impl.DoubleAccumulatorGaugeDataPoint;
-import org.hiero.metrics.api.datapoint.impl.DoubleGaugeCompositeArrayDataPoint;
+import org.hiero.metrics.api.utils.StatUtils;
+import org.hiero.metrics.internal.DefaultDoubleGaugeComposite;
+import org.hiero.metrics.internal.datapoint.AtomicDoubleGaugeDataPoint;
+import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
+import org.hiero.metrics.internal.datapoint.DoubleGaugeCompositeArrayDataPoint;
 
-public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompositeDataPoint>
-        implements DoubleGaugeCompositeDataPoint {
+public interface DoubleGaugeComposite
+        extends StatefulMetric<DoubleGaugeCompositeDataPoint>, DoubleGaugeCompositeDataPoint {
 
-    private final Label[] statLabels;
-    private final ToDoubleFunction<DoubleGaugeDataPoint> snapshotValueSupplier;
+    @Override
+    void reset();
 
-    private DoubleGaugeComposite(Builder builder) {
-        super(builder);
-
-        Objects.requireNonNull(builder.statNames, "Data point names must not be null");
-
-        snapshotValueSupplier = builder.snapshotValueSupplier;
-        statLabels = new Label[builder.statNames.size()];
-        for (int i = 0; i < statLabels.length; i++) {
-            statLabels[i] = new Label(builder.statLabel, builder.statNames.get(i));
-        }
-    }
-
-    public static Builder builder(String name) {
+    static Builder builder(String name) {
         return new Builder(name);
     }
 
-    @Override
-    public void reset(DoubleGaugeCompositeDataPoint dataPoint) {
-        dataPoint.reset();
-    }
-
-    @NonNull
-    @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(DoubleGaugeCompositeDataPoint datapoint) {
-        List<DataPointSnapshot.ValueItem> valueItems = new ArrayList<>(datapoint.size());
-        for (int i = 0; i < datapoint.size(); i++) {
-            double value = snapshotValueSupplier.applyAsDouble(datapoint.get(i));
-            if (Double.MAX_VALUE != value && Double.MIN_VALUE != value) {
-                valueItems.add(new DataPointSnapshot.ValueItem(value, statLabels[i]));
-            }
-        }
-        return valueItems;
-    }
-
-    @Override
-    public void update(double value) {
-        getNoLabels().update(value);
-    }
-
-    @Override
-    public int size() {
-        return getNoLabels().size();
-    }
-
-    @Override
-    public DoubleGaugeDataPoint get(int index) {
-        return getNoLabels().get(index);
-    }
-
-    public static class Builder
-            extends StatefulMetric.Builder<DoubleGaugeCompositeDataPoint, Builder, DoubleGaugeComposite> {
+    final class Builder extends StatefulMetric.Builder<DoubleGaugeCompositeDataPoint, Builder, DoubleGaugeComposite> {
 
         private String statLabel = DEFAULT_STAT_LABEL;
         private final List<String> statNames = new ArrayList<>();
         private final List<Supplier<DoubleGaugeDataPoint>> dataPointFactories = new ArrayList<>();
-        private ToDoubleFunction<DoubleGaugeDataPoint> snapshotValueSupplier = DoubleGaugeDataPoint::getAsDouble;
+        private boolean resetOnSnapshot = false;
 
         private Builder(String name) {
-            super(name);
+            super(name, () -> new DoubleGaugeCompositeArrayDataPoint(() -> new DoubleGaugeDataPoint[0]));
         }
 
         @Override
-        protected MetricType getType() {
+        public MetricType getType() {
             return MetricType.GAUGE;
+        }
+
+        public boolean isResetOnSnapshot() {
+            return resetOnSnapshot;
+        }
+
+        @NonNull
+        public String getStatLabel() {
+            return statLabel;
+        }
+
+        @NonNull
+        public List<String> getStatNames() {
+            return statNames;
+        }
+
+        @NonNull
+        public List<Supplier<DoubleGaugeDataPoint>> getDataPointFactories() {
+            return dataPointFactories;
         }
 
         public Builder withStatLabel(String statLabel) {
@@ -139,7 +110,7 @@ public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompos
         }
 
         public Builder withResetOnSnapshot() {
-            snapshotValueSupplier = DoubleGaugeDataPoint::getAndReset;
+            this.resetOnSnapshot = true;
             return this;
         }
 
@@ -153,8 +124,22 @@ public final class DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompos
                 throw new IllegalArgumentException("Stat names must be unique");
             }
 
-            withContainerFactory(() -> new DoubleGaugeCompositeArrayDataPoint(dataPointFactories));
-            return new DoubleGaugeComposite(this);
+            if (constantLabels.containsKey(statLabel)) {
+                throw new IllegalStateException("Stat label '" + statLabel + "' conflicts with a constant label");
+            }
+            for (String dynamicLabelName : getDynamicLabelNames()) {
+                if (dynamicLabelName.equals(statLabel)) {
+                    throw new IllegalStateException("Stat label '" + statLabel + "' conflicts with a dynamic label");
+                }
+            }
+
+            // copy the data point factories to ensure immutability
+            final List<Supplier<DoubleGaugeDataPoint>> suppliers = List.copyOf(dataPointFactories);
+            Supplier<DoubleGaugeDataPoint[]> dataPonitsSupplier =
+                    () -> suppliers.stream().map(Supplier::get).toArray(DoubleGaugeDataPoint[]::new);
+
+            withContainerFactory(() -> new DoubleGaugeCompositeArrayDataPoint(dataPonitsSupplier));
+            return new DefaultDoubleGaugeComposite(this);
         }
 
         @Override
