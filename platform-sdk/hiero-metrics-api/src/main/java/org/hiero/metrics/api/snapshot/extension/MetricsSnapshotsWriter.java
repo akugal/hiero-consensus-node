@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.snapshot.extension;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.metrics.api.snapshot.MetricsSnapshot;
+
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
-import org.hiero.metrics.api.snapshot.MetricSnapshot;
 
 public interface MetricsSnapshotsWriter {
 
-    void export(List<MetricSnapshot> snapshots, OutputStream outputStream) throws IOException;
+    void export(@NonNull MetricsSnapshot snapshot, OutputStream outputStream) throws IOException;
 }
