@@ -10,13 +10,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.function.Predicate;
+
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricMetadata;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.snapshot.MetricSnapshot;
+import org.hiero.metrics.api.snapshot.MetricsSnapshot;
 
-// TODO handle unknown
 public class OpenMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
 
     private static final EnumMap<MetricType, String> METRIC_TYPES = new EnumMap<>(MetricType.class);
@@ -31,16 +33,25 @@ public class OpenMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
     private static final String COUNTER_SUFFIX = "_total";
     private static final String INFO_SUFFIX = "_info";
 
-    public OpenMetricsSnapshotsWriter(Predicate<MetricMetadata> filterMetrics, String decimalFormat) {
+    private final boolean writeTimestamp;
+
+    public OpenMetricsSnapshotsWriter(Predicate<MetricMetadata> filterMetrics, String decimalFormat, boolean writeTimestamp) {
         super(filterMetrics, decimalFormat);
+        this.writeTimestamp = writeTimestamp;
+    }
+
+    public OpenMetricsSnapshotsWriter(Predicate<MetricMetadata> filterMetrics, String decimalFormat) {
+        this(filterMetrics, decimalFormat, false);
     }
 
     public OpenMetricsSnapshotsWriter(String doubleFormat) {
         super(doubleFormat);
+        writeTimestamp = false;
     }
 
     public OpenMetricsSnapshotsWriter() {
         super();
+        writeTimestamp = false;
     }
 
     private String getMetricTypeName(MetricType metricType) {
@@ -52,11 +63,12 @@ public class OpenMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
     }
 
     @Override
-    public void export(List<MetricSnapshot> snapshots, OutputStream outputStream) throws IOException {
+    public void export(@NonNull MetricsSnapshot snapshot, OutputStream outputStream) throws IOException {
         Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+        long snapshotTimestamp = snapshot.createdTime().toEpochMilli();
 
-        for (MetricSnapshot snapshot : snapshots) {
-            MetricMetadata metadata = snapshot.metadata();
+        for (MetricSnapshot metricSnapshot : snapshot.snapshots()) {
+            MetricMetadata metadata = metricSnapshot.metadata();
 
             if (!filterMetrics.test(metadata)) {
                 continue;
@@ -78,7 +90,7 @@ public class OpenMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
                 writeMetadataLine(writer, "# HELP ", metricName, metadata.getDescription());
             }
 
-            for (DataPointSnapshot dataPoint : snapshot.dataPoints()) {
+            for (DataPointSnapshot dataPoint : metricSnapshot.dataPoints()) {
                 for (DataPointSnapshot.ValueItem valueItem : dataPoint.valueItems()) {
                     writer.write(metricName);
                     if (metadata.getMetricType() == MetricType.COUNTER) {
@@ -92,6 +104,12 @@ public class OpenMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
                     writer.write(' ');
 
                     writeDouble(writer, valueItem.value());
+
+                    if (writeTimestamp) {
+                        writer.write(' ');
+                        writeOpenMetricsTimestamp(writer, snapshotTimestamp);
+                    }
+
                     writer.write('\n');
                 }
             }

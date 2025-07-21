@@ -7,8 +7,8 @@ import org.hiero.metrics.api.core.MetricMetadata;
 
 public abstract class AbstractMetricsSnapshotsWriter implements MetricsSnapshotsWriter {
 
-    private static final String DEFAULT_DECIMAL_FORMAT = "#.####";
-    private static final Predicate<MetricMetadata> ALLOW_ALL = metadata -> true;
+    public static final String DEFAULT_DECIMAL_FORMAT = "#.####";
+    public static final Predicate<MetricMetadata> ALLOW_ALL = metadata -> true;
 
     protected final Predicate<MetricMetadata> filterMetrics;
     protected final DecimalFormat formatter;

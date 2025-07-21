@@ -1,20 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.api.snapshot.extension;
+package org.hiero.metrics.api.snapshot.extension.impl;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.spi.HttpServerProvider;
+import org.hiero.metrics.api.snapshot.MetricsSnapshot;
+import org.hiero.metrics.api.snapshot.extension.OpenMetricsSnapshotsWriter;
+import org.hiero.metrics.api.snapshot.extension.PullingMetricsExporterAdapter;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import org.hiero.metrics.api.snapshot.MetricSnapshot;
-import org.hiero.metrics.api.snapshot.MetricsSnapshot;
 
-public class OpenMetricsHttpEndpoint extends PullingMetricsExporterSnapshotsHolder {
+public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
 
     public static final String CONTENT_TYPE = "application/openmetrics-text; version=1.0.0; charset=utf-8";
 
@@ -34,11 +36,14 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterSnapshotsHold
 
     private void handleSnapshots(HttpExchange exchange) throws IOException {
         try {
-            List<MetricSnapshot> snapshot =
-                    getSnapshot().map(MetricsSnapshot::snapshots).orElse(List.of());
-            ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream(lastResponseSize.get() + 1024);
+            Optional<MetricsSnapshot> optionalSnapshot = getSnapshot();
+            if (optionalSnapshot.isEmpty()) {
+                exchange.sendResponseHeaders(204, 0); // No Content
+                return;
+            }
 
-            exporter.export(snapshot, responseBuffer);
+            ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream(lastResponseSize.get() + 1024);
+            exporter.export(optionalSnapshot.get(), responseBuffer);
             lastResponseSize.set(responseBuffer.size());
 
             exchange.getResponseHeaders().set("Content-Type", CONTENT_TYPE);

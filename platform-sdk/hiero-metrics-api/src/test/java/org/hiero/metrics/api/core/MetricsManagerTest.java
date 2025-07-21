@@ -1,24 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hiero.metrics.api.utils.StatUtils.DEFAULT_STAT_LABEL;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.List;
-import java.util.Optional;
 import org.hiero.metrics.api.DoubleGaugeComposite;
 import org.hiero.metrics.api.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.snapshot.MetricSnapshot;
-import org.hiero.metrics.api.snapshot.MetricsSnapshot;
-import org.hiero.metrics.api.snapshot.extension.PullingMetricsExporterSnapshotsHolder;
+import org.hiero.metrics.api.snapshot.extension.PullingMetricsExporterAdapter;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hiero.metrics.api.utils.StatUtils.DEFAULT_STAT_LABEL;
 
 public class MetricsManagerTest {
 
     @Test
     public void test() {
-        TestExporter exporter = new TestExporter();
+        PullingMetricsExporterAdapter exporter = new PullingMetricsExporterAdapter("test");
 
         MetricsManager manager = MetricsManager.createSimple(exporter);
         Label globalLabel = new Label("env", "test");
@@ -76,18 +74,5 @@ public class MetricsManagerTest {
                                                 5.0, new Label(DEFAULT_STAT_LABEL, "sumPlusOne"))))));
 
         manager.shutdown();
-    }
-
-    private static class TestExporter extends PullingMetricsExporterSnapshotsHolder {
-
-        public TestExporter() {
-            super("test");
-        }
-
-        @NonNull
-        @Override
-        public Optional<MetricsSnapshot> getSnapshot() {
-            return super.getSnapshot();
-        }
     }
 }
