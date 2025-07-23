@@ -1,0 +1,39 @@
+apiVersion: 1
+
+datasources:
+  - name: CSV Metrics
+    type: yesoreyeram-infinity-datasource
+    access: proxy
+    isDefault: false
+    url: http://file-server/metrics.csv
+    jsonData:
+      datasource_mode: "basic"
+      auth_method: "none"
+      global_queries:
+        - id: "metrics-csv-column"
+          name: "Metrics CSV Columns"
+          query:
+            columns:
+              - selector: "timestamp"
+                text: "timestamp"
+                type: "timestamp"
+              - selector: "metric"
+                text: "metric"
+                type: "string"
+              - selector: "value"
+                text: "value"
+                type: "number"
+              - selector: "labels"
+                text: "labels"
+                type: "string"
+            filters: [ ]
+            format: "table"
+            parser: "backend"
+            root_selector: ""
+            source: "url"
+            type: "csv"
+            url: ""
+            url_options:
+              data: ""
+              method: "GET"
+    editable: true

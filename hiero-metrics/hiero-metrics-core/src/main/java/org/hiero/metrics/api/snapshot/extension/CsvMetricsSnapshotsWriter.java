@@ -19,7 +19,7 @@ import org.hiero.metrics.api.snapshot.MetricsSnapshot;
 
 public class CsvMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
 
-    public static final MetricsSnapshotsWriter DEFAULT =
+    public static final CsvMetricsSnapshotsWriter DEFAULT =
             new CsvMetricsSnapshotsWriter(ALLOW_ALL, DEFAULT_DECIMAL_FORMAT);
 
     public CsvMetricsSnapshotsWriter(@NonNull Predicate<MetricMetadata> filterMetrics, @NonNull String decimalFormat) {
@@ -27,7 +27,7 @@ public class CsvMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
     }
 
     public void writeHeaders(OutputStream outputStream) throws IOException {
-        outputStream.write("timestamp,name,unit,value,labels\n".getBytes(StandardCharsets.UTF_8));
+        outputStream.write("timestamp,metric,unit,value,labels\n".getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
@@ -92,9 +92,5 @@ public class CsvMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
         }
 
         writer.write('"'); // End quote
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Instant.now().toString());
     }
 }

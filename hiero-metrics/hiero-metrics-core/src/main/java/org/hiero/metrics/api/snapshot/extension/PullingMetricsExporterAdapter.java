@@ -19,6 +19,7 @@ public class PullingMetricsExporterAdapter implements PullingMetricsExporter {
         this.name = ArgumentUtils.throwArgBlank(name, "exporter name");
     }
 
+    @NonNull
     @Override
     public final String getName() {
         return name;
