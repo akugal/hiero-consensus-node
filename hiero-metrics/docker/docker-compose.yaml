@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  file-server:
+    image: nginx:alpine
+    volumes:
+      - ./tmp:/usr/share/nginx/html:ro
+    networks:
+      - observe-network
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - observe-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana-oss
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_PLUGIN_ALLOW_LOCAL_MODE=true
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource
+      - GF_SERVER_HTTP_PORT=3001
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana/dashboards
+    ports:
+      - "3001:3001"
+    networks:
+      - observe-network
+
+networks:
+  observe-network:
+    driver: bridge

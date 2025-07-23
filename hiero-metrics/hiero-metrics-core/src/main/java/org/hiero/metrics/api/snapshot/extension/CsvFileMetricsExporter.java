@@ -15,12 +15,19 @@ public class CsvFileMetricsExporter implements PushingMetricsExporter {
 
     private final String name;
     private final Path filePath;
-    private final MetricsSnapshotsWriter writer;
+    private final CsvMetricsSnapshotsWriter writer;
 
-    public CsvFileMetricsExporter(String name, Path filePath) {
+    public CsvFileMetricsExporter(String name, Path filePath) throws IOException {
         this.name = name;
         this.filePath = filePath;
         writer = CsvMetricsSnapshotsWriter.DEFAULT;
+
+        if (!Files.exists(filePath)) {
+            Files.createFile(filePath);
+            try (OutputStream outputStream = Files.newOutputStream(filePath, APPEND)) {
+                writer.writeHeaders(outputStream);
+            }
+        }
     }
 
     @Override

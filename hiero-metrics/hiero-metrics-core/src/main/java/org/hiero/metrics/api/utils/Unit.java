@@ -28,6 +28,9 @@ public final class Unit {
 
     public static final String SECOND_UNIT = "s";
 
+    public static final String BYTE_UNIT = "byte";
+    public static final String MEGABYTE_UNIT = "mb";
+
     @NonNull
     public static String getUnit(final ChronoUnit timeUnit) {
         Objects.requireNonNull(timeUnit, "timeUnit must not be null");
