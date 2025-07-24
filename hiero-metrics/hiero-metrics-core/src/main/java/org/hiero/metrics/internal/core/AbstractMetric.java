@@ -4,6 +4,7 @@ package org.hiero.metrics.internal.core;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricMetadata;
@@ -13,13 +14,15 @@ public abstract class AbstractMetric implements Metric {
     private final MetricMetadata metadata;
     private final List<Label> constantLabels;
     private final List<String> dynamicLabelNames;
+    private final Set<String> dynamicLabelNamesSet;
 
     protected AbstractMetric(Builder<?, ?> builder) {
-        metadata =
-                new MetricMetadata(builder.getType(), builder.getName(), builder.getDescription(), builder.getUnit());
+        metadata = new MetricMetadata(
+                builder.getType(), builder.getKey().getName(), builder.getDescription(), builder.getUnit());
 
         constantLabels = List.copyOf(builder.getConstantLabels());
         dynamicLabelNames = List.copyOf(builder.getDynamicLabelNames());
+        dynamicLabelNamesSet = Set.of(builder.getDynamicLabelNamesSet().toArray(new String[0]));
     }
 
     @NonNull
@@ -37,6 +40,10 @@ public abstract class AbstractMetric implements Metric {
     @Override
     public List<String> getDynamicLabelNames() {
         return dynamicLabelNames;
+    }
+
+    protected Set<String> getDynamicLabelNamesSet() {
+        return dynamicLabelNamesSet;
     }
 
     protected List<Label> createDataPointLabels(List<String> dynamicLabelValues) {

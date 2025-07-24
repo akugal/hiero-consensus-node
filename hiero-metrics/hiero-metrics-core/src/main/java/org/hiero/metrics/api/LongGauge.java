@@ -4,6 +4,7 @@ package org.hiero.metrics.api;
 import java.util.Objects;
 import java.util.function.LongBinaryOperator;
 import java.util.function.LongSupplier;
+import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
@@ -14,20 +15,28 @@ import org.hiero.metrics.internal.datapoint.LongAccumulatorGaugeDataPoint;
 
 public interface LongGauge extends StatefulMetric<LongGaugeDataPoint>, LongGaugeDataPoint {
 
-    static Builder builder(String name) {
-        return new Builder(name);
+    static MetricKey<LongGauge> key(String name) {
+        return MetricKey.of(name, LongGauge.class);
     }
 
-    static Builder sumBuilder(String name, boolean resetOnSnapshot) {
-        return builder(name).withOperator(StatUtils.LONG_SUM, resetOnSnapshot);
+    static MetricKey<LongGauge> key(String category, String name) {
+        return MetricKey.of(category, name, LongGauge.class);
     }
 
-    static Builder maxBuilder(String name, boolean resetOnSnapshot) {
-        return builder(name).withOperator(StatUtils.LONG_MAX, resetOnSnapshot).withInitValue(Long.MIN_VALUE);
+    static Builder builder(MetricKey<LongGauge> key) {
+        return new Builder(key);
     }
 
-    static Builder minBuilder(String name, boolean resetOnSnapshot) {
-        return builder(name).withOperator(StatUtils.LONG_MIN, resetOnSnapshot).withInitValue(Long.MAX_VALUE);
+    static Builder sumBuilder(MetricKey<LongGauge> key, boolean resetOnSnapshot) {
+        return builder(key).withOperator(StatUtils.LONG_SUM, resetOnSnapshot);
+    }
+
+    static Builder maxBuilder(MetricKey<LongGauge> key, boolean resetOnSnapshot) {
+        return builder(key).withOperator(StatUtils.LONG_MAX, resetOnSnapshot).withInitValue(Long.MIN_VALUE);
+    }
+
+    static Builder minBuilder(MetricKey<LongGauge> key, boolean resetOnSnapshot) {
+        return builder(key).withOperator(StatUtils.LONG_MIN, resetOnSnapshot).withInitValue(Long.MAX_VALUE);
     }
 
     @Override
@@ -39,8 +48,8 @@ public interface LongGauge extends StatefulMetric<LongGaugeDataPoint>, LongGauge
         private LongBinaryOperator operator;
         private boolean resetOnSnapshot = false;
 
-        private Builder(String name) {
-            super(name, () -> new AtomicLongGaugeDataPoint(LongGaugeDataPoint.DEFAULT_INIT));
+        private Builder(MetricKey<LongGauge> key) {
+            super(key, () -> new AtomicLongGaugeDataPoint(LongGaugeDataPoint.DEFAULT_INIT));
         }
 
         @Override

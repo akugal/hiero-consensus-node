@@ -10,14 +10,15 @@ public class DoubleGaugeCompositeTest {
 
     @Test
     public void testFailBuildWhenNoStatsDefined() {
-        assertThatThrownBy(() -> DoubleGaugeComposite.builder("noStats").build())
+        assertThatThrownBy(() -> DoubleGaugeComposite.builder(DoubleGaugeComposite.key("noStats"))
+                        .build())
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("At least one stat must be defined");
     }
 
     @Test
     public void testFailBuildWhenDuplicateStatsDefined() {
-        assertThatThrownBy(() -> DoubleGaugeComposite.builder("duplicateStat")
+        assertThatThrownBy(() -> DoubleGaugeComposite.builder(DoubleGaugeComposite.key("multipleDoubleStats"))
                         .withAccumulatorStat("stat1", Double::max, 0.0)
                         .withAccumulatorStat("stat1", Double::min, 0.0)
                         .build())
@@ -27,8 +28,9 @@ public class DoubleGaugeCompositeTest {
 
     @Test
     public void testSingleSumStat() {
-        DoubleGaugeComposite metric =
-                DoubleGaugeComposite.builder("singleSumStat").withSumStat().build();
+        DoubleGaugeComposite metric = DoubleGaugeComposite.builder(DoubleGaugeComposite.key("singleSumStat"))
+                .withSumStat()
+                .build();
 
         assertThat(metric.size()).isEqualTo(1);
 
@@ -47,7 +49,7 @@ public class DoubleGaugeCompositeTest {
 
     @Test
     public void testMultipleStats() {
-        DoubleGaugeComposite metric = DoubleGaugeComposite.builder("multipleStats")
+        DoubleGaugeComposite metric = DoubleGaugeComposite.builder(DoubleGaugeComposite.key("multipleDoubleStats"))
                 .withSumStat()
                 .withAccumulatorStat("sumPlusOne", (v1, v2) -> v1 + v2 + 1)
                 .build();

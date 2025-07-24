@@ -6,6 +6,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -26,21 +27,22 @@ public interface Metric {
 
     abstract class Builder<B extends Builder<B, M>, M extends Metric> {
 
-        private String name;
+        private final MetricKey<M> key;
         private String description;
         private String unit;
 
         protected final TreeMap<String, Label> constantLabels = new TreeMap<>();
         private final List<String> dynamicLabelNames = new ArrayList<>();
+        private final Set<String> dynamicLabelNamesSet = new HashSet<>();
 
-        protected Builder(String name) {
-            withName(name);
+        protected Builder(@NonNull MetricKey<M> key) {
+            this.key = Objects.requireNonNull(key, "key must not be null");
         }
 
         public abstract MetricType getType();
 
-        public String getName() {
-            return name;
+        public MetricKey<M> getKey() {
+            return key;
         }
 
         public String getDescription() {
@@ -59,9 +61,8 @@ public interface Metric {
             return dynamicLabelNames;
         }
 
-        public final B withName(String name) {
-            this.name = ArgumentUtils.throwArgBlank(name, "name");
-            return self();
+        public Set<String> getDynamicLabelNamesSet() {
+            return dynamicLabelNamesSet;
         }
 
         public final B withDescription(String description) {
@@ -75,13 +76,11 @@ public interface Metric {
         }
 
         public final B withDynamicLabelNames(String... labelNames) {
-            if (labelNames == null || labelNames.length == 0) {
-                return self();
+            for (String labelName : labelNames) {
+                if (dynamicLabelNamesSet.add(labelName)) {
+                    dynamicLabelNames.add(labelName);
+                }
             }
-
-            // verify no duplicates
-            Set<String> lablesSet = Set.of(labelNames);
-            dynamicLabelNames.addAll(lablesSet);
 
             return self();
         }
@@ -119,10 +118,6 @@ public interface Metric {
 
         public final M register(MetricRegistry registry) {
             return registry.register(this);
-        }
-
-        public final M register() {
-            return register(MetricRegistry.DEFAULT);
         }
 
         protected abstract M buildMetric();
