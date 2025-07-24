@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.Supplier;
+import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.DoubleGaugeCompositeDataPoint;
@@ -25,12 +26,20 @@ import org.hiero.metrics.internal.datapoint.DoubleGaugeCompositeArrayDataPoint;
 public interface DoubleGaugeComposite
         extends StatefulMetric<DoubleGaugeCompositeDataPoint>, DoubleGaugeCompositeDataPoint {
 
+    static MetricKey<DoubleGaugeComposite> key(String name) {
+        return MetricKey.of(name, DoubleGaugeComposite.class);
+    }
+
+    static MetricKey<DoubleGaugeComposite> key(String category, String name) {
+        return MetricKey.of(category, name, DoubleGaugeComposite.class);
+    }
+
+    static Builder builder(MetricKey<DoubleGaugeComposite> key) {
+        return new Builder(key);
+    }
+
     @Override
     void reset();
-
-    static Builder builder(String name) {
-        return new Builder(name);
-    }
 
     final class Builder extends StatefulMetric.Builder<DoubleGaugeCompositeDataPoint, Builder, DoubleGaugeComposite> {
 
@@ -39,8 +48,8 @@ public interface DoubleGaugeComposite
         private final List<Supplier<DoubleGaugeDataPoint>> dataPointFactories = new ArrayList<>();
         private boolean resetOnSnapshot = false;
 
-        private Builder(String name) {
-            super(name, () -> new DoubleGaugeCompositeArrayDataPoint(() -> new DoubleGaugeDataPoint[0]));
+        private Builder(MetricKey<DoubleGaugeComposite> key) {
+            super(key, () -> new DoubleGaugeCompositeArrayDataPoint(() -> new DoubleGaugeDataPoint[0]));
         }
 
         @Override
@@ -60,11 +69,6 @@ public interface DoubleGaugeComposite
         @NonNull
         public List<String> getStatNames() {
             return statNames;
-        }
-
-        @NonNull
-        public List<Supplier<DoubleGaugeDataPoint>> getDataPointFactories() {
-            return dataPointFactories;
         }
 
         public Builder withStatLabel(String statLabel) {

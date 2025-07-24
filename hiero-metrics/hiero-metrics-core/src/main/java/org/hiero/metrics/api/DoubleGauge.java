@@ -4,6 +4,7 @@ package org.hiero.metrics.api;
 import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
+import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
@@ -15,20 +16,28 @@ import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
 
 public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint>, DoubleGaugeDataPoint {
 
-    static Builder builder(String name) {
-        return new Builder(name);
+    static MetricKey<DoubleGauge> key(String name) {
+        return MetricKey.of(name, DoubleGauge.class);
     }
 
-    static Builder sumBuilder(String name, boolean resetOnSnapshot) {
-        return builder(name).withOperator(StatUtils.DOUBLE_SUM, resetOnSnapshot);
+    static MetricKey<DoubleGauge> key(String category, String name) {
+        return MetricKey.of(category, name, DoubleGauge.class);
     }
 
-    static Builder maxBuilder(String name, boolean resetOnSnapshot) {
-        return builder(name).withOperator(StatUtils.DOUBLE_MAX, resetOnSnapshot).withInitValue(Double.MIN_VALUE);
+    static Builder builder(MetricKey<DoubleGauge> key) {
+        return new Builder(key);
     }
 
-    static Builder minBuilder(String name, boolean resetOnSnapshot) {
-        return builder(name).withOperator(StatUtils.DOUBLE_MIN, resetOnSnapshot).withInitValue(Double.MAX_VALUE);
+    static Builder sumBuilder(MetricKey<DoubleGauge> key, boolean resetOnSnapshot) {
+        return builder(key).withOperator(StatUtils.DOUBLE_SUM, resetOnSnapshot);
+    }
+
+    static Builder maxBuilder(MetricKey<DoubleGauge> key, boolean resetOnSnapshot) {
+        return builder(key).withOperator(StatUtils.DOUBLE_MAX, resetOnSnapshot).withInitValue(Double.MIN_VALUE);
+    }
+
+    static Builder minBuilder(MetricKey<DoubleGauge> key, boolean resetOnSnapshot) {
+        return builder(key).withOperator(StatUtils.DOUBLE_MIN, resetOnSnapshot).withInitValue(Double.MAX_VALUE);
     }
 
     final class Builder extends StatefulMetric.Builder<DoubleGaugeDataPoint, Builder, DoubleGauge> {
@@ -37,8 +46,8 @@ public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint>, Doubl
         private DoubleBinaryOperator operator;
         private boolean resetOnSnapshot = false;
 
-        private Builder(String name) {
-            super(name, () -> new AtomicDoubleGaugeDataPoint(DoubleGaugeDataPoint.DEFAULT_INIT));
+        private Builder(MetricKey<DoubleGauge> key) {
+            super(key, () -> new AtomicDoubleGaugeDataPoint(DoubleGaugeDataPoint.DEFAULT_INIT));
         }
 
         @Override

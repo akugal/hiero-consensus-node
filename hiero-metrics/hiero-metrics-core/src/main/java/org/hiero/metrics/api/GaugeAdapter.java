@@ -7,15 +7,26 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.internal.DefaultGaugeAdapter;
 
 public interface GaugeAdapter<D> extends StatefulMetric<D>, Supplier<D> {
 
+    static <D> MetricKey<GaugeAdapter<D>> key(String name) {
+        return MetricKey.of(name, GaugeAdapter.class);
+    }
+
+    static <D> MetricKey<GaugeAdapter<D>> key(String category, String name) {
+        return MetricKey.of(category, name, GaugeAdapter.class);
+    }
+
     static <D> Builder<D> builder(
-            String name, @NonNull Supplier<D> valueContainerFactory, @NonNull Function<D, Number> snapshotGetter) {
-        return new Builder<>(name, valueContainerFactory, snapshotGetter);
+            MetricKey<GaugeAdapter<D>> key,
+            @NonNull Supplier<D> valueContainerFactory,
+            @NonNull Function<D, Number> snapshotGetter) {
+        return new Builder<>(key, valueContainerFactory, snapshotGetter);
     }
 
     final class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, GaugeAdapter<D>> {
@@ -24,8 +35,10 @@ public interface GaugeAdapter<D> extends StatefulMetric<D>, Supplier<D> {
         private Consumer<D> reset;
 
         private Builder(
-                String name, @NonNull Supplier<D> valueContainerFactory, @NonNull Function<D, Number> snapshotGetter) {
-            super(name, valueContainerFactory);
+                MetricKey<GaugeAdapter<D>> key,
+                @NonNull Supplier<D> valueContainerFactory,
+                @NonNull Function<D, Number> snapshotGetter) {
+            super(key, valueContainerFactory);
             this.snapshotGetter = Objects.requireNonNull(snapshotGetter, "Snapshot getter must not be null");
         }
 

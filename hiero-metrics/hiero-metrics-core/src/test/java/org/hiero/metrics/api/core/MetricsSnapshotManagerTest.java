@@ -8,24 +8,28 @@ import java.util.List;
 import org.hiero.metrics.api.DoubleGaugeComposite;
 import org.hiero.metrics.api.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.snapshot.MetricSnapshot;
+import org.hiero.metrics.api.snapshot.MetricsSnapshotManager;
 import org.hiero.metrics.api.snapshot.extension.PullingMetricsExporterAdapter;
 import org.junit.jupiter.api.Test;
 
-public class MetricsManagerTest {
+public class MetricsSnapshotManagerTest {
 
     @Test
     public void test() {
         PullingMetricsExporterAdapter exporter = new PullingMetricsExporterAdapter("test");
 
-        MetricsManager manager = MetricsManager.createSimple(exporter);
+        MetricsSnapshotManager manager = MetricsFacade.createSnapshotManager(exporter);
         Label globalLabel = new Label("env", "test");
-        MetricRegistry registry = manager.createManagedMetricsRegistry("test_registry", globalLabel);
+        MetricRegistry registry = MetricsFacade.createRegistry(globalLabel);
+        manager.manageMetricRegistry(registry);
 
         // given
-        DoubleGaugeComposite singleSumDoubleMetric = DoubleGaugeComposite.builder("singleSumDoubleMetric")
+        DoubleGaugeComposite singleSumDoubleMetric = DoubleGaugeComposite.builder(
+                        DoubleGaugeComposite.key("singleSumDoubleMetric"))
                 .withSumStat()
                 .register(registry);
-        DoubleGaugeComposite multipleDoubleStats = DoubleGaugeComposite.builder("multipleDoubleStats")
+        DoubleGaugeComposite multipleDoubleStats = DoubleGaugeComposite.builder(
+                        DoubleGaugeComposite.key("multipleDoubleStats"))
                 .withSumStat()
                 .withAccumulatorStat("sumPlusOne", (v1, v2) -> v1 + v2 + 1)
                 .register(registry);

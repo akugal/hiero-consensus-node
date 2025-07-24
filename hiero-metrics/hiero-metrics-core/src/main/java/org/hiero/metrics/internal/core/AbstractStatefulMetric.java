@@ -55,6 +55,34 @@ public abstract class AbstractStatefulMetric<D> extends AbstractMetric
         return noLabelsDataPoint;
     }
 
+    @NonNull
+    @Override
+    public D getOrCreateLabeled(Map<String, String> labels) {
+        if (noLabelsDataPoint != null) {
+            if (!labels.isEmpty()) {
+                throw new IllegalArgumentException(getClass().getSimpleName()
+                        + " "
+                        + getMetadata().getName()
+                        + " was created without label names, so you must not provide label values.");
+            }
+            return noLabelsDataPoint;
+        } else if (labels.size() != getDynamicLabelNames().size()) {
+            throw new IllegalArgumentException(
+                    "Expected different size of labels. Expected: + " + getDynamicLabelNames() + ", got " + labels);
+        } else if (labels.keySet().equals(getDynamicLabelNamesSet())) {
+            throw new IllegalArgumentException(
+                    "Expected different label names. Expected: + " + getDynamicLabelNames() + ", got " + labels);
+        }
+
+        List<String> labelValues = new ArrayList<>(getDynamicLabelNames().size());
+        for (String labelName : getDynamicLabelNames()) {
+            labelValues.add(labels.get(labelName));
+        }
+
+        return labeledDataPoints.computeIfAbsent(labelValues, l -> dataPointFactory.get());
+    }
+
+    @NonNull
     public final D getOrCreateLabeled(String... labelValues) {
         if (noLabelsDataPoint != null) {
             if (labelValues.length != 0) {
@@ -65,8 +93,8 @@ public abstract class AbstractStatefulMetric<D> extends AbstractMetric
             }
             return noLabelsDataPoint;
         } else if (labelValues.length != getDynamicLabelNames().size()) {
-            throw new IllegalArgumentException(
-                    "Expected " + getDynamicLabelNames().size() + " label values, but got " + labelValues.length + ".");
+            throw new IllegalArgumentException("Expected different size of labels. Expected: + "
+                    + getDynamicLabelNames() + ", got " + Arrays.asList(labelValues));
         }
 
         checkNoNullLabels(labelValues);

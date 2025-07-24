@@ -12,14 +12,23 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.internal.DefaultStatsGaugeAdapter;
 
 public interface StatsGaugeAdapter<D> extends StatefulMetric<D>, Supplier<D> {
 
-    static <D> Builder<D> builder(String name, @NonNull Supplier<D> valueContainerFactory) {
-        return new Builder<>(name, valueContainerFactory);
+    static <D> MetricKey<StatsGaugeAdapter<D>> key(String name) {
+        return MetricKey.of(name, StatsGaugeAdapter.class);
+    }
+
+    static <D> MetricKey<StatsGaugeAdapter<D>> key(String category, String name) {
+        return MetricKey.of(category, name, StatsGaugeAdapter.class);
+    }
+
+    static <D> Builder<D> builder(MetricKey<StatsGaugeAdapter<D>> key, @NonNull Supplier<D> valueContainerFactory) {
+        return new Builder<>(key, valueContainerFactory);
     }
 
     final class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, StatsGaugeAdapter<D>> {
@@ -29,8 +38,8 @@ public interface StatsGaugeAdapter<D> extends StatefulMetric<D>, Supplier<D> {
         private final List<Function<D, Number>> statSnapshotGetters = new ArrayList<>();
         private Consumer<D> reset;
 
-        private Builder(String name, @NonNull Supplier<D> valueContainerFactory) {
-            super(name, Objects.requireNonNull(valueContainerFactory, "container factory must not be null"));
+        private Builder(MetricKey<StatsGaugeAdapter<D>> key, @NonNull Supplier<D> valueContainerFactory) {
+            super(key, Objects.requireNonNull(valueContainerFactory, "container factory must not be null"));
         }
 
         @Override

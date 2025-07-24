@@ -5,18 +5,8 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import org.hiero.metrics.internal.core.DefaultMetricRegistry;
 
 public interface MetricRegistry {
-
-    MetricRegistry DEFAULT = new DefaultMetricRegistry();
-
-    static MetricRegistry create(@NonNull String name, Label... globalLabels) {
-        return new DefaultMetricRegistry(name, globalLabels);
-    }
-
-    @NonNull
-    String getName();
 
     @NonNull
     List<Label> getGlobalLabels();
@@ -24,19 +14,25 @@ public interface MetricRegistry {
     @NonNull
     Collection<Metric> getAll();
 
-    @NonNull
-    <M extends Metric, B extends Metric.Builder<?, M>> M register(B builder);
+    void registerMetrics(@NonNull MetricsRegistrationProvider provider);
 
     @NonNull
-    <M extends Metric> Optional<M> findMetric(String name);
+    <M extends Metric, B extends Metric.Builder<?, M>> M getOrRegister(@NonNull B builder);
 
     @NonNull
-    default <M extends Metric> M getMetric(String name) {
-        Optional<M> metric = findMetric(name);
+    <M extends Metric, B extends Metric.Builder<?, M>> M register(@NonNull B builder);
+
+    // TODO add typed key instead of just name
+    @NonNull
+    <M extends Metric> Optional<M> findMetric(@NonNull MetricKey<M> key);
+
+    @NonNull
+    default <M extends Metric> M getMetric(@NonNull MetricKey<M> key) {
+        Optional<M> metric = findMetric(key);
         if (metric.isPresent()) {
             return metric.get();
         }
-        throw new IllegalArgumentException("Metric not found: " + name);
+        throw new IllegalArgumentException("Metric not found: " + key);
     }
 
     default void reset() {

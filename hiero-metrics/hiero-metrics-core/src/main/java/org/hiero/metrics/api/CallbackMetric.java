@@ -6,26 +6,35 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricCallback;
+import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.internal.DefaultCallbackMetric;
 
 public interface CallbackMetric extends Metric {
+
+    static MetricKey<CallbackMetric> key(String name) {
+        return MetricKey.of(name, CallbackMetric.class);
+    }
+
+    static MetricKey<CallbackMetric> key(String category, String name) {
+        return MetricKey.of(category, name, CallbackMetric.class);
+    }
+
+    static Builder builder(MetricKey<CallbackMetric> key, Consumer<MetricCallback> callback) {
+        return new Builder(key, callback);
+    }
 
     @Override
     default void reset() {
         // no op
     }
 
-    static Builder builder(String name, Consumer<MetricCallback> callback) {
-        return new Builder(name, callback);
-    }
-
     final class Builder extends Metric.Builder<Builder, CallbackMetric> {
 
         private final Consumer<MetricCallback> callback;
 
-        private Builder(String name, Consumer<MetricCallback> callback) {
-            super(name);
+        private Builder(MetricKey<CallbackMetric> key, Consumer<MetricCallback> callback) {
+            super(key);
             this.callback = Objects.requireNonNull(callback, "Callback consumer cannot be null");
         }
 

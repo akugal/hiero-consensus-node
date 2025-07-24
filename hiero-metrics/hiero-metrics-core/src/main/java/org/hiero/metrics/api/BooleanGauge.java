@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.BooleanGaugeDataPoint;
@@ -9,14 +10,22 @@ import org.hiero.metrics.internal.datapoint.AtomicBooleanGaugeDataPoint;
 
 public interface BooleanGauge extends StatefulMetric<BooleanGaugeDataPoint>, BooleanGaugeDataPoint {
 
-    static Builder builder(String name) {
-        return new Builder(name);
+    static MetricKey<BooleanGauge> key(String name) {
+        return MetricKey.of(name, BooleanGauge.class);
+    }
+
+    static MetricKey<BooleanGauge> key(String category, String name) {
+        return MetricKey.of(category, name, BooleanGauge.class);
+    }
+
+    static Builder builder(MetricKey<BooleanGauge> key) {
+        return new Builder(key);
     }
 
     final class Builder extends StatefulMetric.Builder<BooleanGaugeDataPoint, Builder, BooleanGauge> {
 
-        private Builder(String name) {
-            super(name, AtomicBooleanGaugeDataPoint::new);
+        private Builder(MetricKey<BooleanGauge> key) {
+            super(key, AtomicBooleanGaugeDataPoint::new);
         }
 
         @Override
