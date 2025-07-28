@@ -8,7 +8,7 @@ import org.hiero.metrics.api.datapoint.DoubleCounterDataPoint;
 import org.hiero.metrics.internal.DefaultDoubleCounter;
 import org.hiero.metrics.internal.datapoint.DoubleAdderCounterDataPoint;
 
-public interface DoubleCounter extends StatefulMetric<DoubleCounterDataPoint>, DoubleCounterDataPoint {
+public interface DoubleCounter extends StatefulMetric<DoubleCounterDataPoint> {
 
     static MetricKey<DoubleCounter> key(String name) {
         return MetricKey.of(name, DoubleCounter.class);

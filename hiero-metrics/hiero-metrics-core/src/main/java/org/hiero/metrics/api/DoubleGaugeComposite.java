@@ -23,8 +23,7 @@ import org.hiero.metrics.internal.datapoint.AtomicDoubleGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.DoubleGaugeCompositeArrayDataPoint;
 
-public interface DoubleGaugeComposite
-        extends StatefulMetric<DoubleGaugeCompositeDataPoint>, DoubleGaugeCompositeDataPoint {
+public interface DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompositeDataPoint> {
 
     static MetricKey<DoubleGaugeComposite> key(String name) {
         return MetricKey.of(name, DoubleGaugeComposite.class);
@@ -37,9 +36,6 @@ public interface DoubleGaugeComposite
     static Builder builder(MetricKey<DoubleGaugeComposite> key) {
         return new Builder(key);
     }
-
-    @Override
-    void reset();
 
     final class Builder extends StatefulMetric.Builder<DoubleGaugeCompositeDataPoint, Builder, DoubleGaugeComposite> {
 

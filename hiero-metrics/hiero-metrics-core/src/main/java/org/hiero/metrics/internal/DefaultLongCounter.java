@@ -24,14 +24,4 @@ public final class DefaultLongCounter extends AbstractStatefulMetric<LongCounter
     protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(LongCounterDataPoint datapoint) {
         return List.of(new DataPointSnapshot.ValueItem(datapoint.getAsLong()));
     }
-
-    @Override
-    public void increment(long value) {
-        getNoLabels().increment(value);
-    }
-
-    @Override
-    public long getAsLong() {
-        return getNoLabels().getAsLong();
-    }
 }

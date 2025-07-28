@@ -21,31 +21,6 @@ public class DefaultIntegerPairGauge extends AbstractStatefulMetric<IntegerPairD
     }
 
     @Override
-    public void update(int left, int right) {
-        getNoLabels().update(left, right);
-    }
-
-    @Override
-    public int getLeft() {
-        return getNoLabels().getLeft();
-    }
-
-    @Override
-    public int getRight() {
-        return getNoLabels().getRight();
-    }
-
-    @Override
-    public double getAndReset() {
-        return getNoLabels().getAndReset();
-    }
-
-    @Override
-    public double getAsDouble() {
-        return getNoLabels().getAsDouble();
-    }
-
-    @Override
     protected void reset(IntegerPairDataPoint dataPoint) {
         dataPoint.reset();
     }

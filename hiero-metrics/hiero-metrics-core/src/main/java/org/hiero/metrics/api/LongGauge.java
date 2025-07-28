@@ -13,7 +13,7 @@ import org.hiero.metrics.internal.DefaultLongGauge;
 import org.hiero.metrics.internal.datapoint.AtomicLongGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.LongAccumulatorGaugeDataPoint;
 
-public interface LongGauge extends StatefulMetric<LongGaugeDataPoint>, LongGaugeDataPoint {
+public interface LongGauge extends StatefulMetric<LongGaugeDataPoint> {
 
     static MetricKey<LongGauge> key(String name) {
         return MetricKey.of(name, LongGauge.class);
@@ -38,9 +38,6 @@ public interface LongGauge extends StatefulMetric<LongGaugeDataPoint>, LongGauge
     static Builder minBuilder(MetricKey<LongGauge> key, boolean resetOnSnapshot) {
         return builder(key).withOperator(StatUtils.LONG_MIN, resetOnSnapshot).withInitValue(Long.MAX_VALUE);
     }
-
-    @Override
-    void reset();
 
     final class Builder extends StatefulMetric.Builder<LongGaugeDataPoint, Builder, LongGauge> {
 

@@ -12,7 +12,7 @@ import org.hiero.metrics.api.utils.Unit;
 import org.hiero.metrics.internal.DefaultGenericGauge;
 import org.hiero.metrics.internal.datapoint.AtomicReferenceGaugeDataPoint;
 
-public interface GenericGauge<T> extends StatefulMetric<GaugeDataPoint<T>>, GaugeDataPoint<T> {
+public interface GenericGauge<T> extends StatefulMetric<GaugeDataPoint<T>> {
 
     static <T> MetricKey<GenericGauge<T>> key(String name) {
         return MetricKey.of(name, GenericGauge.class);

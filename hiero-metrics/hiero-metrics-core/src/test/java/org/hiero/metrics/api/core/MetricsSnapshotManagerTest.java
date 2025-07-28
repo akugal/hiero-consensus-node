@@ -35,8 +35,8 @@ public class MetricsSnapshotManagerTest {
                 .register(registry);
 
         // given
-        singleSumDoubleMetric.update(1.3);
-        multipleDoubleStats.update(1.3);
+        singleSumDoubleMetric.getNotLabeled().update(1.3);
+        multipleDoubleStats.getNotLabeled().update(1.3);
 
         // then
         List<MetricSnapshot> snapshots = exporter.getSnapshot().get().snapshots();
@@ -56,8 +56,8 @@ public class MetricsSnapshotManagerTest {
                                                 2.3, new Label(DEFAULT_STAT_LABEL, "sumPlusOne"))))));
 
         // given
-        singleSumDoubleMetric.update(1.7);
-        multipleDoubleStats.update(1.7);
+        singleSumDoubleMetric.getNotLabeled().update(1.7);
+        multipleDoubleStats.getNotLabeled().update(1.7);
 
         // then
         snapshots = exporter.getSnapshot().get().snapshots();

@@ -37,24 +37,4 @@ public final class DefaultLongGauge extends AbstractStatefulMetric<LongGaugeData
         }
         return List.of(new DataPointSnapshot.ValueItem(value));
     }
-
-    @Override
-    public long getInitValue() {
-        return getNoLabels().getInitValue();
-    }
-
-    @Override
-    public void update(long value) {
-        getNoLabels().update(value);
-    }
-
-    @Override
-    public long getAndReset() {
-        return getNoLabels().getAndReset();
-    }
-
-    @Override
-    public long getAsLong() {
-        return getNoLabels().getAsLong();
-    }
 }

@@ -28,14 +28,4 @@ public final class DefaultGenericGauge<T> extends AbstractStatefulMetric<GaugeDa
         }
         return List.of(new DataPointSnapshot.ValueItem(value));
     }
-
-    @Override
-    public void update(T value) {
-        getNoLabels().update(value);
-    }
-
-    @Override
-    public double getAsDouble() {
-        return getNoLabels().getAsDouble();
-    }
 }

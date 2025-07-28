@@ -17,7 +17,7 @@ import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.internal.DefaultStatsGaugeAdapter;
 
-public interface StatsGaugeAdapter<D> extends StatefulMetric<D>, Supplier<D> {
+public interface StatsGaugeAdapter<D> extends StatefulMetric<D> {
 
     static <D> MetricKey<StatsGaugeAdapter<D>> key(String name) {
         return MetricKey.of(name, StatsGaugeAdapter.class);

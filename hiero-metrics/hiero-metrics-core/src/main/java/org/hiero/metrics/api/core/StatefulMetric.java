@@ -9,6 +9,9 @@ import java.util.function.Supplier;
 public interface StatefulMetric<D> extends Metric {
 
     @NonNull
+    D getNotLabeled();
+
+    @NonNull
     D getOrCreateLabeled(Map<String, String> labels);
 
     @NonNull

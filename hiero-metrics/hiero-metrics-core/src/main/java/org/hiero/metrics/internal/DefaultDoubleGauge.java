@@ -37,24 +37,4 @@ public final class DefaultDoubleGauge extends AbstractStatefulMetric<DoubleGauge
         }
         return List.of(new DataPointSnapshot.ValueItem(datapoint.getAsDouble()));
     }
-
-    @Override
-    public double getInitValue() {
-        return getNoLabels().getInitValue();
-    }
-
-    @Override
-    public void update(double value) {
-        getNoLabels().update(value);
-    }
-
-    @Override
-    public double getAndReset() {
-        return getNoLabels().getAndReset();
-    }
-
-    @Override
-    public double getAsDouble() {
-        return getNoLabels().getAsDouble();
-    }
 }

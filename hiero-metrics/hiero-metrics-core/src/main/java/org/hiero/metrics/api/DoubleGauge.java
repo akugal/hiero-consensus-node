@@ -14,7 +14,7 @@ import org.hiero.metrics.internal.DefaultDoubleGauge;
 import org.hiero.metrics.internal.datapoint.AtomicDoubleGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
 
-public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint>, DoubleGaugeDataPoint {
+public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> {
 
     static MetricKey<DoubleGauge> key(String name) {
         return MetricKey.of(name, DoubleGauge.class);

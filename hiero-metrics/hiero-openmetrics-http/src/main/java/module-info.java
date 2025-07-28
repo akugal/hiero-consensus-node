@@ -2,6 +2,7 @@
 module org.hiero.metrics.openmetrics.http {
     requires transitive org.hiero.metrics.core;
     requires jdk.httpserver;
+    requires org.apache.logging.log4j;
     requires static transitive com.github.spotbugs.annotations;
     requires static transitive com.google.auto.service;
 

@@ -15,7 +15,7 @@ import org.hiero.metrics.api.datapoint.IntegerPairDataPoint;
 import org.hiero.metrics.internal.DefaultIntegerPairGauge;
 import org.hiero.metrics.internal.datapoint.AtomicIntegerPairDataPoint;
 
-public interface IntegerPairGauge extends StatefulMetric<IntegerPairDataPoint>, IntegerPairDataPoint {
+public interface IntegerPairGauge extends StatefulMetric<IntegerPairDataPoint> {
 
     static MetricKey<IntegerPairGauge> key(String name) {
         return MetricKey.of(name, IntegerPairGauge.class);

@@ -10,7 +10,7 @@ import org.hiero.metrics.internal.DefaultStateSet;
 import org.hiero.metrics.internal.datapoint.EnumStateSetDataPoint;
 import org.hiero.metrics.internal.datapoint.GenerictStateSetDataPoint;
 
-public interface StateSet<T> extends StatefulMetric<StateSetDataPoint<T>>, StateSetDataPoint<T> {
+public interface StateSet<T> extends StatefulMetric<StateSetDataPoint<T>> {
 
     static <T> MetricKey<StateSet<T>> key(String name) {
         return MetricKey.of(name, StateSet.class);
