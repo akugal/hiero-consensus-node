@@ -12,7 +12,7 @@ import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.internal.DefaultGaugeAdapter;
 
-public interface GaugeAdapter<D> extends StatefulMetric<D>, Supplier<D> {
+public interface GaugeAdapter<D> extends StatefulMetric<D> {
 
     static <D> MetricKey<GaugeAdapter<D>> key(String name) {
         return MetricKey.of(name, GaugeAdapter.class);

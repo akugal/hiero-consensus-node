@@ -26,27 +26,6 @@ public class DefaultStateSet<T> extends AbstractStatefulMetric<StateSetDataPoint
     }
 
     @Override
-    public void setFalse(T value) {
-        getNoLabels().setFalse(value);
-    }
-
-    @Override
-    public void setTrue(T value) {
-        getNoLabels().setTrue(value);
-    }
-
-    @Override
-    public boolean getState(T value) {
-        return getNoLabels().getState(value);
-    }
-
-    @NonNull
-    @Override
-    public Set<T> getStates() {
-        return getNoLabels().getStates();
-    }
-
-    @Override
     protected void reset(StateSetDataPoint<T> dataPoint) {
         dataPoint.reset();
     }

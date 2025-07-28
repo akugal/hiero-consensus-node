@@ -8,7 +8,7 @@ import org.hiero.metrics.api.datapoint.BooleanGaugeDataPoint;
 import org.hiero.metrics.internal.DefaultBooleanGauge;
 import org.hiero.metrics.internal.datapoint.AtomicBooleanGaugeDataPoint;
 
-public interface BooleanGauge extends StatefulMetric<BooleanGaugeDataPoint>, BooleanGaugeDataPoint {
+public interface BooleanGauge extends StatefulMetric<BooleanGaugeDataPoint> {
 
     static MetricKey<BooleanGauge> key(String name) {
         return MetricKey.of(name, BooleanGauge.class);

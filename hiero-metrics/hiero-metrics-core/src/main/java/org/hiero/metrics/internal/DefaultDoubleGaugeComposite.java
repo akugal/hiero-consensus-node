@@ -48,19 +48,4 @@ public final class DefaultDoubleGaugeComposite extends AbstractStatefulMetric<Do
         }
         return valueItems;
     }
-
-    @Override
-    public void update(double value) {
-        getNoLabels().update(value);
-    }
-
-    @Override
-    public int size() {
-        return getNoLabels().size();
-    }
-
-    @Override
-    public DoubleGaugeDataPoint get(int index) {
-        return getNoLabels().get(index);
-    }
 }

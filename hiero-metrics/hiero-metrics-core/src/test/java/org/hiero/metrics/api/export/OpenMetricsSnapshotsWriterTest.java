@@ -28,12 +28,12 @@ public class OpenMetricsSnapshotsWriterTest {
         BooleanGauge booleanGauge = BooleanGauge.builder(BooleanGauge.key("test_boolean_gauge"))
                 .withDescription("A test boolean gauge")
                 .register(registry);
-        booleanGauge.update(true);
+        booleanGauge.getNotLabeled().update(true);
 
         LongCounter longCounter = LongCounter.builder(LongCounter.key("test_long_counter"))
                 .withUnit("requests")
                 .register(registry);
-        longCounter.increment(42);
+        longCounter.getNotLabeled().increment(42);
 
         CallbackMetric.builder(CallbackMetric.key("test_callback_metric"), callback -> {
                     callback.call(123.45, "val1", "val2");
@@ -51,8 +51,8 @@ public class OpenMetricsSnapshotsWriterTest {
                 .withStat("average", StatContainer::getAverage)
                 .withReset(StatContainer::reset)
                 .register(registry);
-        statGauge.get().update(3);
-        statGauge.get().update(5);
+        statGauge.getNotLabeled().update(3);
+        statGauge.getNotLabeled().update(5);
 
         Thread.sleep(1000);
     }

@@ -48,7 +48,8 @@ public abstract class AbstractStatefulMetric<D> extends AbstractMetric
     }
 
     @NonNull
-    protected final D getNoLabels() {
+    @Override
+    public final D getNotLabeled() {
         if (noLabelsDataPoint == null) {
             throw new IllegalStateException("This metric has dynamic labels, so you must call getOrCreateLabeled()");
         }

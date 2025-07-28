@@ -8,7 +8,7 @@ import org.hiero.metrics.api.datapoint.LongCounterDataPoint;
 import org.hiero.metrics.internal.DefaultLongCounter;
 import org.hiero.metrics.internal.datapoint.LongAdderCounterDataPoint;
 
-public interface LongCounter extends StatefulMetric<LongCounterDataPoint>, LongCounterDataPoint {
+public interface LongCounter extends StatefulMetric<LongCounterDataPoint> {
 
     static MetricKey<LongCounter> key(String name) {
         return MetricKey.of(name, LongCounter.class);

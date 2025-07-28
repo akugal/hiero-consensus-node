@@ -4,6 +4,7 @@ package org.hiero.metrics.api;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+import org.hiero.metrics.api.datapoint.DoubleGaugeCompositeDataPoint;
 import org.junit.jupiter.api.Test;
 
 public class DoubleGaugeCompositeTest {
@@ -28,46 +29,50 @@ public class DoubleGaugeCompositeTest {
 
     @Test
     public void testSingleSumStat() {
-        DoubleGaugeComposite metric = DoubleGaugeComposite.builder(DoubleGaugeComposite.key("singleSumStat"))
+        DoubleGaugeCompositeDataPoint dataPoint = DoubleGaugeComposite.builder(
+                        DoubleGaugeComposite.key("singleSumStat"))
                 .withSumStat()
-                .build();
+                .build()
+                .getNotLabeled();
 
-        assertThat(metric.size()).isEqualTo(1);
-
-        // given
-        metric.update(1.3);
-        // than
-        assertThat(metric.get(0).getAsDouble()).isEqualTo(1.3);
+        assertThat(dataPoint.size()).isEqualTo(1);
 
         // given
-        metric.update(1.7);
+        dataPoint.update(1.3);
         // than
-        assertThat(metric.get(0).getAsDouble()).isEqualTo(3.0);
+        assertThat(dataPoint.get(0).getAsDouble()).isEqualTo(1.3);
+
+        // given
+        dataPoint.update(1.7);
+        // than
+        assertThat(dataPoint.get(0).getAsDouble()).isEqualTo(3.0);
     }
 
     // TODO other stats tests
 
     @Test
     public void testMultipleStats() {
-        DoubleGaugeComposite metric = DoubleGaugeComposite.builder(DoubleGaugeComposite.key("multipleDoubleStats"))
+        DoubleGaugeCompositeDataPoint dataPoint = DoubleGaugeComposite.builder(
+                        DoubleGaugeComposite.key("multipleDoubleStats"))
                 .withSumStat()
                 .withAccumulatorStat("sumPlusOne", (v1, v2) -> v1 + v2 + 1)
-                .build();
+                .build()
+                .getNotLabeled();
 
-        assertThat(metric.size()).isEqualTo(2);
-
-        // given
-        metric.update(1.3);
-
-        // than
-        assertThat(metric.get(0).getAsDouble()).isEqualTo(1.3);
-        assertThat(metric.get(1).getAsDouble()).isEqualTo(2.3);
+        assertThat(dataPoint.size()).isEqualTo(2);
 
         // given
-        metric.update(1.7);
+        dataPoint.update(1.3);
 
         // than
-        assertThat(metric.get(0).getAsDouble()).isEqualTo(3.0);
-        assertThat(metric.get(1).getAsDouble()).isEqualTo(5.0);
+        assertThat(dataPoint.get(0).getAsDouble()).isEqualTo(1.3);
+        assertThat(dataPoint.get(1).getAsDouble()).isEqualTo(2.3);
+
+        // given
+        dataPoint.update(1.7);
+
+        // than
+        assertThat(dataPoint.get(0).getAsDouble()).isEqualTo(3.0);
+        assertThat(dataPoint.get(1).getAsDouble()).isEqualTo(5.0);
     }
 }

@@ -31,11 +31,6 @@ public final class DefaultStatsGaugeAdapter<D> extends AbstractStatefulMetric<D>
     }
 
     @Override
-    public D get() {
-        return getNoLabels();
-    }
-
-    @Override
     protected void reset(D dataPoint) {
         reset.accept(dataPoint);
     }

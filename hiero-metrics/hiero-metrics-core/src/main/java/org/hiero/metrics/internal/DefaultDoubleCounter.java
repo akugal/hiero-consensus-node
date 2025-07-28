@@ -25,14 +25,4 @@ public final class DefaultDoubleCounter extends AbstractStatefulMetric<DoubleCou
     protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(DoubleCounterDataPoint datapoint) {
         return List.of(new DataPointSnapshot.ValueItem(datapoint.getAsDouble()));
     }
-
-    @Override
-    public void increment(double value) {
-        getNoLabels().increment(value);
-    }
-
-    @Override
-    public double getAsDouble() {
-        return getNoLabels().getAsDouble();
-    }
 }
