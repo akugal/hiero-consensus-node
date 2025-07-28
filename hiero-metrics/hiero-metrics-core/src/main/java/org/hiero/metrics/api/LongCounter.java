@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.LongCounterDataPoint;
 import org.hiero.metrics.internal.DefaultLongCounter;
+import org.hiero.metrics.internal.datapoint.AtomicLongCounterDataPoint;
 import org.hiero.metrics.internal.datapoint.LongAdderCounterDataPoint;
 
 public interface LongCounter extends StatefulMetric<LongCounterDataPoint> {
@@ -26,6 +28,12 @@ public interface LongCounter extends StatefulMetric<LongCounterDataPoint> {
 
         private Builder(MetricKey<LongCounter> key) {
             super(key, LongAdderCounterDataPoint::new);
+        }
+
+        @NonNull
+        public Builder withLowThreadContention() {
+            withContainerFactory(AtomicLongCounterDataPoint::new);
+            return this;
         }
 
         @Override

@@ -2,11 +2,8 @@
 package org.hiero.metrics.api.datapoint;
 
 import java.util.function.DoubleSupplier;
-import org.hiero.metrics.api.utils.MetricUtils;
 
 public interface DoubleGaugeDataPoint extends DoubleSupplier, DataPoint {
-
-    DoubleSupplier DEFAULT_INIT = () -> MetricUtils.ZERO;
 
     double getInitValue();
 

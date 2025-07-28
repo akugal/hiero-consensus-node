@@ -9,7 +9,7 @@ public final class AtomicBooleanGaugeDataPoint implements BooleanGaugeDataPoint 
     private final AtomicBoolean container = new AtomicBoolean();
 
     @Override
-    public void update(boolean value) {
+    public void set(boolean value) {
         container.set(value);
     }
 

@@ -8,9 +8,6 @@ import org.hiero.metrics.api.core.Label;
 
 public final class MetricUtils {
 
-    public static final double ZERO = 0.0;
-    public static final double ONE = 1.0;
-
     private MetricUtils() {}
 
     public static List<Label> asList(Label... labels) {

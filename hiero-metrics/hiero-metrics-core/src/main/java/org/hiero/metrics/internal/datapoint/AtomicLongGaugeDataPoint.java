@@ -16,14 +16,6 @@ public class AtomicLongGaugeDataPoint implements LongGaugeDataPoint {
         container = new AtomicLong(initializer.getAsLong());
     }
 
-    public AtomicLongGaugeDataPoint(long initValue) {
-        this(initValue == 0L ? DEFAULT_INIT : () -> initValue);
-    }
-
-    public AtomicLongGaugeDataPoint() {
-        this(DEFAULT_INIT);
-    }
-
     @Override
     public long getInitValue() {
         return initializer.getAsLong();

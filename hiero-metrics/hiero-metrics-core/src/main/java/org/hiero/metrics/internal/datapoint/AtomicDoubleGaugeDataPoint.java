@@ -1,60 +1,44 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal.datapoint;
 
-import static org.hiero.metrics.api.utils.MetricUtils.ZERO;
-
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
+import org.hiero.metrics.api.stat.container.AtomicDouble;
 
 public class AtomicDoubleGaugeDataPoint implements DoubleGaugeDataPoint {
 
-    private final DoubleSupplier initializer;
-    protected final AtomicLong container;
+    protected final AtomicDouble container;
 
     public AtomicDoubleGaugeDataPoint(DoubleSupplier initializer) {
-        this.initializer = initializer;
-        container = new AtomicLong(fromDouble(initializer.getAsDouble()));
+        container = new AtomicDouble(initializer);
     }
 
     public AtomicDoubleGaugeDataPoint(double initialValue) {
-        this(initialValue == ZERO ? DEFAULT_INIT : () -> initialValue);
-    }
-
-    public AtomicDoubleGaugeDataPoint() {
-        this(DEFAULT_INIT);
+        container = new AtomicDouble(initialValue);
     }
 
     @Override
     public double getInitValue() {
-        return initializer.getAsDouble();
+        return container.getInitValue();
     }
 
     @Override
     public void update(double value) {
-        container.set(fromDouble(value));
+        container.set(value);
     }
 
     @Override
     public double getAndReset() {
-        return toDouble(container.getAndSet(fromDouble(getInitValue())));
+        return container.getAndReset();
     }
 
     @Override
     public double getAsDouble() {
-        return toDouble(container.get());
-    }
-
-    protected long fromDouble(double value) {
-        return Double.doubleToRawLongBits(value);
-    }
-
-    protected double toDouble(long value) {
-        return Double.longBitsToDouble(value);
+        return container.getAsDouble();
     }
 
     @Override
     public void reset() {
-        container.set(fromDouble(getInitValue()));
+        container.reset();
     }
 }

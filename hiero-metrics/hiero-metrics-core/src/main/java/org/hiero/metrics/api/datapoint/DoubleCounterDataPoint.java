@@ -2,7 +2,7 @@
 package org.hiero.metrics.api.datapoint;
 
 import java.util.function.DoubleSupplier;
-import org.hiero.metrics.api.utils.MetricUtils;
+import org.hiero.metrics.api.stat.StatUtils;
 
 public interface DoubleCounterDataPoint extends DoubleSupplier, DataPoint {
 
@@ -17,6 +17,6 @@ public interface DoubleCounterDataPoint extends DoubleSupplier, DataPoint {
      * Increments the counter by 1.
      */
     default void increment() {
-        increment(MetricUtils.ONE);
+        increment(StatUtils.ONE);
     }
 }
