@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import static org.hiero.metrics.api.stat.StatUtils.LONG_INIT;
+
 import java.util.Objects;
 import java.util.function.LongBinaryOperator;
 import java.util.function.LongSupplier;
@@ -8,7 +10,7 @@ import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
-import org.hiero.metrics.api.utils.StatUtils;
+import org.hiero.metrics.api.stat.StatUtils;
 import org.hiero.metrics.internal.DefaultLongGauge;
 import org.hiero.metrics.internal.datapoint.AtomicLongGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.LongAccumulatorGaugeDataPoint;
@@ -41,12 +43,12 @@ public interface LongGauge extends StatefulMetric<LongGaugeDataPoint> {
 
     final class Builder extends StatefulMetric.Builder<LongGaugeDataPoint, Builder, LongGauge> {
 
-        private LongSupplier initializer = LongGaugeDataPoint.DEFAULT_INIT;
+        private LongSupplier initializer = LONG_INIT;
         private LongBinaryOperator operator;
         private boolean resetOnSnapshot = false;
 
         private Builder(MetricKey<LongGauge> key) {
-            super(key, () -> new AtomicLongGaugeDataPoint(LongGaugeDataPoint.DEFAULT_INIT));
+            super(key, () -> new AtomicLongGaugeDataPoint(LONG_INIT));
         }
 
         @Override
@@ -64,7 +66,7 @@ public interface LongGauge extends StatefulMetric<LongGaugeDataPoint> {
         }
 
         public Builder withInitValue(long initValue) {
-            this.initializer = () -> initValue;
+            this.initializer = StatUtils.asInitializer(initValue);
             return this;
         }
 

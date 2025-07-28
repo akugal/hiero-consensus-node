@@ -2,7 +2,7 @@
 package org.hiero.metrics.api.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hiero.metrics.api.utils.StatUtils.DEFAULT_STAT_LABEL;
+import static org.hiero.metrics.api.stat.StatUtils.DEFAULT_STAT_LABEL;
 
 import java.util.List;
 import org.hiero.metrics.api.DoubleGaugeComposite;

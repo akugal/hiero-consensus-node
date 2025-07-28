@@ -5,5 +5,13 @@ import java.util.function.BooleanSupplier;
 
 public interface BooleanGaugeDataPoint extends BooleanSupplier, DataPoint {
 
-    void update(boolean value);
+    void set(boolean value);
+
+    default void setTrue() {
+        set(true);
+    }
+
+    default void setFalse() {
+        set(false);
+    }
 }

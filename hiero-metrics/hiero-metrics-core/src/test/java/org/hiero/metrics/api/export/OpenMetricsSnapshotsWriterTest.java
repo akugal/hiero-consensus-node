@@ -28,7 +28,7 @@ public class OpenMetricsSnapshotsWriterTest {
         BooleanGauge booleanGauge = BooleanGauge.builder(BooleanGauge.key("test_boolean_gauge"))
                 .withDescription("A test boolean gauge")
                 .register(registry);
-        booleanGauge.getNotLabeled().update(true);
+        booleanGauge.getNotLabeled().set(true);
 
         LongCounter longCounter = LongCounter.builder(LongCounter.key("test_long_counter"))
                 .withUnit("requests")

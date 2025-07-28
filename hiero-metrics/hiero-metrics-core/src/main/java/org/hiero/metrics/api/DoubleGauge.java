@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import static org.hiero.metrics.api.stat.StatUtils.DOUBLE_INIT;
+
 import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
@@ -8,8 +10,7 @@ import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
-import org.hiero.metrics.api.utils.MetricUtils;
-import org.hiero.metrics.api.utils.StatUtils;
+import org.hiero.metrics.api.stat.StatUtils;
 import org.hiero.metrics.internal.DefaultDoubleGauge;
 import org.hiero.metrics.internal.datapoint.AtomicDoubleGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
@@ -42,12 +43,12 @@ public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> {
 
     final class Builder extends StatefulMetric.Builder<DoubleGaugeDataPoint, Builder, DoubleGauge> {
 
-        private DoubleSupplier initializer = DoubleGaugeDataPoint.DEFAULT_INIT;
+        private DoubleSupplier initializer = DOUBLE_INIT;
         private DoubleBinaryOperator operator;
         private boolean resetOnSnapshot = false;
 
         private Builder(MetricKey<DoubleGauge> key) {
-            super(key, () -> new AtomicDoubleGaugeDataPoint(DoubleGaugeDataPoint.DEFAULT_INIT));
+            super(key, () -> new AtomicDoubleGaugeDataPoint(DOUBLE_INIT));
         }
 
         @Override
@@ -65,11 +66,7 @@ public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> {
         }
 
         public Builder withInitValue(double initValue) {
-            if (initValue == MetricUtils.ZERO) {
-                initializer = DoubleGaugeDataPoint.DEFAULT_INIT;
-            } else {
-                this.initializer = () -> initValue;
-            }
+            this.initializer = StatUtils.asInitializer(initValue);
             return this;
         }
 

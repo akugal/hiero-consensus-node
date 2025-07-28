@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
-import static org.hiero.metrics.api.utils.StatUtils.DEFAULT_STAT_LABEL;
+import static org.hiero.metrics.api.stat.StatUtils.DEFAULT_STAT_LABEL;
 
 import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;

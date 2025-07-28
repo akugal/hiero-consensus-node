@@ -13,14 +13,6 @@ public final class LongAccumulatorGaugeDataPoint extends AtomicLongGaugeDataPoin
         this.operator = operator;
     }
 
-    public LongAccumulatorGaugeDataPoint(LongBinaryOperator operator, long initialValue) {
-        this(operator, initialValue == 0L ? DEFAULT_INIT : () -> initialValue);
-    }
-
-    public LongAccumulatorGaugeDataPoint(LongBinaryOperator operator) {
-        this(operator, DEFAULT_INIT);
-    }
-
     @Override
     public void update(long value) {
         container.accumulateAndGet(value, operator);

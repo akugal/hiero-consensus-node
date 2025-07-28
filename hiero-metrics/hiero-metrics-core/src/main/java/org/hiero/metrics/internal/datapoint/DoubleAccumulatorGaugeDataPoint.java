@@ -1,31 +1,29 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal.datapoint;
 
-import static org.hiero.metrics.api.utils.MetricUtils.ZERO;
-
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
 import java.util.function.LongBinaryOperator;
+import org.hiero.metrics.api.stat.StatUtils;
+import org.hiero.metrics.api.stat.container.AtomicDouble;
 
 public class DoubleAccumulatorGaugeDataPoint extends AtomicDoubleGaugeDataPoint {
 
     private final LongBinaryOperator operator;
 
-    public DoubleAccumulatorGaugeDataPoint(DoubleBinaryOperator operator, DoubleSupplier initializer) {
+    public DoubleAccumulatorGaugeDataPoint(
+            @NonNull DoubleBinaryOperator operator, @NonNull DoubleSupplier initializer) {
         super(initializer);
-        this.operator = (prev, cur) -> fromDouble(operator.applyAsDouble(toDouble(prev), toDouble(cur)));
+        this.operator = AtomicDouble.convertBinaryOperator(operator);
     }
 
     public DoubleAccumulatorGaugeDataPoint(DoubleBinaryOperator operator, double initialValue) {
-        this(operator, initialValue == ZERO ? DEFAULT_INIT : () -> initialValue);
-    }
-
-    public DoubleAccumulatorGaugeDataPoint(DoubleBinaryOperator operator) {
-        this(operator, DEFAULT_INIT);
+        this(operator, StatUtils.asInitializer(initialValue));
     }
 
     @Override
     public void update(double value) {
-        container.accumulateAndGet(fromDouble(value), operator);
+        container.accumulateAndGet(value, operator);
     }
 }
