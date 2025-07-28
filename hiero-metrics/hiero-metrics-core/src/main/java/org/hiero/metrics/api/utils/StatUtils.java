@@ -2,7 +2,9 @@
 package org.hiero.metrics.api.utils;
 
 import java.util.function.DoubleBinaryOperator;
+import java.util.function.IntBinaryOperator;
 import java.util.function.LongBinaryOperator;
+import java.util.function.ToDoubleBiFunction;
 
 public final class StatUtils {
 
@@ -19,6 +21,13 @@ public final class StatUtils {
     public static final double WEIGHT_VOLATILE = 0.1;
 
     public static final double WEIGHT_DEFAULT = 0.5;
+
+    public static final IntBinaryOperator INT_SUM = Integer::sum;
+    public static final IntBinaryOperator INT_MIN = Integer::min;
+    public static final IntBinaryOperator INT_MAX = Integer::max;
+
+    public static final ToDoubleBiFunction<Integer, Integer> INT_AVERAGE =
+            (sum, count) -> count == 0 ? 0 : (double) sum / count;
 
     public static final LongBinaryOperator LONG_SUM = Long::sum;
     public static final LongBinaryOperator LONG_MIN = Long::min;

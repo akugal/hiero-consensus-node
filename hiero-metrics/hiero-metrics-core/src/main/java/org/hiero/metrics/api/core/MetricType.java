@@ -5,5 +5,6 @@ public enum MetricType {
     UNKNOWN,
     COUNTER,
     GAUGE,
-    INFO;
+    STATE_SET,
+    INFO
 }
