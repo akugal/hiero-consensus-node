@@ -18,7 +18,7 @@ public interface StatefulMetric<D> extends Metric {
 
         private Supplier<D> valueContainerFactory;
 
-        protected Builder(MetricKey<M> key, @NonNull Supplier<D> valueContainerFactory) {
+        protected Builder(@NonNull MetricKey<M> key, @NonNull Supplier<D> valueContainerFactory) {
             super(key);
             withContainerFactory(valueContainerFactory);
         }

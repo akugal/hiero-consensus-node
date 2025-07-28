@@ -26,6 +26,7 @@ public class OpenMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
         METRIC_TYPES.put(MetricType.UNKNOWN, "unknown");
         METRIC_TYPES.put(MetricType.GAUGE, "gauge");
         METRIC_TYPES.put(MetricType.COUNTER, "counter");
+        METRIC_TYPES.put(MetricType.STATE_SET, "stateset");
         METRIC_TYPES.put(MetricType.INFO, "info");
     }
 

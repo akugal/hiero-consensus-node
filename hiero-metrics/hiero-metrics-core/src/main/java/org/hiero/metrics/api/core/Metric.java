@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.core;
 
-import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,12 +65,12 @@ public interface Metric {
         }
 
         public final B withDescription(String description) {
-            this.description = ArgumentUtils.throwArgBlank(description, "description");
+            this.description = description;
             return self();
         }
 
         public final B withUnit(String unit) {
-            this.unit = ArgumentUtils.throwArgBlank(unit, "unit");
+            this.unit = unit;
             return self();
         }
 

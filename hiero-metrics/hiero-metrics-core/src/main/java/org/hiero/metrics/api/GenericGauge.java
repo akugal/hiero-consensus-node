@@ -27,7 +27,7 @@ public interface GenericGauge<T> extends StatefulMetric<GaugeDataPoint<T>>, Gaug
     }
 
     static Builder<Duration> durationBuilder(MetricKey<GenericGauge<Duration>> key, ChronoUnit unit) {
-        return new Builder<Duration>(
+        return new Builder<>(
                         key,
                         duration -> ((double) duration.toNanos()
                                 / unit.getDuration().toNanos()))
@@ -35,7 +35,7 @@ public interface GenericGauge<T> extends StatefulMetric<GaugeDataPoint<T>>, Gaug
     }
 
     static <E extends Enum<E>> Builder<E> enumGauge(MetricKey<GenericGauge<E>> key) {
-        return new Builder<E>(key, Enum::ordinal);
+        return new Builder<>(key, Enum::ordinal);
     }
 
     final class Builder<T> extends StatefulMetric.Builder<GaugeDataPoint<T>, Builder<T>, GenericGauge<T>> {
