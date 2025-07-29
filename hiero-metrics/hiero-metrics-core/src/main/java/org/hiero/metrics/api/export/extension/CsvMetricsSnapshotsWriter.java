@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.api.snapshot.extension;
+package org.hiero.metrics.api.export.extension;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.BufferedWriter;
@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.function.Predicate;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricMetadata;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
-import org.hiero.metrics.api.snapshot.MetricSnapshot;
-import org.hiero.metrics.api.snapshot.MetricsSnapshot;
+import org.hiero.metrics.api.export.DataPointSnapshot;
+import org.hiero.metrics.api.export.MetricSnapshot;
+import org.hiero.metrics.api.export.MetricsSnapshot;
 
 public class CsvMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
 

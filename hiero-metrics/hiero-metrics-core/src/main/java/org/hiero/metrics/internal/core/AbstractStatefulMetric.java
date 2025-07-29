@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import org.hiero.metrics.api.core.StatefulMetric;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.DataPointSnapshot;
 
 public abstract class AbstractStatefulMetric<D> extends AbstractMetric
         implements StatefulMetric<D>, SnapshotableMetric {

@@ -17,12 +17,8 @@ public interface MetricRegistry {
     void registerMetrics(@NonNull MetricsRegistrationProvider provider);
 
     @NonNull
-    <M extends Metric, B extends Metric.Builder<?, M>> M getOrRegister(@NonNull B builder);
-
-    @NonNull
     <M extends Metric, B extends Metric.Builder<?, M>> M register(@NonNull B builder);
 
-    // TODO add typed key instead of just name
     @NonNull
     <M extends Metric> Optional<M> findMetric(@NonNull MetricKey<M> key);
 

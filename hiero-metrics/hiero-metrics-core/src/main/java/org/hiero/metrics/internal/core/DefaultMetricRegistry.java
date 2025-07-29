@@ -51,14 +51,22 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
 
     @NonNull
     @Override
-    public <M extends Metric, B extends Metric.Builder<?, M>> M getOrRegister(final @NonNull B builder) {
-        return getOrCreate(builder, true);
-    }
-
-    @NonNull
-    @Override
+    @SuppressWarnings("unchecked")
     public <M extends Metric, B extends Metric.Builder<?, M>> M register(final @NonNull B builder) {
-        return getOrCreate(builder, false);
+        Objects.requireNonNull(builder, "builder must not be null");
+
+        final MetricKey<M> metricKey = builder.getKey();
+
+        return (M) metrics.compute(metricKey.getName(), (name, existingMetric) -> {
+            if (existingMetric != null) {
+                throw new IllegalArgumentException(
+                        "Duplicate metric name: " + metricKey + ". Existing metric: " + existingMetric.getMetadata());
+            }
+
+            M metric = builder.withConstantLabels(globalLabels).build();
+            logger.info("Registered metric: {} with global labels: {}", metric.getMetadata(), globalLabels);
+            return metric;
+        });
     }
 
     @NonNull
@@ -71,34 +79,5 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
             return Optional.of((M) metric);
         }
         return Optional.empty();
-    }
-
-    @NonNull
-    @SuppressWarnings("unchecked")
-    private <M extends Metric, B extends Metric.Builder<?, M>> M getOrCreate(
-            @NonNull final B builder, final boolean reuseExisting) {
-        Objects.requireNonNull(builder, "builder must not be null");
-
-        final MetricKey<M> metricKey = builder.getKey();
-
-        return (M) metrics.compute(metricKey.getName(), (name, existingMetric) -> {
-            if (existingMetric != null) {
-                if (reuseExisting) {
-                    if (metricKey.getMetricClass().isInstance(existingMetric)) {
-                        return existingMetric;
-                    }
-                    throw new IllegalArgumentException(
-                            "Duplicate metric with same name, but different id exists. Requested key:  " + metricKey
-                                    + ". Existing metric: " + existingMetric.getMetadata());
-                } else {
-                    throw new IllegalArgumentException("Duplicate metric name: " + metricKey + ". Existing metric: "
-                            + existingMetric.getMetadata());
-                }
-            }
-
-            M metric = builder.withConstantLabels(globalLabels).build();
-            logger.info("Registered metric: {} with global labels: {}", metric.getMetadata(), globalLabels);
-            return metric;
-        });
     }
 }

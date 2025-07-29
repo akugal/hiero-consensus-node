@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.api.snapshot.extension;
+package org.hiero.metrics.api.export.extension;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 
@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.hiero.metrics.api.snapshot.MetricsSnapshot;
-import org.hiero.metrics.api.snapshot.PushingMetricsExporter;
+import org.hiero.metrics.api.export.MetricsSnapshot;
+import org.hiero.metrics.api.export.PushingMetricsExporter;
 
 public class CsvFileMetricsExporter implements PushingMetricsExporter {
 

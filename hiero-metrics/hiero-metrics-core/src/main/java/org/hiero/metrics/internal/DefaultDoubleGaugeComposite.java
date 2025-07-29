@@ -9,7 +9,7 @@ import org.hiero.metrics.api.DoubleGaugeComposite;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.datapoint.DoubleGaugeCompositeDataPoint;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
 public final class DefaultDoubleGaugeComposite extends AbstractStatefulMetric<DoubleGaugeCompositeDataPoint>

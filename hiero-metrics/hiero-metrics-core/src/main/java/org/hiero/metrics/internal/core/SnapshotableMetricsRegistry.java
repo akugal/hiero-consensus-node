@@ -5,7 +5,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.snapshot.MetricSnapshot;
+import org.hiero.metrics.api.export.MetricSnapshot;
 
 public interface SnapshotableMetricsRegistry extends MetricRegistry {
 

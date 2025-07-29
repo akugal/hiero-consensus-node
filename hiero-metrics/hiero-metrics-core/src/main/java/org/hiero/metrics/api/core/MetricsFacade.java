@@ -11,14 +11,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hiero.metrics.api.snapshot.MetricsSnapshotManager;
-import org.hiero.metrics.api.snapshot.PullingMetricsExporter;
-import org.hiero.metrics.api.snapshot.PushingMetricsExporter;
+import org.hiero.metrics.api.export.MetricsSnapshotManager;
+import org.hiero.metrics.api.export.PullingMetricsExporter;
+import org.hiero.metrics.api.export.PushingMetricsExporter;
 import org.hiero.metrics.api.utils.MetricUtils;
 import org.hiero.metrics.internal.core.DefaultMetricRegistry;
-import org.hiero.metrics.internal.snapshot.DefaultMetricsSnapshotManager;
-import org.hiero.metrics.internal.snapshot.NoOpMetricsSnapshotManager;
-import org.hiero.metrics.internal.snapshot.SinglePullingExporterMetricsSnapshotManager;
+import org.hiero.metrics.internal.export.DefaultMetricsSnapshotManager;
+import org.hiero.metrics.internal.export.NoOpMetricsSnapshotManager;
+import org.hiero.metrics.internal.export.SinglePullingExporterMetricsSnapshotManager;
 
 public final class MetricsFacade {
 

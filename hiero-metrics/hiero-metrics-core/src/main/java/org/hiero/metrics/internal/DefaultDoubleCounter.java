@@ -5,7 +5,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import org.hiero.metrics.api.DoubleCounter;
 import org.hiero.metrics.api.datapoint.DoubleCounterDataPoint;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
 public final class DefaultDoubleCounter extends AbstractStatefulMetric<DoubleCounterDataPoint>

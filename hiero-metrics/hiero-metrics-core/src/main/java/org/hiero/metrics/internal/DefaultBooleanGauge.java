@@ -8,7 +8,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import org.hiero.metrics.api.BooleanGauge;
 import org.hiero.metrics.api.datapoint.BooleanGaugeDataPoint;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
 public final class DefaultBooleanGauge extends AbstractStatefulMetric<BooleanGaugeDataPoint> implements BooleanGauge {

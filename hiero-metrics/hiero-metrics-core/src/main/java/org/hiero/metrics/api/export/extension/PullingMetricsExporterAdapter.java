@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.api.snapshot.extension;
+package org.hiero.metrics.api.export.extension;
 
 import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
-import org.hiero.metrics.api.snapshot.MetricsSnapshot;
-import org.hiero.metrics.api.snapshot.PullingMetricsExporter;
+import org.hiero.metrics.api.export.MetricsSnapshot;
+import org.hiero.metrics.api.export.PullingMetricsExporter;
 
 public class PullingMetricsExporterAdapter implements PullingMetricsExporter {
 

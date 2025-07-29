@@ -4,7 +4,7 @@ package org.hiero.metrics.internal.core;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import org.hiero.metrics.api.core.Metric;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.DataPointSnapshot;
 
 public interface SnapshotableMetric extends Metric {
 

@@ -6,10 +6,10 @@ import static org.hiero.metrics.api.stat.StatUtils.DEFAULT_STAT_LABEL;
 
 import java.util.List;
 import org.hiero.metrics.api.DoubleGaugeComposite;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
-import org.hiero.metrics.api.snapshot.MetricSnapshot;
-import org.hiero.metrics.api.snapshot.MetricsSnapshotManager;
-import org.hiero.metrics.api.snapshot.extension.PullingMetricsExporterAdapter;
+import org.hiero.metrics.api.export.DataPointSnapshot;
+import org.hiero.metrics.api.export.MetricSnapshot;
+import org.hiero.metrics.api.export.MetricsSnapshotManager;
+import org.hiero.metrics.api.export.extension.PullingMetricsExporterAdapter;
 import org.junit.jupiter.api.Test;
 
 public class MetricsSnapshotManagerTest {
