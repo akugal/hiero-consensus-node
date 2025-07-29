@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.api.snapshot;
+package org.hiero.metrics.api.export;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Optional;

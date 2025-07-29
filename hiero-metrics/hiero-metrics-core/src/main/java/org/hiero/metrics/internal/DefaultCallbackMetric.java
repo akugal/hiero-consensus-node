@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.hiero.metrics.api.CallbackMetric;
 import org.hiero.metrics.api.core.MetricCallback;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractMetric;
 import org.hiero.metrics.internal.core.SnapshotableMetric;
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.api.snapshot.extension;
+package org.hiero.metrics.api.export.extension;
 
 import java.text.DecimalFormat;
 import java.util.function.Predicate;

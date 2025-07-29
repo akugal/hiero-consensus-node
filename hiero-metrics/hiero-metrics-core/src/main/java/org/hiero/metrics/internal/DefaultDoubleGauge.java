@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.ToDoubleFunction;
 import org.hiero.metrics.api.DoubleGauge;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
 public final class DefaultDoubleGauge extends AbstractStatefulMetric<DoubleGaugeDataPoint> implements DoubleGauge {

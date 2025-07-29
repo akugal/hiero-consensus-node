@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.internal.snapshot;
+package org.hiero.metrics.internal.export;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.snapshot.MetricsSnapshotManager;
+import org.hiero.metrics.api.export.MetricsSnapshotManager;
 
 public class NoOpMetricsSnapshotManager implements MetricsSnapshotManager {
 

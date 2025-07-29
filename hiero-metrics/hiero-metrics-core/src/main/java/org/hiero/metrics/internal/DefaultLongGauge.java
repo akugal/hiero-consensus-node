@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.ToLongFunction;
 import org.hiero.metrics.api.LongGauge;
 import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
 public final class DefaultLongGauge extends AbstractStatefulMetric<LongGaugeDataPoint> implements LongGauge {

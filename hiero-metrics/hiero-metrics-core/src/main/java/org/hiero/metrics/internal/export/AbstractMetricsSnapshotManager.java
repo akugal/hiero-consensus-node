@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.internal.snapshot;
+package org.hiero.metrics.internal.export;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.time.Instant;
@@ -13,9 +13,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.snapshot.MetricSnapshot;
-import org.hiero.metrics.api.snapshot.MetricsSnapshot;
-import org.hiero.metrics.api.snapshot.MetricsSnapshotManager;
+import org.hiero.metrics.api.export.MetricSnapshot;
+import org.hiero.metrics.api.export.MetricsSnapshot;
+import org.hiero.metrics.api.export.MetricsSnapshotManager;
 import org.hiero.metrics.internal.core.SnapshotableMetricsRegistry;
 
 public abstract class AbstractMetricsSnapshotManager implements MetricsSnapshotManager {

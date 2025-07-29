@@ -14,7 +14,7 @@ import java.util.function.Function;
 import org.hiero.metrics.api.StateSet;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.datapoint.StateSetDataPoint;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
 public class DefaultStateSet<T> extends AbstractStatefulMetric<StateSetDataPoint<T>> implements StateSet<T> {

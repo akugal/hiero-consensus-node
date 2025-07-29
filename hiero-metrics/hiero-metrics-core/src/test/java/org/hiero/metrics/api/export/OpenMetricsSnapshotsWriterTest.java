@@ -10,9 +10,8 @@ import org.hiero.metrics.api.StatsGaugeAdapter;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricsFacade;
-import org.hiero.metrics.api.snapshot.MetricsSnapshotManager;
-import org.hiero.metrics.api.snapshot.extension.OpenMetricsSnapshotsWriter;
-import org.hiero.metrics.api.snapshot.extension.PushingMetricsExporterWriterAdapter;
+import org.hiero.metrics.api.export.extension.OpenMetricsSnapshotsWriter;
+import org.hiero.metrics.api.export.extension.PushingMetricsExporterWriterAdapter;
 import org.junit.jupiter.api.Test;
 
 public class OpenMetricsSnapshotsWriterTest {

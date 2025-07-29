@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.hiero.metrics.api.StatsGaugeAdapter;
 import org.hiero.metrics.api.core.Label;
-import org.hiero.metrics.api.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
 public final class DefaultStatsGaugeAdapter<D> extends AbstractStatefulMetric<D> implements StatsGaugeAdapter<D> {
