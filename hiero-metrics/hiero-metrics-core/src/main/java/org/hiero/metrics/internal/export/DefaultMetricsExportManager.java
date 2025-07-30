@@ -16,7 +16,7 @@ import org.hiero.metrics.api.export.MetricsSnapshot;
 import org.hiero.metrics.api.export.PullingMetricsExporter;
 import org.hiero.metrics.api.export.PushingMetricsExporter;
 
-public class DefaultMetricsSnapshotManager extends AbstractMetricsSnapshotManager {
+public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
 
     private final List<PullingMetricsExporter> pullingExporters;
     private final List<PushingMetricsExporter> pushingExporters;
@@ -24,21 +24,21 @@ public class DefaultMetricsSnapshotManager extends AbstractMetricsSnapshotManage
     private final AtomicReference<Optional<MetricsSnapshot>> snapshotHolder = new AtomicReference<>(Optional.empty());
 
     private final Supplier<ScheduledExecutorService> executorServiceFactory;
-    private final int snapshotIntervalSeconds;
-    private volatile ScheduledFuture<?> scheduledSnapshotFuture;
+    private final int exportIntervalSeconds;
+    private volatile ScheduledFuture<?> scheduledExportFuture;
 
-    public DefaultMetricsSnapshotManager(
+    public DefaultMetricsExportManager(
             @NonNull Supplier<ScheduledExecutorService> executorServiceFactory,
-            int snapshotIntervalSeconds,
+            int exportIntervalSeconds,
             @NonNull List<PullingMetricsExporter> pullingExporters,
             @NonNull List<PushingMetricsExporter> pushingExporters) {
-        if (snapshotIntervalSeconds <= 0) {
-            throw new IllegalArgumentException("Snapshot interval must be greater than 0 seconds");
+        if (exportIntervalSeconds <= 0) {
+            throw new IllegalArgumentException("Export interval must be greater than 0 seconds");
         }
 
         this.executorServiceFactory =
                 Objects.requireNonNull(executorServiceFactory, "executor service factory must not be null");
-        this.snapshotIntervalSeconds = snapshotIntervalSeconds;
+        this.exportIntervalSeconds = exportIntervalSeconds;
 
         this.pullingExporters =
                 List.copyOf(Objects.requireNonNull(pullingExporters, "pulling exporters must not be null"));
@@ -79,22 +79,22 @@ public class DefaultMetricsSnapshotManager extends AbstractMetricsSnapshotManage
             }
         }
 
-        logger.info("Scheduling periodic snapshotting with interval of {} seconds", snapshotIntervalSeconds);
-        scheduledSnapshotFuture = executorServiceFactory
+        logger.info("Scheduling periodic exporting with interval of {} seconds", exportIntervalSeconds);
+        scheduledExportFuture = executorServiceFactory
                 .get()
-                .scheduleAtFixedRate(new SnapshotRunnable(), 0, snapshotIntervalSeconds, TimeUnit.SECONDS);
+                .scheduleAtFixedRate(new ExportRunnable(), 0, exportIntervalSeconds, TimeUnit.SECONDS);
     }
 
     @Override
-    public boolean hasRunningSnapshotThread() {
-        return scheduledSnapshotFuture != null;
+    public boolean hasRunningExportThread() {
+        return scheduledExportFuture != null;
     }
 
     @Override
     public synchronized void shutdown() {
-        if (scheduledSnapshotFuture != null && !scheduledSnapshotFuture.isDone()) {
-            scheduledSnapshotFuture.cancel(false);
-            scheduledSnapshotFuture = null;
+        if (scheduledExportFuture != null && !scheduledExportFuture.isDone()) {
+            scheduledExportFuture.cancel(false);
+            scheduledExportFuture = null;
 
             // just in case - re-init pulling exporters to get empty snapshots
             for (PullingMetricsExporter pullingExporter : pullingExporters) {
@@ -109,7 +109,7 @@ public class DefaultMetricsSnapshotManager extends AbstractMetricsSnapshotManage
         }
     }
 
-    private class SnapshotRunnable implements Runnable {
+    private class ExportRunnable implements Runnable {
 
         @Override
         public void run() {

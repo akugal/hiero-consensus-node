@@ -14,9 +14,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hiero.metrics.api.snapshot.MetricsSnapshot;
-import org.hiero.metrics.api.snapshot.extension.OpenMetricsSnapshotsWriter;
-import org.hiero.metrics.api.snapshot.extension.PullingMetricsExporterAdapter;
+import org.hiero.metrics.api.export.MetricsSnapshot;
+import org.hiero.metrics.api.export.extension.OpenMetricsSnapshotsWriter;
+import org.hiero.metrics.api.export.extension.PullingMetricsExporterAdapter;
 
 @AutoService(PullingMetricsExporterAdapter.class)
 public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
@@ -43,16 +43,13 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
         server.setExecutor(null);
         server.start();
 
-        System.out.println("OpenMetrics HTTP endpoint started. port=" + port + ", path=" + path);
         logger.info("OpenMetrics HTTP endpoint started. port={}, path={}", port, path);
     }
 
     private void handleSnapshots(HttpExchange exchange) throws IOException {
-        System.out.println("Received request for OpenMetrics snapshots: " + exchange.getRequestURI());
         try {
             Optional<MetricsSnapshot> optionalSnapshot = getSnapshot();
             if (optionalSnapshot.isEmpty()) {
-                System.out.println("No metrics snapshot available, returning 204 No Content");
                 exchange.sendResponseHeaders(204, 0); // No Content
                 return;
             }
@@ -72,15 +69,9 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
 
             exchange.sendResponseHeaders(200, contentLength);
             responseBuffer.writeTo(exchange.getResponseBody());
-        } catch (IOException e) {
-            // TODO error handling
-            System.out.println("Error exporting metrics: " + e.getMessage());
-            e.printStackTrace();
-            exchange.sendResponseHeaders(500, 0);
         } catch (RuntimeException e) {
             // TODO error handling
-            System.out.println("Error exporting metrics: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error exporting metrics snapshot", e);
             exchange.sendResponseHeaders(500, 0);
         } finally {
             exchange.close();

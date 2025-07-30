@@ -8,17 +8,17 @@ import java.util.List;
 import org.hiero.metrics.api.DoubleGaugeComposite;
 import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.api.export.MetricSnapshot;
-import org.hiero.metrics.api.export.MetricsSnapshotManager;
+import org.hiero.metrics.api.export.MetricsExportManager;
 import org.hiero.metrics.api.export.extension.PullingMetricsExporterAdapter;
 import org.junit.jupiter.api.Test;
 
-public class MetricsSnapshotManagerTest {
+public class MetricsExportManagerTest {
 
     @Test
     public void test() {
         PullingMetricsExporterAdapter exporter = new PullingMetricsExporterAdapter("test");
 
-        MetricsSnapshotManager manager = MetricsFacade.createSnapshotManager(exporter);
+        MetricsExportManager manager = MetricsFacade.createExportManager(exporter);
         Label globalLabel = new Label("env", "test");
         MetricRegistry registry = MetricsFacade.createRegistry(globalLabel);
         manager.manageMetricRegistry(registry);

@@ -3,11 +3,11 @@ package org.hiero.metrics.internal.export;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.export.MetricsSnapshotManager;
+import org.hiero.metrics.api.export.MetricsExportManager;
 
-public class NoOpMetricsSnapshotManager implements MetricsSnapshotManager {
+public class NoOpMetricsExportManager implements MetricsExportManager {
 
-    public static final MetricsSnapshotManager INSTANCE = new NoOpMetricsSnapshotManager();
+    public static final MetricsExportManager INSTANCE = new NoOpMetricsExportManager();
 
     @Override
     public void manageMetricRegistry(@NonNull MetricRegistry metricRegistry) {
@@ -20,7 +20,7 @@ public class NoOpMetricsSnapshotManager implements MetricsSnapshotManager {
     }
 
     @Override
-    public boolean hasRunningSnapshotThread() {
+    public boolean hasRunningExportThread() {
         return false;
     }
 

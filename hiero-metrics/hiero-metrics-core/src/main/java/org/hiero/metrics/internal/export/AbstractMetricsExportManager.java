@@ -15,12 +15,12 @@ import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.export.MetricSnapshot;
 import org.hiero.metrics.api.export.MetricsSnapshot;
-import org.hiero.metrics.api.export.MetricsSnapshotManager;
+import org.hiero.metrics.api.export.MetricsExportManager;
 import org.hiero.metrics.internal.core.SnapshotableMetricsRegistry;
 
-public abstract class AbstractMetricsSnapshotManager implements MetricsSnapshotManager {
+public abstract class AbstractMetricsExportManager implements MetricsExportManager {
 
-    protected static final Logger logger = LogManager.getLogger(MetricsSnapshotManager.class);
+    protected static final Logger logger = LogManager.getLogger(MetricsExportManager.class);
 
     private final Set<Set<Label>> registriesGlobalLabels = new HashSet<>();
     private final List<MetricRegistry> metricRegistries = new CopyOnWriteArrayList<>();

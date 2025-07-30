@@ -11,22 +11,22 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hiero.metrics.api.export.MetricsSnapshotManager;
+import org.hiero.metrics.api.export.MetricsExportManager;
 import org.hiero.metrics.api.export.PullingMetricsExporter;
 import org.hiero.metrics.api.export.PushingMetricsExporter;
 import org.hiero.metrics.api.utils.MetricUtils;
 import org.hiero.metrics.internal.core.DefaultMetricRegistry;
-import org.hiero.metrics.internal.export.DefaultMetricsSnapshotManager;
-import org.hiero.metrics.internal.export.NoOpMetricsSnapshotManager;
-import org.hiero.metrics.internal.export.SinglePullingExporterMetricsSnapshotManager;
+import org.hiero.metrics.internal.export.DefaultMetricsExportManager;
+import org.hiero.metrics.internal.export.NoOpMetricsExportManager;
+import org.hiero.metrics.internal.export.SinglePullingExporterMetricsExportManager;
 
 public final class MetricsFacade {
 
     private static final Logger logger = LogManager.getLogger(MetricsFacade.class);
 
-    private static final class DefaultSnapshotManagerHolder {
-        private static final MetricsSnapshotManager INSTANCE =
-                createSnapshotManagerWithDiscoveredExporters(Executors::newSingleThreadScheduledExecutor, 1);
+    private static final class DefaultExportManagerHolder {
+        private static final MetricsExportManager INSTANCE =
+                createExportManagerWithDiscoveredExporters(Executors::newSingleThreadScheduledExecutor, 1);
     }
 
     private MetricsFacade() {
@@ -54,37 +54,37 @@ public final class MetricsFacade {
         return new DefaultMetricRegistry(globalLabels);
     }
 
-    public static MetricsSnapshotManager getDefaultSnapshotManager() {
-        return DefaultSnapshotManagerHolder.INSTANCE;
+    public static MetricsExportManager getDefaultExportManager() {
+        return DefaultExportManagerHolder.INSTANCE;
     }
 
-    public static MetricsSnapshotManager createSnapshotManagerWithDiscoveredExporters(
-            @NonNull Supplier<ScheduledExecutorService> executorServiceFactory, int snapshotIntervalSeconds) {
+    public static MetricsExportManager createExportManagerWithDiscoveredExporters(
+            @NonNull Supplier<ScheduledExecutorService> executorServiceFactory, int exportIntervalSeconds) {
         List<PullingMetricsExporter> pullingExporters = load(PullingMetricsExporter.class);
         List<PushingMetricsExporter> pushingExporters = load(PushingMetricsExporter.class);
 
         if (pullingExporters.isEmpty() && pushingExporters.isEmpty()) {
-            logger.info("No metrics exporters found. Using no-op snapshot manager.");
-            return NoOpMetricsSnapshotManager.INSTANCE;
+            logger.info("No metrics exporters found. Using no-op export manager.");
+            return NoOpMetricsExportManager.INSTANCE;
         }
 
         if (pushingExporters.isEmpty() && pullingExporters.size() == 1) {
-            logger.info("Single pulling exporter found. No snapshot thread will be running.");
-            return new SinglePullingExporterMetricsSnapshotManager(pullingExporters.getFirst());
+            logger.info("Single pulling exporter found. No export thread will be running.");
+            return new SinglePullingExporterMetricsExportManager(pullingExporters.getFirst());
         }
 
-        return new DefaultMetricsSnapshotManager(
-                executorServiceFactory, snapshotIntervalSeconds, pullingExporters, pushingExporters);
+        return new DefaultMetricsExportManager(
+                executorServiceFactory, exportIntervalSeconds, pullingExporters, pushingExporters);
     }
 
-    public static MetricsSnapshotManager createSnapshotManager(
-            @NonNull PushingMetricsExporter exporter, int snapshotIntervalSeconds) {
+    public static MetricsExportManager createExportManager(
+            @NonNull PushingMetricsExporter exporter, int exportIntervalSeconds) {
         Objects.requireNonNull(exporter, "exporter must not be null");
-        return new DefaultMetricsSnapshotManager(
-                Executors::newSingleThreadScheduledExecutor, snapshotIntervalSeconds, List.of(), List.of(exporter));
+        return new DefaultMetricsExportManager(
+                Executors::newSingleThreadScheduledExecutor, exportIntervalSeconds, List.of(), List.of(exporter));
     }
 
-    public static MetricsSnapshotManager createSnapshotManager(@NonNull PullingMetricsExporter exporter) {
-        return new SinglePullingExporterMetricsSnapshotManager(exporter);
+    public static MetricsExportManager createExportManager(@NonNull PullingMetricsExporter exporter) {
+        return new SinglePullingExporterMetricsExportManager(exporter);
     }
 }
