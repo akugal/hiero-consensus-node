@@ -6,6 +6,6 @@ module org.hiero.metrics.openmetrics.http {
     requires static transitive com.github.spotbugs.annotations;
     requires static transitive com.google.auto.service;
 
-    provides org.hiero.metrics.api.snapshot.PullingMetricsExporter with
+    provides org.hiero.metrics.api.export.PullingMetricsExporter with
             org.hiero.metrics.openmetrics.OpenMetricsHttpEndpoint;
 }

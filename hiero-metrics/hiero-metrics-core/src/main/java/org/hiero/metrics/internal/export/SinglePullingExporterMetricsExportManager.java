@@ -5,11 +5,11 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
 import org.hiero.metrics.api.export.PullingMetricsExporter;
 
-public class SinglePullingExporterMetricsSnapshotManager extends AbstractMetricsSnapshotManager {
+public class SinglePullingExporterMetricsExportManager extends AbstractMetricsExportManager {
 
     private final PullingMetricsExporter exporter;
 
-    public SinglePullingExporterMetricsSnapshotManager(@NonNull PullingMetricsExporter exporter) {
+    public SinglePullingExporterMetricsExportManager(@NonNull PullingMetricsExporter exporter) {
         super();
         this.exporter = Objects.requireNonNull(exporter, "exporter must not be null");
     }
@@ -20,7 +20,7 @@ public class SinglePullingExporterMetricsSnapshotManager extends AbstractMetrics
     }
 
     @Override
-    public boolean hasRunningSnapshotThread() {
+    public boolean hasRunningExportThread() {
         return false;
     }
 }

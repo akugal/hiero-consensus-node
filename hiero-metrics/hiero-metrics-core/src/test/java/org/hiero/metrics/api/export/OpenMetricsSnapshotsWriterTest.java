@@ -19,7 +19,7 @@ public class OpenMetricsSnapshotsWriterTest {
     @Test
     public void export() throws IOException, InterruptedException {
         MetricRegistry registry = MetricsFacade.createRegistry();
-        MetricsSnapshotManager snapshotManager = MetricsFacade.createSnapshotManager(
+        MetricsExportManager snapshotManager = MetricsFacade.createExportManager(
                 new PushingMetricsExporterWriterAdapter("console", new OpenMetricsSnapshotsWriter(), () -> System.out),
                 1);
         snapshotManager.manageMetricRegistry(registry);
