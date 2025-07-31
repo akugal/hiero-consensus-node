@@ -11,13 +11,13 @@ import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
 public final class DefaultLongGauge extends AbstractStatefulMetric<LongGaugeDataPoint> implements LongGauge {
 
-    private final ToLongFunction<LongGaugeDataPoint> snapshotValueSupplier;
+    private final ToLongFunction<LongGaugeDataPoint> exportValueSupplier;
 
     public DefaultLongGauge(LongGauge.Builder builder) {
         super(builder);
 
-        snapshotValueSupplier =
-                builder.isResetOnSnapshot() ? LongGaugeDataPoint::getAndReset : LongGaugeDataPoint::getAsLong;
+        exportValueSupplier =
+                builder.isResetOnExport() ? LongGaugeDataPoint::getAndReset : LongGaugeDataPoint::getAsLong;
     }
 
     @Override
@@ -27,8 +27,8 @@ public final class DefaultLongGauge extends AbstractStatefulMetric<LongGaugeData
 
     @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(LongGaugeDataPoint datapoint) {
-        long value = snapshotValueSupplier.applyAsLong(datapoint);
+    protected List<DataPointSnapshot.ValueItem> exportDataPoint(LongGaugeDataPoint datapoint) {
+        long value = exportValueSupplier.applyAsLong(datapoint);
         if (Long.MAX_VALUE == value || Long.MIN_VALUE == value) {
             // This is a safeguard against using long extreme values as a valid metric value.
             // MAX_VALUE or MIN_VALUE could be initial values for min or max statistics,

@@ -16,13 +16,13 @@ public final class DefaultDoubleGaugeComposite extends AbstractStatefulMetric<Do
         implements DoubleGaugeComposite {
 
     private final Label[] statLabels;
-    private final ToDoubleFunction<DoubleGaugeDataPoint> snapshotValueSupplier;
+    private final ToDoubleFunction<DoubleGaugeDataPoint> exportValueSupplier;
 
     public DefaultDoubleGaugeComposite(DoubleGaugeComposite.Builder builder) {
         super(builder);
 
-        snapshotValueSupplier =
-                builder.isResetOnSnapshot() ? DoubleGaugeDataPoint::getAndReset : DoubleGaugeDataPoint::getAsDouble;
+        exportValueSupplier =
+                builder.isResetOnExport() ? DoubleGaugeDataPoint::getAndReset : DoubleGaugeDataPoint::getAsDouble;
 
         statLabels = new Label[builder.getStatNames().size()];
         for (int i = 0; i < statLabels.length; i++) {
@@ -38,10 +38,10 @@ public final class DefaultDoubleGaugeComposite extends AbstractStatefulMetric<Do
 
     @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(DoubleGaugeCompositeDataPoint datapoint) {
+    protected List<DataPointSnapshot.ValueItem> exportDataPoint(DoubleGaugeCompositeDataPoint datapoint) {
         List<DataPointSnapshot.ValueItem> valueItems = new ArrayList<>(datapoint.size());
         for (int i = 0; i < datapoint.size(); i++) {
-            double value = snapshotValueSupplier.applyAsDouble(datapoint.get(i));
+            double value = exportValueSupplier.applyAsDouble(datapoint.get(i));
             if (Double.MAX_VALUE != value && Double.MIN_VALUE != value) {
                 valueItems.add(new DataPointSnapshot.ValueItem(value, statLabels[i]));
             }

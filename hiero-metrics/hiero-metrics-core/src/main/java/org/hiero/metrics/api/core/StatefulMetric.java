@@ -19,21 +19,20 @@ public interface StatefulMetric<D> extends Metric {
 
     abstract class Builder<D, B extends Builder<D, B, M>, M extends StatefulMetric<D>> extends Metric.Builder<B, M> {
 
-        private Supplier<D> valueContainerFactory;
+        private Supplier<D> dataPointFactory;
 
-        protected Builder(@NonNull MetricKey<M> key, @NonNull Supplier<D> valueContainerFactory) {
+        protected Builder(@NonNull MetricKey<M> key, @NonNull Supplier<D> dataPointFactory) {
             super(key);
-            withContainerFactory(valueContainerFactory);
+            withContainerFactory(dataPointFactory);
         }
 
         @NonNull
-        public Supplier<D> getValueContainerFactory() {
-            return valueContainerFactory;
+        public Supplier<D> getDataPointFactory() {
+            return dataPointFactory;
         }
 
-        public B withContainerFactory(Supplier<D> valueContainerFactory) {
-            this.valueContainerFactory =
-                    Objects.requireNonNull(valueContainerFactory, "Value container factory must not be null");
+        public B withContainerFactory(Supplier<D> dataPointFactory) {
+            this.dataPointFactory = Objects.requireNonNull(dataPointFactory, "Data point factory must not be null");
             return self();
         }
     }

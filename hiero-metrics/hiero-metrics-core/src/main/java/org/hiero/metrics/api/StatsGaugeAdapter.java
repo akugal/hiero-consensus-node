@@ -27,19 +27,19 @@ public interface StatsGaugeAdapter<D> extends StatefulMetric<D> {
         return MetricKey.of(category, name, StatsGaugeAdapter.class);
     }
 
-    static <D> Builder<D> builder(MetricKey<StatsGaugeAdapter<D>> key, @NonNull Supplier<D> valueContainerFactory) {
-        return new Builder<>(key, valueContainerFactory);
+    static <D> Builder<D> builder(MetricKey<StatsGaugeAdapter<D>> key, @NonNull Supplier<D> dataPointFactory) {
+        return new Builder<>(key, dataPointFactory);
     }
 
     final class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, StatsGaugeAdapter<D>> {
 
         private String statLabel = DEFAULT_STAT_LABEL;
         private final List<String> statNames = new ArrayList<>();
-        private final List<Function<D, Number>> statSnapshotGetters = new ArrayList<>();
+        private final List<Function<D, Number>> statExportGetters = new ArrayList<>();
         private Consumer<D> reset;
 
-        private Builder(MetricKey<StatsGaugeAdapter<D>> key, @NonNull Supplier<D> valueContainerFactory) {
-            super(key, Objects.requireNonNull(valueContainerFactory, "container factory must not be null"));
+        private Builder(MetricKey<StatsGaugeAdapter<D>> key, @NonNull Supplier<D> dataPointFactory) {
+            super(key, dataPointFactory);
         }
 
         @Override
@@ -55,8 +55,8 @@ public interface StatsGaugeAdapter<D> extends StatefulMetric<D> {
             return statNames;
         }
 
-        public List<Function<D, Number>> getStatSnapshotGetters() {
-            return statSnapshotGetters;
+        public List<Function<D, Number>> getStatExportGetters() {
+            return statExportGetters;
         }
 
         public Consumer<D> getReset() {
@@ -73,19 +73,18 @@ public interface StatsGaugeAdapter<D> extends StatefulMetric<D> {
             return this;
         }
 
-        public Builder<D> withStat(String statName, Function<D, Number> snapshotValueGetter) {
+        public Builder<D> withStat(String statName, Function<D, Number> exportGetter) {
             statNames.add(ArgumentUtils.throwArgBlank(statName, "stat name"));
-            statSnapshotGetters.add(
-                    Objects.requireNonNull(snapshotValueGetter, "Snapshot value getter must not be null"));
+            statExportGetters.add(Objects.requireNonNull(exportGetter, "Export getter must not be null"));
             return this;
         }
 
         @Override
         protected StatsGaugeAdapter<D> buildMetric() {
-            if (statSnapshotGetters.isEmpty()) {
+            if (statExportGetters.isEmpty()) {
                 throw new IllegalStateException("At least one stat must be defined");
             }
-            if (new HashSet<>(statNames).size() != statSnapshotGetters.size()) {
+            if (new HashSet<>(statNames).size() != statExportGetters.size()) {
                 throw new IllegalStateException("Stat names must be unique");
             }
 

@@ -34,7 +34,7 @@ public class DefaultStateSet<T> extends AbstractStatefulMetric<StateSetDataPoint
 
     @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(StateSetDataPoint<T> datapoint) {
+    protected List<DataPointSnapshot.ValueItem> exportDataPoint(StateSetDataPoint<T> datapoint) {
         final Set<T> states = datapoint.getStates();
         final List<DataPointSnapshot.ValueItem> items = new ArrayList<>();
 

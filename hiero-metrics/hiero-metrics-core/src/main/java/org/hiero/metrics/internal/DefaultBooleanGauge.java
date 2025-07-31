@@ -24,7 +24,7 @@ public final class DefaultBooleanGauge extends AbstractStatefulMetric<BooleanGau
 
     @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(BooleanGaugeDataPoint datapoint) {
+    protected List<DataPointSnapshot.ValueItem> exportDataPoint(BooleanGaugeDataPoint datapoint) {
         return List.of(new DataPointSnapshot.ValueItem(datapoint.getAsBoolean() ? ONE : ZERO));
     }
 }

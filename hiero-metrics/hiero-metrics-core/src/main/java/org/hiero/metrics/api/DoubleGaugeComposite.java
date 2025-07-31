@@ -42,7 +42,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<DoubleGaugeComposit
         private String statLabel = DEFAULT_STAT_LABEL;
         private final List<String> statNames = new ArrayList<>();
         private final List<Supplier<DoubleGaugeDataPoint>> dataPointFactories = new ArrayList<>();
-        private boolean resetOnSnapshot = false;
+        private boolean resetOnExport = false;
 
         private Builder(MetricKey<DoubleGaugeComposite> key) {
             super(key, () -> new DoubleGaugeCompositeArrayDataPoint(() -> new DoubleGaugeDataPoint[0]));
@@ -53,8 +53,8 @@ public interface DoubleGaugeComposite extends StatefulMetric<DoubleGaugeComposit
             return MetricType.GAUGE;
         }
 
-        public boolean isResetOnSnapshot() {
-            return resetOnSnapshot;
+        public boolean isResetOnExport() {
+            return resetOnExport;
         }
 
         @NonNull
@@ -110,7 +110,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<DoubleGaugeComposit
         }
 
         public Builder withResetOnSnapshot() {
-            this.resetOnSnapshot = true;
+            this.resetOnExport = true;
             return this;
         }
 

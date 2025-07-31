@@ -45,7 +45,7 @@ public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> {
 
         private DoubleSupplier initializer = DOUBLE_INIT;
         private DoubleBinaryOperator operator;
-        private boolean resetOnSnapshot = false;
+        private boolean resetOnExport = false;
 
         private Builder(MetricKey<DoubleGauge> key) {
             super(key, () -> new AtomicDoubleGaugeDataPoint(DOUBLE_INIT));
@@ -56,8 +56,8 @@ public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> {
             return MetricType.GAUGE;
         }
 
-        public boolean isResetOnSnapshot() {
-            return resetOnSnapshot;
+        public boolean isResetOnExport() {
+            return resetOnExport;
         }
 
         public Builder withInitializer(DoubleSupplier initializer) {
@@ -75,9 +75,9 @@ public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> {
             return this;
         }
 
-        public Builder withOperator(DoubleBinaryOperator operator, boolean resetOnSnapshot) {
+        public Builder withOperator(DoubleBinaryOperator operator, boolean resetOnExport) {
             withOperator(operator);
-            this.resetOnSnapshot = resetOnSnapshot;
+            this.resetOnExport = resetOnExport;
             return this;
         }
 

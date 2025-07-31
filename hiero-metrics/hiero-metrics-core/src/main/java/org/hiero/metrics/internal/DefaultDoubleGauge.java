@@ -11,13 +11,13 @@ import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
 public final class DefaultDoubleGauge extends AbstractStatefulMetric<DoubleGaugeDataPoint> implements DoubleGauge {
 
-    private final ToDoubleFunction<DoubleGaugeDataPoint> snapshotValueSupplier;
+    private final ToDoubleFunction<DoubleGaugeDataPoint> exportValueSupplier;
 
     public DefaultDoubleGauge(DoubleGauge.Builder builder) {
         super(builder);
 
-        snapshotValueSupplier =
-                builder.isResetOnSnapshot() ? DoubleGaugeDataPoint::getAndReset : DoubleGaugeDataPoint::getAsDouble;
+        exportValueSupplier =
+                builder.isResetOnExport() ? DoubleGaugeDataPoint::getAndReset : DoubleGaugeDataPoint::getAsDouble;
     }
 
     @Override
@@ -27,8 +27,8 @@ public final class DefaultDoubleGauge extends AbstractStatefulMetric<DoubleGauge
 
     @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(DoubleGaugeDataPoint datapoint) {
-        double value = snapshotValueSupplier.applyAsDouble(datapoint);
+    protected List<DataPointSnapshot.ValueItem> exportDataPoint(DoubleGaugeDataPoint datapoint) {
+        double value = exportValueSupplier.applyAsDouble(datapoint);
         if (Double.MAX_VALUE == value || Double.MIN_VALUE == value) {
             // This is a safeguard against using double extreme values as a valid metric value.
             // MAX_VALUE or MIN_VALUE could be initial values for min or max statistics,

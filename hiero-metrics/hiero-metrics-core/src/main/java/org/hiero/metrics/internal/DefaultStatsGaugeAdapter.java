@@ -14,7 +14,7 @@ import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 public final class DefaultStatsGaugeAdapter<D> extends AbstractStatefulMetric<D> implements StatsGaugeAdapter<D> {
 
     private final Label[] statLabels;
-    private final Function<D, Number>[] statSnapshotGetters;
+    private final Function<D, Number>[] statExportGetters;
     private final Consumer<D> reset;
 
     @SuppressWarnings("unchecked")
@@ -22,7 +22,7 @@ public final class DefaultStatsGaugeAdapter<D> extends AbstractStatefulMetric<D>
         super(builder);
 
         reset = builder.getReset() != null ? builder.getReset() : container -> {}; // no-op reset if no specified
-        statSnapshotGetters = builder.getStatSnapshotGetters().toArray(new Function[0]);
+        statExportGetters = builder.getStatExportGetters().toArray(new Function[0]);
         statLabels = new Label[builder.getStatNames().size()];
         for (int i = 0; i < statLabels.length; i++) {
             statLabels[i] =
@@ -37,10 +37,10 @@ public final class DefaultStatsGaugeAdapter<D> extends AbstractStatefulMetric<D>
 
     @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(D datapoint) {
-        List<DataPointSnapshot.ValueItem> valueItems = new ArrayList<>(statSnapshotGetters.length);
-        for (int i = 0; i < statSnapshotGetters.length; i++) {
-            Number value = statSnapshotGetters[i].apply(datapoint);
+    protected List<DataPointSnapshot.ValueItem> exportDataPoint(D datapoint) {
+        List<DataPointSnapshot.ValueItem> valueItems = new ArrayList<>(statExportGetters.length);
+        for (int i = 0; i < statExportGetters.length; i++) {
+            Number value = statExportGetters[i].apply(datapoint);
             if (value != null) {
                 valueItems.add(new DataPointSnapshot.ValueItem(value.doubleValue(), statLabels[i]));
             }

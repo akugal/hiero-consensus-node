@@ -24,26 +24,26 @@ public interface GaugeAdapter<D> extends StatefulMetric<D> {
 
     static <D> Builder<D> builder(
             MetricKey<GaugeAdapter<D>> key,
-            @NonNull Supplier<D> valueContainerFactory,
-            @NonNull Function<D, Number> snapshotGetter) {
-        return new Builder<>(key, valueContainerFactory, snapshotGetter);
+            @NonNull Supplier<D> dataPointFactory,
+            @NonNull Function<D, Number> exportGetter) {
+        return new Builder<>(key, dataPointFactory, exportGetter);
     }
 
     final class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, GaugeAdapter<D>> {
 
-        private final Function<D, Number> snapshotGetter;
+        private final Function<D, Number> exportGetter;
         private Consumer<D> reset;
 
         private Builder(
                 MetricKey<GaugeAdapter<D>> key,
-                @NonNull Supplier<D> valueContainerFactory,
-                @NonNull Function<D, Number> snapshotGetter) {
-            super(key, valueContainerFactory);
-            this.snapshotGetter = Objects.requireNonNull(snapshotGetter, "Snapshot getter must not be null");
+                @NonNull Supplier<D> dataPointFactory,
+                @NonNull Function<D, Number> exportGetter) {
+            super(key, dataPointFactory);
+            this.exportGetter = Objects.requireNonNull(exportGetter, "Export getter must not be null");
         }
 
-        public Function<D, Number> getSnapshotGetter() {
-            return snapshotGetter;
+        public Function<D, Number> getExportGetter() {
+            return exportGetter;
         }
 
         @Nullable

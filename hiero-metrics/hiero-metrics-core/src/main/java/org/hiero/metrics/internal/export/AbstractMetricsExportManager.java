@@ -14,8 +14,8 @@ import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.export.MetricSnapshot;
-import org.hiero.metrics.api.export.MetricsSnapshot;
 import org.hiero.metrics.api.export.MetricsExportManager;
+import org.hiero.metrics.api.export.MetricsSnapshot;
 import org.hiero.metrics.internal.core.SnapshotableMetricsRegistry;
 
 public abstract class AbstractMetricsExportManager implements MetricsExportManager {
