@@ -21,7 +21,7 @@ public final class DefaultGenericGauge<T> extends AbstractStatefulMetric<GaugeDa
 
     @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(GaugeDataPoint<T> datapoint) {
+    protected List<DataPointSnapshot.ValueItem> exportDataPoint(GaugeDataPoint<T> datapoint) {
         double value = datapoint.getAsDouble();
         if (Double.isNaN(value)) {
             return List.of();

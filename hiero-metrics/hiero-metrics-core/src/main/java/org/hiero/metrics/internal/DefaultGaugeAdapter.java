@@ -11,13 +11,13 @@ import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
 public final class DefaultGaugeAdapter<D> extends AbstractStatefulMetric<D> implements GaugeAdapter<D> {
 
-    private final Function<D, Number> snapshotGetter;
+    private final Function<D, Number> exportGetter;
     private final Consumer<D> reset;
 
     public DefaultGaugeAdapter(GaugeAdapter.Builder<D> builder) {
         super(builder);
 
-        snapshotGetter = builder.getSnapshotGetter();
+        exportGetter = builder.getExportGetter();
         reset = builder.getReset() != null ? builder.getReset() : container -> {};
     }
 
@@ -28,8 +28,8 @@ public final class DefaultGaugeAdapter<D> extends AbstractStatefulMetric<D> impl
 
     @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(D datapoint) {
-        Number value = snapshotGetter.apply(datapoint);
+    protected List<DataPointSnapshot.ValueItem> exportDataPoint(D datapoint) {
+        Number value = exportGetter.apply(datapoint);
         if (value == null) {
             return List.of();
         }

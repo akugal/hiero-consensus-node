@@ -22,7 +22,7 @@ public final class DefaultDoubleCounter extends AbstractStatefulMetric<DoubleCou
 
     @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> snapshotDataPoint(DoubleCounterDataPoint datapoint) {
+    protected List<DataPointSnapshot.ValueItem> exportDataPoint(DoubleCounterDataPoint datapoint) {
         return List.of(new DataPointSnapshot.ValueItem(datapoint.getAsDouble()));
     }
 }

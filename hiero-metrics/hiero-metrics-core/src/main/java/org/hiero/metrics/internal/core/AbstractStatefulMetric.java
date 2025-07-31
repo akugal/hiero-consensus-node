@@ -25,7 +25,7 @@ public abstract class AbstractStatefulMetric<D> extends AbstractMetric
     protected AbstractStatefulMetric(StatefulMetric.Builder<D, ?, ?> builder) {
         super(builder);
 
-        dataPointFactory = builder.getValueContainerFactory();
+        dataPointFactory = builder.getDataPointFactory();
 
         if (getDynamicLabelNames().isEmpty()) {
             noLabelsDataPoint = dataPointFactory.get();
@@ -107,7 +107,7 @@ public abstract class AbstractStatefulMetric<D> extends AbstractMetric
     @Override
     public final List<DataPointSnapshot> snapshot() {
         if (noLabelsDataPoint != null) {
-            List<DataPointSnapshot.ValueItem> valueItems = snapshotDataPoint(noLabelsDataPoint);
+            List<DataPointSnapshot.ValueItem> valueItems = exportDataPoint(noLabelsDataPoint);
             if (valueItems.isEmpty()) {
                 return List.of();
             } else {
@@ -118,7 +118,7 @@ public abstract class AbstractStatefulMetric<D> extends AbstractMetric
         } else {
             List<DataPointSnapshot> snapshots = new ArrayList<>(labeledDataPoints.size());
             for (Map.Entry<List<String>, D> entry : labeledDataPoints.entrySet()) {
-                List<DataPointSnapshot.ValueItem> valueItems = snapshotDataPoint(entry.getValue());
+                List<DataPointSnapshot.ValueItem> valueItems = exportDataPoint(entry.getValue());
                 if (!valueItems.isEmpty()) {
                     snapshots.add(new DataPointSnapshot(createDataPointLabels(entry.getKey()), valueItems));
                 }
@@ -128,7 +128,7 @@ public abstract class AbstractStatefulMetric<D> extends AbstractMetric
     }
 
     @NonNull
-    protected abstract List<DataPointSnapshot.ValueItem> snapshotDataPoint(D datapoint);
+    protected abstract List<DataPointSnapshot.ValueItem> exportDataPoint(D datapoint);
 
     private void checkNoNullLabels(String[] labelValues) {
         for (int i = 0; i < labelValues.length; i++) {

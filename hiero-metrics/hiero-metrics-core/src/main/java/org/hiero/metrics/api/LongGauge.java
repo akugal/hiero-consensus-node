@@ -45,7 +45,7 @@ public interface LongGauge extends StatefulMetric<LongGaugeDataPoint> {
 
         private LongSupplier initializer = LONG_INIT;
         private LongBinaryOperator operator;
-        private boolean resetOnSnapshot = false;
+        private boolean resetOnExport = false;
 
         private Builder(MetricKey<LongGauge> key) {
             super(key, () -> new AtomicLongGaugeDataPoint(LONG_INIT));
@@ -56,8 +56,8 @@ public interface LongGauge extends StatefulMetric<LongGaugeDataPoint> {
             return MetricType.GAUGE;
         }
 
-        public boolean isResetOnSnapshot() {
-            return resetOnSnapshot;
+        public boolean isResetOnExport() {
+            return resetOnExport;
         }
 
         public Builder withInitializer(LongSupplier initializer) {
@@ -70,9 +70,9 @@ public interface LongGauge extends StatefulMetric<LongGaugeDataPoint> {
             return this;
         }
 
-        public Builder withOperator(LongBinaryOperator operator, boolean resetOnSnapshot) {
+        public Builder withOperator(LongBinaryOperator operator, boolean resetOnExport) {
             this.operator = Objects.requireNonNull(operator, "Operator must not be null");
-            this.resetOnSnapshot = resetOnSnapshot;
+            this.resetOnExport = resetOnExport;
             return this;
         }
 
