@@ -10,6 +10,6 @@ module org.hiero.metrics.demo.crawler.cli {
     requires org.hiero.metrics.demo.crawler.api;
     requires org.apache.logging.log4j;
 
-    provides org.hiero.metrics.demo.crawler.api.document.SchemeProcessor with
-            org.hiero.metrics.demo.crawler.file.FileSchemeProcessor;
+    provides org.hiero.metrics.demo.crawler.api.document.SchemeCrawler with
+            org.hiero.metrics.demo.crawler.file.FileSchemeCrawler;
 }

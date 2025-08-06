@@ -2,13 +2,12 @@
 package org.hiero.metrics.demo.crawler.api.job;
 
 import com.swirlds.config.api.Configuration;
-
-import java.util.Collection;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import org.hiero.metrics.api.core.MetricRegistryAware;
-import org.hiero.metrics.demo.crawler.api.document.SchemeProcessor;
+import org.hiero.metrics.demo.crawler.api.document.SchemeCrawler;
 import org.hiero.metrics.demo.crawler.api.exception.JobException;
 import org.hiero.metrics.demo.crawler.internal.DefaultJobManager;
 
@@ -21,18 +20,20 @@ public interface JobManager extends MetricRegistryAware {
         JobScheduler jobScheduler = jobSchedulerFactory.createJobScheduler(configuration);
         JobManager jobManager = new DefaultJobManager(jobScheduler);
 
-        ServiceLoader<SchemeProcessor> loader = ServiceLoader.load(SchemeProcessor.class);
-        for (SchemeProcessor schemeProcessor : loader) {
-            jobManager.registerScheme(schemeProcessor);
+        ServiceLoader<SchemeCrawler> loader = ServiceLoader.load(SchemeCrawler.class);
+        for (SchemeCrawler schemeCrawler : loader) {
+            jobManager.registerScheme(schemeCrawler);
         }
         return jobManager;
     }
 
-    void registerScheme(SchemeProcessor schemeProcessor);
+    void shootdown();
 
-    List<SchemeProcessor> schemes();
+    void registerScheme(SchemeCrawler schemeCrawler);
 
-    ScheduledJob schedule(String uri, int depth, String... processors) throws JobException;
+    List<SchemeCrawler> schemes();
+
+    ScheduledJob schedule(String uri, Duration timeout, int depth, String... processors) throws JobException;
 
     Optional<ScheduledJob> getJob(int jobId);
 }

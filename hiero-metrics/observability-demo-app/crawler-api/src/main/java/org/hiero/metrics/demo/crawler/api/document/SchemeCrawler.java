@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hiero.metrics.demo.crawler.api.util.Named;
 
-public interface SchemeProcessor extends Named {
+public interface SchemeCrawler extends Named {
 
     boolean supports(URI uri);
 

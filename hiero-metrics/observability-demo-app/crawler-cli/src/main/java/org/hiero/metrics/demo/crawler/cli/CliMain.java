@@ -34,6 +34,8 @@ public class CliMain {
         System.out.println("Type 'help' for available commands or 'exit' to quit.\n");
 
         startInteractiveLoop(commandManager);
+
+        jobManager.shootdown();
     }
 
     private static void startInteractiveLoop(CommandManager commandManager) {

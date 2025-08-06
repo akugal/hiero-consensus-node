@@ -7,8 +7,9 @@ import org.hiero.metrics.api.core.MetricRegistryAware;
 import org.hiero.metrics.demo.crawler.api.document.Document;
 import org.hiero.metrics.demo.crawler.api.document.DocumentFetcher;
 import org.hiero.metrics.demo.crawler.api.exception.DocumentFetchException;
+import org.hiero.metrics.demo.crawler.api.util.Named;
 
-public interface DocumentCache extends MetricRegistryAware {
+public interface DocumentCache extends MetricRegistryAware, Named {
 
     Optional<Document> fetchIfAbsent(URI uri, DocumentFetcher fetcher) throws DocumentFetchException;
 }

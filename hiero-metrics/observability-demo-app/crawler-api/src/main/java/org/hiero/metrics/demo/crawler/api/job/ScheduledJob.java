@@ -1,6 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.demo.crawler.api.job;
 
-import java.util.concurrent.Future;
+public interface ScheduledJob {
 
-public record ScheduledJob(int jobId, Future<JobResult> future) {}
+    int getJobId();
+
+    boolean isDone();
+
+    boolean isCancelled();
+
+    JobResult getResult();
+
+    /**
+     * Cancels the job if it is still running.
+     */
+    void cancel();
+}
