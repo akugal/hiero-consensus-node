@@ -16,6 +16,11 @@ public final class NoOpDocumentCache implements DocumentCache {
     private NoOpDocumentCache() {}
 
     @Override
+    public String getName() {
+        return "doc-no-op";
+    }
+
+    @Override
     public Optional<Document> fetchIfAbsent(URI uri, DocumentFetcher fetcher) throws DocumentFetchException {
         return fetcher.fetch(uri);
     }

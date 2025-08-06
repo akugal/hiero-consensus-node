@@ -2,11 +2,12 @@
 package org.hiero.metrics.demo.crawler.cli.internal;
 
 import java.io.PrintStream;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Future;
+import org.hiero.metrics.demo.crawler.api.job.JobConcurrencyMetrics;
 import org.hiero.metrics.demo.crawler.api.job.JobManager;
-import org.hiero.metrics.demo.crawler.api.job.JobMetrics;
+import org.hiero.metrics.demo.crawler.api.job.JobProcessingMetrics;
 import org.hiero.metrics.demo.crawler.api.job.JobResult;
 import org.hiero.metrics.demo.crawler.api.job.ScheduledJob;
 import org.hiero.metrics.demo.crawler.api.util.TypedMap;
@@ -17,9 +18,11 @@ public class JobCommand extends AbstractCommand {
 
     private final String help =
             """
-            Usage: job job_id
+            Print status or cancel scheduled jobs.
+            Usage: job status|cancel job_id
             Options:
-              job_id    Job id to print details for""";
+              job_id    Required bob id to print details for
+            """;
 
     public JobCommand(JobManager jobManager) {
         super("job", "Prints job details");
@@ -32,37 +35,47 @@ public class JobCommand extends AbstractCommand {
             throw new InputException("Missing Job ID.");
         }
 
-        int jobId = Integer.parseInt(args[0]);
+        String subCommand = args[0];
+        int jobId = Integer.parseInt(args[1]);
 
-        Optional<ScheduledJob> job = jobManager.getJob(jobId);
-        if (job.isEmpty()) {
+        Optional<ScheduledJob> optionalJob = jobManager.getJob(jobId);
+        if (optionalJob.isEmpty()) {
             out.println("No job found with ID: " + jobId);
         } else {
-            Future<JobResult> jobFuture = job.get().future();
-            if (jobFuture.isDone()) {
-                if (jobFuture.isCancelled()) {
-                    out.println("Job ID: " + jobId + " has been cancelled.");
+            ScheduledJob scheduledJob = optionalJob.get();
+
+            if (subCommand.equals("cancel")) {
+                scheduledJob.cancel();
+            } else if (subCommand.equals("status")) {
+                if (scheduledJob.isDone()) {
+                    if (scheduledJob.isCancelled()) {
+                        out.println("Job ID: " + jobId + " has been cancelled.");
+                    } else {
+                        JobResult result = scheduledJob.getResult();
+                        StringBuilder sb = new StringBuilder();
+
+                        sb.append("Job ")
+                                .append(jobId)
+                                .append(" for ")
+                                .append(result.rootUri())
+                                .append(" completed. ")
+                                .append("\n");
+
+                        // sb.append("Data:\n");
+                        // nestedOutput(result.data().asMap(), "  ", sb);
+
+                        sb.append("Processing metrics:\n");
+                        printMetrics(sb, result.jobMetrics().processingMetrics(), "  ");
+                        sb.append("Concurrency metrics:\n");
+                        printMetrics(sb, result.jobMetrics().concurrencyMetrics(), "  ");
+
+                        out.println(sb);
+                    }
                 } else {
-                    JobResult result = jobFuture.get();
-                    StringBuilder sb = new StringBuilder();
-
-                    sb.append("Job ")
-                            .append(jobId)
-                            .append(" for ")
-                            .append(result.rootUri())
-                            .append(" completed. ")
-                            .append("\n");
-
-                    sb.append("Data:\n");
-                    nestedOutput(result.data().asMap(), "  ", sb);
-
-                    sb.append("Metrics:\n");
-                    printMetrics(sb, result.jobMetrics(), "  ");
-
-                    out.println(sb);
+                    out.println("Job " + jobId + " is still running.");
                 }
             } else {
-                out.println("Job " + jobId + " is still running.");
+                out.println("❌ Unknown job command: " + subCommand);
             }
         }
     }
@@ -88,72 +101,105 @@ public class JobCommand extends AbstractCommand {
         }
     }
 
-    private void printMetrics(StringBuilder builder, JobMetrics jobMetrics, String indent) {
+    private void printMetrics(StringBuilder builder, JobProcessingMetrics metrics, String indent) {
         builder.append(indent).append("URI count:\n");
         builder.append(indent)
                 .append(indent)
                 .append("Distinct:    ")
-                .append(jobMetrics.distinctUriCount())
+                .append(metrics.distinctUriCount())
                 .append('\n');
         builder.append(indent)
                 .append(indent)
                 .append("Duplicate:   ")
-                .append(jobMetrics.duplicateUriCount())
+                .append(metrics.duplicateUriCount())
                 .append('\n');
         builder.append(indent)
                 .append(indent)
                 .append("Unsupported: ")
-                .append(jobMetrics.unsupportedUriCount())
+                .append(metrics.unsupportedUriCount())
                 .append('\n');
 
-        builder.append(indent).append("Duration (ms):\n");
+        builder.append(indent).append("Duration:\n");
         builder.append(indent)
                 .append(indent)
                 .append("Job:             ")
-                .append(jobMetrics.durationMs())
+                .append(durationToString(metrics.jobDuration()))
                 .append('\n');
         builder.append(indent)
                 .append(indent)
                 .append("Fetch success:   ")
-                .append(jobMetrics.fetchSuccessTotalTimeMs())
+                .append(durationToString(metrics.fetchSuccessTotalDuration()))
                 .append('\n');
         builder.append(indent)
                 .append(indent)
                 .append("Fetch error:     ")
-                .append(jobMetrics.fetchErrorTotalTimeMs())
+                .append(durationToString(metrics.fetchErrorTotalDuration()))
                 .append('\n');
         builder.append(indent)
                 .append(indent)
                 .append("Process success: ")
-                .append(jobMetrics.processSuccessTotalTimeMs())
+                .append(durationToString(metrics.processSuccessTotalDuration()))
                 .append('\n');
 
         builder.append(indent).append("Fetch count:\n");
         builder.append(indent)
                 .append(indent)
                 .append("Success:   ")
-                .append(jobMetrics.fetchSuccessCount())
+                .append(metrics.fetchSuccessCount())
                 .append('\n');
         builder.append(indent)
                 .append(indent)
                 .append("Error:     ")
-                .append(jobMetrics.fetchErrorsCount())
+                .append(metrics.fetchErrorsCount())
                 .append('\n');
         builder.append(indent)
                 .append(indent)
                 .append("Cache hit: ")
-                .append(jobMetrics.getUriCacheHitCount())
+                .append(metrics.getUriCacheHitCount())
                 .append('\n');
 
         builder.append(indent)
-                .append("Process success count: ")
-                .append(jobMetrics.processSuccessTotalTimeMs())
-                .append('\n');
-        builder.append(indent)
                 .append("Parallel time improvement ratio: ")
-                .append(jobMetrics.parallelImprovementRatio())
+                .append(metrics.parallelImprovementRatio())
                 .append('x')
                 .append('\n');
+    }
+
+    private void printMetrics(StringBuilder builder, JobConcurrencyMetrics metrics, String indent) {
+        builder.append(indent)
+                .append("Job delay execution:         ")
+                .append(durationToString(metrics.jobDelayExecutionDuration()))
+                .append('\n');
+        builder.append(indent)
+                .append("Total tasks count:           ")
+                .append(metrics.totalTasksCount())
+                .append('\n');
+        builder.append(indent)
+                .append("Rejected tasks count:        ")
+                .append(metrics.rejectedTasksCount())
+                .append('\n');
+
+        builder.append(indent)
+                .append("Tasks execution delay total: ")
+                .append(durationToString(metrics.tasksExecutionDelayTotalDuration()))
+                .append('\n');
+        builder.append(indent)
+                .append("Task execution delay avg:    ")
+                .append(durationToString(metrics.taskExecutionDelayAverageDuration()))
+                .append('\n');
+
+        builder.append(indent)
+                .append("Tasks execution total:       ")
+                .append(durationToString(metrics.taskExecutionTotalDuration()))
+                .append('\n');
+        builder.append(indent)
+                .append("Task execution avg:          ")
+                .append(durationToString(metrics.taskExecutionAverageDuration()))
+                .append('\n');
+    }
+
+    private String durationToString(Duration duration) {
+        return String.format("%d ms", duration.toMillis());
     }
 
     @Override

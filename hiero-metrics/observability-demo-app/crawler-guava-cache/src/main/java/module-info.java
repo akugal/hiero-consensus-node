@@ -5,8 +5,8 @@ module org.hiero.metrics.demo.crawler.cache.guava {
             com.swirlds.config.extensions;
 
     requires transitive com.swirlds.config.api;
+    requires transitive org.hiero.metrics.core;
     requires transitive org.hiero.metrics.demo.crawler.api;
-    requires org.hiero.metrics.core;
     requires com.google.common;
     requires org.apache.logging.log4j;
 

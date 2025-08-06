@@ -5,6 +5,6 @@ module org.hiero.metrics.demo.crawler.http {
     requires transitive org.jsoup;
     requires java.net.http;
 
-    provides org.hiero.metrics.demo.crawler.api.document.SchemeProcessor with
-            org.hiero.metrics.demo.crawler.http.HttpSchemeProcessor;
+    provides org.hiero.metrics.demo.crawler.api.document.SchemeCrawler with
+            org.hiero.metrics.demo.crawler.http.HttpSchemeCrawler;
 }
