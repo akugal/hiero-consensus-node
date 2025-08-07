@@ -1,11 +1,11 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class IdempotentMetricRegistryAware implements MetricRegistryAware {
 
@@ -19,9 +19,14 @@ public abstract class IdempotentMetricRegistryAware implements MetricRegistryAwa
 
         if (metricsRegistered.compareAndSet(false, true)) {
             registerMetricsNonIdempotent(registry);
-        } else  {
-            logger.warn("Metrics already registered for instance of {}.", getClass().getName());
+        } else {
+            logger.warn(
+                    "Metrics already registered for instance of {}.", getClass().getName());
         }
+    }
+
+    protected boolean isMetricsRegistered() {
+        return metricsRegistered.get();
     }
 
     protected abstract void registerMetricsNonIdempotent(@NonNull MetricRegistry registry);

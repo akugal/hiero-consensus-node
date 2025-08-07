@@ -101,7 +101,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<DoubleGaugeComposit
             return withStatContainerFactory("latest", () -> new AtomicDoubleGaugeDataPoint(initValue));
         }
 
-        private Builder withStatContainerFactory(String statName, Supplier<DoubleGaugeDataPoint> statContainerFactory) {
+        public Builder withStatContainerFactory(String statName, Supplier<DoubleGaugeDataPoint> statContainerFactory) {
             ArgumentUtils.throwArgBlank(statName, "stat name");
 
             statNames.add(statName);

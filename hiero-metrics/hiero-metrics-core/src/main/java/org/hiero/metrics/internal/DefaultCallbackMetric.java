@@ -3,30 +3,50 @@ package org.hiero.metrics.internal;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.CallbackMetric;
-import org.hiero.metrics.api.core.MetricCallback;
 import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractMetric;
 import org.hiero.metrics.internal.core.SnapshotableMetric;
 
 public final class DefaultCallbackMetric extends AbstractMetric implements CallbackMetric, SnapshotableMetric {
 
-    private final Consumer<MetricCallback> callback;
+    private final Map<Map<String, String>, DoubleSupplier> labeledDataPoints = new ConcurrentHashMap<>();
 
     public DefaultCallbackMetric(CallbackMetric.Builder builder) {
         super(builder);
-        callback = builder.getCallback();
+
+        for (Map.Entry<Map<String, String>, DoubleSupplier> entry :
+                builder.getLabeledDataPoints().entrySet()) {
+            registerDataPoint(entry.getValue(), entry.getKey());
+        }
     }
 
     @NonNull
     @Override
     public List<DataPointSnapshot> snapshot() {
-        List<DataPointSnapshot> dataPoints = new ArrayList<>();
-        callback.accept((value, labelValues) ->
-                dataPoints.add(new DataPointSnapshot(createDataPointLabels(Arrays.asList(labelValues)), value)));
-        return dataPoints;
+        List<DataPointSnapshot> snapshots = new ArrayList<>(labeledDataPoints.size());
+        for (Map.Entry<Map<String, String>, DoubleSupplier> entry : labeledDataPoints.entrySet()) {
+            snapshots.add(new DataPointSnapshot(
+                    createDataPointLabels(entry.getKey()), entry.getValue().getAsDouble()));
+        }
+        return snapshots;
+    }
+
+    @Override
+    public CallbackMetric registerDataPoint(@NonNull DoubleSupplier valueSupplier, Map<String, String> labels) {
+        Objects.requireNonNull(valueSupplier, "Value supplier must not be null");
+
+        verifyLabels(labels);
+
+        if (labeledDataPoints.putIfAbsent(labels, valueSupplier) != null) {
+            throw new IllegalArgumentException("A data point with the same label values already exists: " + labels);
+        }
+
+        return this;
     }
 }

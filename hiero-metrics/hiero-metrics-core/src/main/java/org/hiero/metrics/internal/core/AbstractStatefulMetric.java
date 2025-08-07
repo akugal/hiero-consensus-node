@@ -67,12 +67,8 @@ public abstract class AbstractStatefulMetric<D> extends AbstractMetric
                         + " was created without label names, so you must not provide label values.");
             }
             return noLabelsDataPoint;
-        } else if (labels.size() != getDynamicLabelNames().size()) {
-            throw new IllegalArgumentException(
-                    "Expected different size of labels. Expected: + " + getDynamicLabelNames() + ", got " + labels);
-        } else if (labels.keySet().equals(getDynamicLabelNamesSet())) {
-            throw new IllegalArgumentException(
-                    "Expected different label names. Expected: + " + getDynamicLabelNames() + ", got " + labels);
+        } else {
+            verifyLabels(labels);
         }
 
         List<String> labelValues = new ArrayList<>(getDynamicLabelNames().size());
