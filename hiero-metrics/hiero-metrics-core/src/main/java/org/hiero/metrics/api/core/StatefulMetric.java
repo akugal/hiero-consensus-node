@@ -31,7 +31,7 @@ public interface StatefulMetric<D> extends Metric {
             return dataPointFactory;
         }
 
-        public B withContainerFactory(Supplier<D> dataPointFactory) {
+        protected B withContainerFactory(Supplier<D> dataPointFactory) {
             this.dataPointFactory = Objects.requireNonNull(dataPointFactory, "Data point factory must not be null");
             return self();
         }
