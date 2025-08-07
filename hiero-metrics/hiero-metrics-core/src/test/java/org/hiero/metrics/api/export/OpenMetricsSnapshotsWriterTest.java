@@ -2,6 +2,7 @@
 package org.hiero.metrics.api.export;
 
 import java.io.IOException;
+import java.util.Map;
 import org.hiero.metrics.api.BooleanGauge;
 import org.hiero.metrics.api.CallbackMetric;
 import org.hiero.metrics.api.LongCounter;
@@ -34,12 +35,11 @@ public class OpenMetricsSnapshotsWriterTest {
                 .register(registry);
         longCounter.getNotLabeled().increment(42);
 
-        CallbackMetric.builder(CallbackMetric.key("test_callback_metric"), callback -> {
-                    callback.call(123.45, "val1", "val2");
-                    callback.call(1.0, "1", "2");
-                })
+        CallbackMetric.builder(CallbackMetric.key("test_callback_metric"))
                 .withDynamicLabelNames("label1", "label2")
-                .register(registry);
+                .register(registry)
+                .registerDataPoint(() -> 123.45, Map.of("label1", "val1", "label2", "val2"))
+                .registerDataPoint(() -> 1.0, Map.of("label1", "1", "label2", "2"));
 
         StatsGaugeAdapter<StatContainer> statGauge = StatsGaugeAdapter.builder(
                         StatsGaugeAdapter.key("test_stats_gauge"), StatContainer::new)

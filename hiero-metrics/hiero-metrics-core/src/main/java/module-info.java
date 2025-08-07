@@ -14,6 +14,11 @@ module org.hiero.metrics.core {
     exports org.hiero.metrics.api.stat.container;
 
     requires transitive com.swirlds.base;
+    requires java.management;
+    requires jdk.management;
     requires org.apache.logging.log4j;
     requires static transitive com.github.spotbugs.annotations;
+
+    provides org.hiero.metrics.api.core.MetricsRegistrationProvider with
+            org.hiero.metrics.internal.JvmMetricsRegistration;
 }

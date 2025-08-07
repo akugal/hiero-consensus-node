@@ -12,13 +12,13 @@ import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.stat.container.AtomicIntPair;
 
-public class CountPerSecond implements DoubleSupplier {
+public class CountPerSecondCumulativeAvg implements DoubleSupplier {
 
     private final AtomicIntPair container = new AtomicIntPair(INT_NO_OP, INT_SUM);
     private final Time time;
     private final ToDoubleBiFunction<Integer, Integer> compute;
 
-    public CountPerSecond(Time time) {
+    public CountPerSecondCumulativeAvg(Time time) {
         this.time = time;
 
         compute = (startTime, count) -> {
@@ -32,18 +32,19 @@ public class CountPerSecond implements DoubleSupplier {
         };
     }
 
-    public static GaugeAdapter.Builder<CountPerSecond> metricBuilder(
-            Time time, MetricKey<GaugeAdapter<CountPerSecond>> key) {
-        return GaugeAdapter.builder(key, () -> new CountPerSecond(time), CountPerSecond::getAndReset)
-                .withReset(CountPerSecond::reset);
+    public static GaugeAdapter.Builder<CountPerSecondCumulativeAvg> metricBuilder(
+            Time time, MetricKey<GaugeAdapter<CountPerSecondCumulativeAvg>> key) {
+        return GaugeAdapter.builder(
+                        key, () -> new CountPerSecondCumulativeAvg(time), CountPerSecondCumulativeAvg::getAndReset)
+                .withReset(CountPerSecondCumulativeAvg::reset);
     }
 
-    public static GaugeAdapter.Builder<CountPerSecond> metricBuilder(MetricKey<GaugeAdapter<CountPerSecond>> key) {
-        return GaugeAdapter.builder(key, CountPerSecond::new, CountPerSecond::getAndReset)
-                .withReset(CountPerSecond::reset);
+    public static GaugeAdapter.Builder<CountPerSecondCumulativeAvg> metricBuilder(
+            MetricKey<GaugeAdapter<CountPerSecondCumulativeAvg>> key) {
+        return metricBuilder(Time.getCurrent(), key);
     }
 
-    public CountPerSecond() {
+    public CountPerSecondCumulativeAvg() {
         this(Time.getCurrent());
     }
 

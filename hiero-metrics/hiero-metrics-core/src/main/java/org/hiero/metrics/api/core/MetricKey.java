@@ -24,7 +24,7 @@ public final class MetricKey<M extends Metric> {
     public static <M extends Metric> MetricKey<M> of(
             @NonNull String category, @NonNull String name, @NonNull Class<? super M> metricClass) {
         ArgumentUtils.throwArgBlank(category, "category");
-        return new MetricKey<>(category + "." + name, (Class<M>) metricClass);
+        return new MetricKey<>(category + ':' + name, (Class<M>) metricClass);
     }
 
     @NonNull

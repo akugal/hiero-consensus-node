@@ -7,6 +7,14 @@ public interface LongGaugeDataPoint extends LongSupplier, DataPoint {
 
     long getInitValue();
 
+    default void increment() {
+        update(1L);
+    }
+
+    default void decrement() {
+        update(-1L);
+    }
+
     void update(long value);
 
     long getAndReset();

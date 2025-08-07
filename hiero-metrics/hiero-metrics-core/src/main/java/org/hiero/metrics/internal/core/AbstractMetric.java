@@ -4,6 +4,7 @@ package org.hiero.metrics.internal.core;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.Metric;
@@ -46,6 +47,31 @@ public abstract class AbstractMetric implements Metric {
         return dynamicLabelNamesSet;
     }
 
+    protected void verifyLabels(Map<String, String> labels) {
+        if (labels.size() != getDynamicLabelNames().size()) {
+            throw new IllegalArgumentException(
+                    "Expected different size of labels. Expected: + " + getDynamicLabelNames() + ", got " + labels);
+        } else if (!labels.keySet().equals(getDynamicLabelNamesSet())) {
+            throw new IllegalArgumentException(
+                    "Expected different label names. Expected: + " + getDynamicLabelNames() + ", got " + labels);
+        }
+    }
+
+    protected List<Label> createDataPointLabels(Map<String, String> labels) {
+        verifyLabels(labels);
+
+        if (constantLabels.isEmpty() && labels.isEmpty()) {
+            return List.of();
+        }
+
+        final List<Label> labelsList = new ArrayList<>(constantLabels.size() + dynamicLabelNames.size());
+        labelsList.addAll(constantLabels);
+        for (String dynamicLabelName : dynamicLabelNames) {
+            labelsList.add(new Label(dynamicLabelName, labels.get(dynamicLabelName)));
+        }
+        return labelsList;
+    }
+
     protected List<Label> createDataPointLabels(List<String> dynamicLabelValues) {
         if (dynamicLabelValues.size() != dynamicLabelNames.size()) {
             throw new IllegalStateException("Expected " + dynamicLabelNames.size() + " label values, but got "
@@ -58,7 +84,7 @@ public abstract class AbstractMetric implements Metric {
             return List.of();
         }
 
-        List<Label> labels = new ArrayList<>(constantLabels.size() + dynamicLabelNames.size());
+        final List<Label> labels = new ArrayList<>(constantLabels.size() + dynamicLabelNames.size());
         labels.addAll(constantLabels);
         for (int i = 0; i < dynamicLabelValues.size(); i++) {
             labels.add(new Label(dynamicLabelNames.get(i), dynamicLabelValues.get(i)));

@@ -2,10 +2,10 @@
 package org.hiero.metrics.api;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.core.Metric;
-import org.hiero.metrics.api.core.MetricCallback;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.internal.DefaultCallbackMetric;
@@ -20,9 +20,11 @@ public interface CallbackMetric extends Metric {
         return MetricKey.of(category, name, CallbackMetric.class);
     }
 
-    static Builder builder(MetricKey<CallbackMetric> key, Consumer<MetricCallback> callback) {
-        return new Builder(key, callback);
+    static Builder builder(MetricKey<CallbackMetric> key) {
+        return new Builder(key);
     }
+
+    CallbackMetric registerDataPoint(DoubleSupplier valueSupplier, Map<String, String> labels);
 
     @Override
     default void reset() {
@@ -31,16 +33,22 @@ public interface CallbackMetric extends Metric {
 
     final class Builder extends Metric.Builder<Builder, CallbackMetric> {
 
-        private final Consumer<MetricCallback> callback;
+        private final Map<Map<String, String>, DoubleSupplier> labeledDataPoints = new HashMap<>();
 
-        private Builder(MetricKey<CallbackMetric> key, Consumer<MetricCallback> callback) {
+        private Builder(MetricKey<CallbackMetric> key) {
             super(key);
-            this.callback = Objects.requireNonNull(callback, "Callback consumer cannot be null");
         }
 
-        @NonNull
-        public Consumer<MetricCallback> getCallback() {
-            return callback;
+        public Builder registerDataPoint(@NonNull DoubleSupplier valueSupplier, Map<String, String> labels) {
+            // labels should be validated in metric during registration
+            if (labeledDataPoints.put(labels, valueSupplier) != null) {
+                throw new IllegalArgumentException("A data point with the same label values already exists: " + labels);
+            }
+            return this;
+        }
+
+        public Map<Map<String, String>, DoubleSupplier> getLabeledDataPoints() {
+            return labeledDataPoints;
         }
 
         @Override

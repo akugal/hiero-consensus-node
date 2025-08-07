@@ -51,7 +51,7 @@ public final class MetricsFacade {
             registry.registerMetrics(provider);
         }
 
-        return new DefaultMetricRegistry(globalLabels);
+        return registry;
     }
 
     public static MetricsExportManager getDefaultExportManager() {
