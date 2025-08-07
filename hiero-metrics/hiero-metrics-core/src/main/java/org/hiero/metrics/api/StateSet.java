@@ -10,6 +10,8 @@ import org.hiero.metrics.internal.DefaultStateSet;
 import org.hiero.metrics.internal.datapoint.EnumStateSetDataPoint;
 import org.hiero.metrics.internal.datapoint.GenerictStateSetDataPoint;
 
+import java.util.function.Supplier;
+
 public interface StateSet<T> extends StatefulMetric<StateSetDataPoint<T>> {
 
     static <T> MetricKey<StateSet<T>> key(String name) {
@@ -25,7 +27,7 @@ public interface StateSet<T> extends StatefulMetric<StateSetDataPoint<T>> {
     }
 
     static <E extends Enum<E>> Builder<E> enumBuilder(MetricKey<StateSet<E>> key, Class<E> enumClass) {
-        return builder(key).withContainerFactory(() -> new EnumStateSetDataPoint<>(enumClass));
+        return new Builder<>(key, () -> new EnumStateSetDataPoint<>(enumClass));
     }
 
     @Override
@@ -37,7 +39,11 @@ public interface StateSet<T> extends StatefulMetric<StateSetDataPoint<T>> {
     final class Builder<T> extends StatefulMetric.Builder<StateSetDataPoint<T>, Builder<T>, StateSet<T>> {
 
         private Builder(@NonNull MetricKey<StateSet<T>> key) {
-            super(key, GenerictStateSetDataPoint::new);
+            this(key, GenerictStateSetDataPoint::new);
+        }
+
+        private Builder(@NonNull MetricKey<StateSet<T>> key, Supplier<StateSetDataPoint<T>> dataPointFactory) {
+            super(key, dataPointFactory);
         }
 
         @Override
