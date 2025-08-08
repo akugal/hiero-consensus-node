@@ -3,12 +3,14 @@ package org.hiero.metrics.internal;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
+import java.util.function.Supplier;
 import org.hiero.metrics.api.GenericGauge;
 import org.hiero.metrics.api.datapoint.GaugeDataPoint;
 import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
-public final class DefaultGenericGauge<T> extends AbstractStatefulMetric<GaugeDataPoint<T>> implements GenericGauge<T> {
+public final class DefaultGenericGauge<T> extends AbstractStatefulMetric<Supplier<T>, GaugeDataPoint<T>>
+        implements GenericGauge<T> {
 
     public DefaultGenericGauge(GenericGauge.Builder<T> builder) {
         super(builder);

@@ -11,7 +11,9 @@ import java.util.function.ToDoubleBiFunction;
 import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.stat.container.AtomicIntPair;
+import org.hiero.metrics.api.utils.Unit;
 
+// has to be reset periodically, otherwise it will overflow!
 public class CountPerSecondCumulativeAvg implements DoubleSupplier {
 
     private final AtomicIntPair container = new AtomicIntPair(INT_NO_OP, INT_SUM);
@@ -21,6 +23,7 @@ public class CountPerSecondCumulativeAvg implements DoubleSupplier {
     public CountPerSecondCumulativeAvg(Time time) {
         this.time = time;
 
+        reset();
         compute = (startTime, count) -> {
             int millisElapsed = currentTimeMillis() - startTime;
             if (millisElapsed == 0) {
@@ -32,15 +35,24 @@ public class CountPerSecondCumulativeAvg implements DoubleSupplier {
         };
     }
 
-    public static GaugeAdapter.Builder<CountPerSecondCumulativeAvg> metricBuilder(
-            Time time, MetricKey<GaugeAdapter<CountPerSecondCumulativeAvg>> key) {
-        return GaugeAdapter.builder(
-                        key, () -> new CountPerSecondCumulativeAvg(time), CountPerSecondCumulativeAvg::getAndReset)
-                .withReset(CountPerSecondCumulativeAvg::reset);
+    public static MetricKey<GaugeAdapter<Object, CountPerSecondCumulativeAvg>> key(String name) {
+        return MetricKey.of(name, GaugeAdapter.class);
     }
 
-    public static GaugeAdapter.Builder<CountPerSecondCumulativeAvg> metricBuilder(
-            MetricKey<GaugeAdapter<CountPerSecondCumulativeAvg>> key) {
+    public static MetricKey<GaugeAdapter<Object, CountPerSecondCumulativeAvg>> key(String category, String name) {
+        return MetricKey.of(category, name, GaugeAdapter.class);
+    }
+
+    public static GaugeAdapter.Builder<Object, CountPerSecondCumulativeAvg> metricBuilder(
+            Time time, MetricKey<GaugeAdapter<Object, CountPerSecondCumulativeAvg>> key) {
+        return GaugeAdapter.builder(
+                        key, () -> new CountPerSecondCumulativeAvg(time), CountPerSecondCumulativeAvg::getAndReset)
+                .withReset(CountPerSecondCumulativeAvg::reset)
+                .withUnit(Unit.COUNT_PER_SEC_UNIT);
+    }
+
+    public static GaugeAdapter.Builder<Object, CountPerSecondCumulativeAvg> metricBuilder(
+            MetricKey<GaugeAdapter<Object, CountPerSecondCumulativeAvg>> key) {
         return metricBuilder(Time.getCurrent(), key);
     }
 
@@ -67,7 +79,7 @@ public class CountPerSecondCumulativeAvg implements DoubleSupplier {
     }
 
     public double getAndReset() {
-        return container.computeDoubleAndReset(compute);
+        return container.computeDoubleAndSet(compute, currentTimeMillis(), 0);
     }
 
     public void reset() {

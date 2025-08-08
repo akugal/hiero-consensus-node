@@ -9,12 +9,12 @@ import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
-public final class DefaultGaugeAdapter<D> extends AbstractStatefulMetric<D> implements GaugeAdapter<D> {
+public final class DefaultGaugeAdapter<I, D> extends AbstractStatefulMetric<I, D> implements GaugeAdapter<I, D> {
 
     private final Function<D, Number> exportGetter;
     private final Consumer<D> reset;
 
-    public DefaultGaugeAdapter(GaugeAdapter.Builder<D> builder) {
+    public DefaultGaugeAdapter(GaugeAdapter.Builder<I, D> builder) {
         super(builder);
 
         exportGetter = builder.getExportGetter();

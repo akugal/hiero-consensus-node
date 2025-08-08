@@ -14,9 +14,4 @@ public interface StateSetDataPoint<T> extends DataPoint {
 
     @NonNull
     Set<T> getStates();
-
-    @Override
-    default void reset() {
-        // there is no use case to reset the entire set, just reset the states
-    }
 }

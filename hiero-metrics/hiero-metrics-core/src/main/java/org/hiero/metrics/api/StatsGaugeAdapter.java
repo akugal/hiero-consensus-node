@@ -2,9 +2,11 @@
 package org.hiero.metrics.api;
 
 import static org.hiero.metrics.api.stat.StatUtils.DEFAULT_STAT_LABEL;
+import static org.hiero.metrics.api.stat.StatUtils.NO_DEFAULT_INITIALIZER;
 
 import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,70 +19,84 @@ import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.internal.DefaultStatsGaugeAdapter;
 
-public interface StatsGaugeAdapter<D> extends StatefulMetric<D> {
+public interface StatsGaugeAdapter<I, D> extends StatefulMetric<I, D> {
 
-    static <D> MetricKey<StatsGaugeAdapter<D>> key(String name) {
+    static <I, D> MetricKey<StatsGaugeAdapter<I, D>> key(String name) {
         return MetricKey.of(name, StatsGaugeAdapter.class);
     }
 
-    static <D> MetricKey<StatsGaugeAdapter<D>> key(String category, String name) {
+    static <I, D> MetricKey<StatsGaugeAdapter<I, D>> key(String category, String name) {
         return MetricKey.of(category, name, StatsGaugeAdapter.class);
     }
 
-    static <D> Builder<D> builder(MetricKey<StatsGaugeAdapter<D>> key, @NonNull Supplier<D> dataPointFactory) {
-        return new Builder<>(key, dataPointFactory);
+    static <I, D> Builder<I, D> builder(
+            MetricKey<StatsGaugeAdapter<I, D>> key,
+            @NonNull I defaultInitializer,
+            @NonNull Function<I, D> dataPointFactory) {
+        return new Builder<>(key, defaultInitializer, dataPointFactory);
     }
 
-    final class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, StatsGaugeAdapter<D>> {
+    static <D> Builder<Object, D> builder(
+            MetricKey<StatsGaugeAdapter<Object, D>> key, @NonNull Supplier<D> dataPointFactory) {
+        return new Builder<>(key, NO_DEFAULT_INITIALIZER, init -> dataPointFactory.get());
+    }
+
+    final class Builder<I, D> extends StatefulMetric.Builder<I, D, Builder<I, D>, StatsGaugeAdapter<I, D>> {
 
         private String statLabel = DEFAULT_STAT_LABEL;
         private final List<String> statNames = new ArrayList<>();
         private final List<Function<D, Number>> statExportGetters = new ArrayList<>();
         private Consumer<D> reset;
 
-        private Builder(MetricKey<StatsGaugeAdapter<D>> key, @NonNull Supplier<D> dataPointFactory) {
-            super(key, dataPointFactory);
+        private Builder(
+                MetricKey<StatsGaugeAdapter<I, D>> key,
+                @NonNull I defaultInitializer,
+                @NonNull Function<I, D> dataPointFactory) {
+            super(MetricType.GAUGE, key, defaultInitializer, dataPointFactory);
         }
 
-        @Override
-        public MetricType getType() {
-            return MetricType.GAUGE;
-        }
-
+        @NonNull
         public String getStatLabel() {
             return statLabel;
         }
 
+        @NonNull
         public List<String> getStatNames() {
             return statNames;
         }
 
+        @NonNull
         public List<Function<D, Number>> getStatExportGetters() {
             return statExportGetters;
         }
 
+        @Nullable
         public Consumer<D> getReset() {
             return reset;
         }
 
-        public Builder<D> withReset(Consumer<D> reset) {
+        @NonNull
+        public Builder<I, D> withReset(Consumer<D> reset) {
             this.reset = Objects.requireNonNull(reset, "Container stats reset must not be null");
             return this;
         }
 
-        public Builder<D> withStatLabel(String statLabel) {
+        @NonNull
+        public Builder<I, D> withStatLabel(String statLabel) {
             this.statLabel = ArgumentUtils.throwArgBlank(statLabel, "stat label");
             return this;
         }
 
-        public Builder<D> withStat(String statName, Function<D, Number> exportGetter) {
+        @NonNull
+        public Builder<I, D> withStat(String statName, Function<D, Number> exportGetter) {
             statNames.add(ArgumentUtils.throwArgBlank(statName, "stat name"));
             statExportGetters.add(Objects.requireNonNull(exportGetter, "Export getter must not be null"));
             return this;
         }
 
+        @NonNull
         @Override
-        protected StatsGaugeAdapter<D> buildMetric() {
+        protected StatsGaugeAdapter<I, D> buildMetric() {
             if (statExportGetters.isEmpty()) {
                 throw new IllegalStateException("At least one stat must be defined");
             }
@@ -100,8 +116,9 @@ public interface StatsGaugeAdapter<D> extends StatefulMetric<D> {
             return new DefaultStatsGaugeAdapter<>(this);
         }
 
+        @NonNull
         @Override
-        protected Builder<D> self() {
+        protected Builder<I, D> self() {
             return this;
         }
     }

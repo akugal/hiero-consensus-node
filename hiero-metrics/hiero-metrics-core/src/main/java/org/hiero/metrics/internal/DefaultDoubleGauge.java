@@ -3,13 +3,15 @@ package org.hiero.metrics.internal;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
+import java.util.function.DoubleSupplier;
 import java.util.function.ToDoubleFunction;
 import org.hiero.metrics.api.DoubleGauge;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
-public final class DefaultDoubleGauge extends AbstractStatefulMetric<DoubleGaugeDataPoint> implements DoubleGauge {
+public final class DefaultDoubleGauge extends AbstractStatefulMetric<DoubleSupplier, DoubleGaugeDataPoint>
+        implements DoubleGauge {
 
     private final ToDoubleFunction<DoubleGaugeDataPoint> exportValueSupplier;
 

@@ -2,15 +2,17 @@
 package org.hiero.metrics.api;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.function.LongSupplier;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.LongCounterDataPoint;
+import org.hiero.metrics.api.stat.StatUtils;
 import org.hiero.metrics.internal.DefaultLongCounter;
 import org.hiero.metrics.internal.datapoint.AtomicLongCounterDataPoint;
 import org.hiero.metrics.internal.datapoint.LongAdderCounterDataPoint;
 
-public interface LongCounter extends StatefulMetric<LongCounterDataPoint> {
+public interface LongCounter extends StatefulMetric<LongSupplier, LongCounterDataPoint> {
 
     static MetricKey<LongCounter> key(String name) {
         return MetricKey.of(name, LongCounter.class);
@@ -24,10 +26,15 @@ public interface LongCounter extends StatefulMetric<LongCounterDataPoint> {
         return new Builder(key);
     }
 
-    final class Builder extends StatefulMetric.Builder<LongCounterDataPoint, Builder, LongCounter> {
+    final class Builder extends StatefulMetric.Builder<LongSupplier, LongCounterDataPoint, Builder, LongCounter> {
 
         private Builder(MetricKey<LongCounter> key) {
-            super(key, LongAdderCounterDataPoint::new);
+            super(MetricType.COUNTER, key, StatUtils.LONG_INIT, LongAdderCounterDataPoint::new);
+        }
+
+        @NonNull
+        public Builder withInitValue(long initValue) {
+            return withDefaultInitializer(StatUtils.asInitializer(initValue));
         }
 
         @NonNull
@@ -36,16 +43,13 @@ public interface LongCounter extends StatefulMetric<LongCounterDataPoint> {
             return this;
         }
 
-        @Override
-        public MetricType getType() {
-            return MetricType.COUNTER;
-        }
-
+        @NonNull
         @Override
         public LongCounter buildMetric() {
             return new DefaultLongCounter(this);
         }
 
+        @NonNull
         @Override
         protected Builder self() {
             return this;

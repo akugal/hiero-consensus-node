@@ -11,9 +11,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.demo.crawler.api.exception.JobException;
+import org.hiero.metrics.demo.crawler.api.exception.JobTimeoutException;
 import org.hiero.metrics.demo.crawler.api.job.JobConcurrencyMetrics;
 
-public class JobConcurrencyContext {
+final class JobConcurrencyContext {
 
     private static final Logger logger = LogManager.getLogger(JobConcurrencyContext.class);
 
@@ -105,7 +106,7 @@ public class JobConcurrencyContext {
     }
 
     public synchronized void waitForTasksToComplete(Duration timeout) throws JobException {
-        while (remainingTasks() > 0) {
+        while (!isCancelled() && remainingTasks() > 0) {
             if (Thread.currentThread().isInterrupted()) {
                 cancel();
                 return;
@@ -116,7 +117,7 @@ public class JobConcurrencyContext {
 
             if (remainingTime <= 0) {
                 cancel();
-                throw new JobException("Job timed out after " + timeout + ". Active tasks: " + activeTasks.get()
+                throw new JobTimeoutException("Job timed out after " + timeout + ". Active tasks: " + activeTasks.get()
                         + ". Submitted tasks: " + submittedTasks.get());
             }
 

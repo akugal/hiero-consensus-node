@@ -2,6 +2,7 @@
 package org.hiero.metrics.api.stat;
 
 import com.swirlds.base.time.Time;
+import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
@@ -34,14 +35,26 @@ public class RunningAverageStat implements DoubleGaugeDataPoint {
         reset();
     }
 
-    public static GaugeAdapter.Builder<RunningAverageStat> metricBuilder(
-            double halfLife, Time time, MetricKey<GaugeAdapter<RunningAverageStat>> key) {
-        return GaugeAdapter.builder(key, () -> new RunningAverageStat(halfLife, time), RunningAverageStat::getAsDouble)
+    public static MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> key(String name) {
+        return MetricKey.of(name, GaugeAdapter.class);
+    }
+
+    public static MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> key(String category, String name) {
+        return MetricKey.of(category, name, GaugeAdapter.class);
+    }
+
+    public static GaugeAdapter.Builder<DoubleSupplier, RunningAverageStat> metricBuilder(
+            double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> key) {
+        return GaugeAdapter.builder(
+                        key,
+                        StatUtils.asInitializer(halfLife),
+                        init -> new RunningAverageStat(init.getAsDouble(), time),
+                        RunningAverageStat::getAsDouble)
                 .withReset(RunningAverageStat::reset);
     }
 
-    public static GaugeAdapter.Builder<RunningAverageStat> metricBuilder(
-            double halfLife, MetricKey<GaugeAdapter<RunningAverageStat>> key) {
+    public static GaugeAdapter.Builder<DoubleSupplier, RunningAverageStat> metricBuilder(
+            double halfLife, MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> key) {
         return metricBuilder(halfLife, Time.getCurrent(), key);
     }
 

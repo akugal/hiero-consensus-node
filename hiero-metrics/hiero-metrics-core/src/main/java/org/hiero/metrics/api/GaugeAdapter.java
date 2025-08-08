@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import static org.hiero.metrics.api.stat.StatUtils.NO_DEFAULT_INITIALIZER;
+
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
@@ -12,36 +14,46 @@ import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.internal.DefaultGaugeAdapter;
 
-public interface GaugeAdapter<D> extends StatefulMetric<D> {
+public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
 
-    static <D> MetricKey<GaugeAdapter<D>> key(String name) {
+    static <I, D> MetricKey<GaugeAdapter<I, D>> key(String name) {
         return MetricKey.of(name, GaugeAdapter.class);
     }
 
-    static <D> MetricKey<GaugeAdapter<D>> key(String category, String name) {
+    static <I, D> MetricKey<GaugeAdapter<I, D>> key(String category, String name) {
         return MetricKey.of(category, name, GaugeAdapter.class);
     }
 
-    static <D> Builder<D> builder(
-            MetricKey<GaugeAdapter<D>> key,
-            @NonNull Supplier<D> dataPointFactory,
+    static <I, D> Builder<I, D> builder(
+            MetricKey<GaugeAdapter<I, D>> key,
+            @NonNull I defaultInitializer,
+            @NonNull Function<I, D> dataPointFactory,
             @NonNull Function<D, Number> exportGetter) {
-        return new Builder<>(key, dataPointFactory, exportGetter);
+        return new Builder<>(key, defaultInitializer, dataPointFactory, exportGetter);
     }
 
-    final class Builder<D> extends StatefulMetric.Builder<D, Builder<D>, GaugeAdapter<D>> {
+    static <D> Builder<Object, D> builder(
+            MetricKey<GaugeAdapter<Object, D>> key,
+            @NonNull Supplier<D> dataPointFactory,
+            @NonNull Function<D, Number> exportGetter) {
+        return new Builder<>(key, NO_DEFAULT_INITIALIZER, init -> dataPointFactory.get(), exportGetter);
+    }
+
+    final class Builder<I, D> extends StatefulMetric.Builder<I, D, Builder<I, D>, GaugeAdapter<I, D>> {
 
         private final Function<D, Number> exportGetter;
         private Consumer<D> reset;
 
         private Builder(
-                MetricKey<GaugeAdapter<D>> key,
-                @NonNull Supplier<D> dataPointFactory,
+                @NonNull MetricKey<GaugeAdapter<I, D>> key,
+                @NonNull I defaultInitializer,
+                @NonNull Function<I, D> dataPointFactory,
                 @NonNull Function<D, Number> exportGetter) {
-            super(key, dataPointFactory);
+            super(MetricType.GAUGE, key, defaultInitializer, dataPointFactory);
             this.exportGetter = Objects.requireNonNull(exportGetter, "Export getter must not be null");
         }
 
+        @NonNull
         public Function<D, Number> getExportGetter() {
             return exportGetter;
         }
@@ -51,23 +63,21 @@ public interface GaugeAdapter<D> extends StatefulMetric<D> {
             return reset;
         }
 
-        @Override
-        public MetricType getType() {
-            return MetricType.GAUGE;
-        }
-
-        public Builder<D> withReset(Consumer<D> reset) {
+        @NonNull
+        public Builder<I, D> withReset(Consumer<D> reset) {
             this.reset = Objects.requireNonNull(reset, "Value reset must not be null");
             return this;
         }
 
+        @NonNull
         @Override
-        protected GaugeAdapter<D> buildMetric() {
+        protected GaugeAdapter<I, D> buildMetric() {
             return new DefaultGaugeAdapter<>(this);
         }
 
+        @NonNull
         @Override
-        protected Builder<D> self() {
+        protected Builder<I, D> self() {
             return this;
         }
     }

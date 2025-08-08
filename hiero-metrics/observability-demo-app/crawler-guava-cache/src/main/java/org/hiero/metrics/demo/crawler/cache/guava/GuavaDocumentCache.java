@@ -13,6 +13,8 @@ import org.hiero.metrics.api.LongGauge;
 import org.hiero.metrics.api.core.IdempotentMetricRegistryAware;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
+import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
+import org.hiero.metrics.api.stat.RunningAverageStat;
 import org.hiero.metrics.api.utils.Unit;
 import org.hiero.metrics.demo.crawler.api.document.Document;
 import org.hiero.metrics.demo.crawler.api.document.DocumentFetcher;
@@ -25,7 +27,10 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
     private final String name;
     private final Cache<URI, Optional<Document>> cache;
 
-    private LongGaugeDataPoint cacheSizeSpikeMax;
+    private LongGaugeDataPoint cacheSizeMaxSpike;
+    private LongGaugeDataPoint cacheSizeMinSpike;
+    private CumulativeAverageIntStat cacheSizeAvgCumulative;
+    private RunningAverageStat cacheSizeAvgRunning;
 
     public GuavaDocumentCache(CacheConfig cacheConfig) {
         this("document", cacheConfig);
@@ -45,9 +50,22 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
     protected void registerMetricsNonIdempotent(@NonNull MetricRegistry metricRegistry) {
         final String cacheCategory = "cache_guava_" + name;
 
-        cacheSizeSpikeMax = metricRegistry
-                .register(LongGauge.maxBuilder(LongGauge.key(cacheCategory, "size_spike_max"), true)
-                        .withDescription("Documents cache size - spike max"))
+        cacheSizeMaxSpike = metricRegistry
+                .register(LongGauge.maxBuilder(LongGauge.key(cacheCategory, "size_max_spike"), true)
+                        .withDescription("Documents cache size - max spike"))
+                .getNotLabeled();
+        cacheSizeMinSpike = metricRegistry
+                .register(LongGauge.minBuilder(LongGauge.key(cacheCategory, "size_min_spike"), true)
+                        .withDescription("Documents cache size - min spike"))
+                .getNotLabeled();
+        // next stats are just to compare average behavior
+        cacheSizeAvgCumulative = metricRegistry
+                .register(CumulativeAverageIntStat.metricBuilder(CumulativeAverageIntStat.key(cacheCategory, "size_avg"))
+                        .withDescription("Documents cache size - avg cumulative"))
+                .getNotLabeled();
+        cacheSizeAvgRunning = metricRegistry
+                .register(RunningAverageStat.metricBuilder(5, RunningAverageStat.key(cacheCategory, "size_avg_running"))
+                        .withDescription("Documents cache size - avg running (half-life 5 sec)"))
                 .getNotLabeled();
 
         metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "size"))
@@ -57,30 +75,34 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
         metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "lookups_count"))
                 .withDynamicLabelNames("type")
                 .withDescription("Document cache lookups count (miss or hit)")
-                .registerDataPoint(cache.stats()::hitCount, Map.of("type", "hit"))
-                .registerDataPoint(cache.stats()::missCount, Map.of("type", "miss")));
+                .registerDataPoint(() -> cache.stats().hitCount(), Map.of("type", "hit"))
+                .registerDataPoint(() -> cache.stats().missCount(), Map.of("type", "miss")));
 
         metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "loads_count"))
                 .withDynamicLabelNames("type")
                 .withDescription("Document cache loads count (success or exception)")
-                .registerDataPoint(cache.stats()::loadSuccessCount, Map.of("type", "success"))
-                .registerDataPoint(cache.stats()::loadExceptionCount, Map.of("type", "exception")));
+                .registerDataPoint(() -> cache.stats().loadSuccessCount(), Map.of("type", "success"))
+                .registerDataPoint(() -> cache.stats().loadExceptionCount(), Map.of("type", "exception")));
 
         metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "eviction_count"))
                 .withDescription("Document cache eviction count")
-                .registerDataPoint(cache.stats()::evictionCount, Map.of()));
+                .registerDataPoint(() -> cache.stats().evictionCount(), Map.of()));
 
         metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "avg_load_time"))
                 .withUnit(Unit.NANOSECOND_UNIT)
                 .withDescription("Document cache average load time in nanoseconds (successful and failed loads)")
-                .registerDataPoint(cache.stats()::averageLoadPenalty, Map.of()));
+                .registerDataPoint(() -> cache.stats().averageLoadPenalty(), Map.of()));
     }
 
     @Override
     @NonNull
     public Optional<Document> fetchIfAbsent(URI uri, DocumentFetcher fetcher) throws DocumentFetchException {
-        if (cacheSizeSpikeMax != null) {
-            cacheSizeSpikeMax.update(cache.size());
+        if (isMetricsRegistered()) {
+            long size = cache.size();
+            cacheSizeMinSpike.update(size);
+            cacheSizeMaxSpike.update(size);
+            cacheSizeAvgCumulative.update((int) size); // we assume no config will have more than Integer.MAX_VALUE entries
+            cacheSizeAvgRunning.update(size);
         }
 
         try {

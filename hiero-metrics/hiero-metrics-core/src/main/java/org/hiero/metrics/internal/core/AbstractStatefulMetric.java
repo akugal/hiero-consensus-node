@@ -8,27 +8,29 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.export.DataPointSnapshot;
 
-public abstract class AbstractStatefulMetric<D> extends AbstractMetric
-        implements StatefulMetric<D>, SnapshotableMetric {
+public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric
+        implements StatefulMetric<I, D>, SnapshotableMetric {
 
-    private final Supplier<D> dataPointFactory;
+    private final I defaultInitializer;
+    private final Function<I, D> dataPointFactory;
 
     @Nullable
     private final D noLabelsDataPoint;
 
     private final Map<List<String>, D> labeledDataPoints;
 
-    protected AbstractStatefulMetric(StatefulMetric.Builder<D, ?, ?> builder) {
+    protected AbstractStatefulMetric(StatefulMetric.Builder<I, D, ?, ?> builder) {
         super(builder);
 
         dataPointFactory = builder.getDataPointFactory();
+        defaultInitializer = builder.getDefaultInitializer();
 
         if (getDynamicLabelNames().isEmpty()) {
-            noLabelsDataPoint = dataPointFactory.get();
+            noLabelsDataPoint = dataPointFactory.apply(defaultInitializer);
             labeledDataPoints = Map.of();
         } else {
             noLabelsDataPoint = null;
@@ -59,6 +61,11 @@ public abstract class AbstractStatefulMetric<D> extends AbstractMetric
     @NonNull
     @Override
     public D getOrCreateLabeled(Map<String, String> labels) {
+        return getOrCreateLabeled(labels, defaultInitializer);
+    }
+
+    @Override
+    public D getOrCreateLabeled(Map<String, String> labels, I initializer) {
         if (noLabelsDataPoint != null) {
             if (!labels.isEmpty()) {
                 throw new IllegalArgumentException(getClass().getSimpleName()
@@ -76,7 +83,7 @@ public abstract class AbstractStatefulMetric<D> extends AbstractMetric
             labelValues.add(labels.get(labelName));
         }
 
-        return labeledDataPoints.computeIfAbsent(labelValues, l -> dataPointFactory.get());
+        return labeledDataPoints.computeIfAbsent(labelValues, l -> dataPointFactory.apply(initializer));
     }
 
     @NonNull
@@ -96,7 +103,8 @@ public abstract class AbstractStatefulMetric<D> extends AbstractMetric
 
         checkNoNullLabels(labelValues);
 
-        return labeledDataPoints.computeIfAbsent(Arrays.asList(labelValues), labels -> dataPointFactory.get());
+        return labeledDataPoints.computeIfAbsent(
+                Arrays.asList(labelValues), labels -> dataPointFactory.apply(defaultInitializer));
     }
 
     @NonNull
