@@ -6,12 +6,14 @@ import static org.hiero.metrics.api.stat.StatUtils.ZERO;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import org.hiero.metrics.api.BooleanGauge;
 import org.hiero.metrics.api.datapoint.BooleanGaugeDataPoint;
 import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
-public final class DefaultBooleanGauge extends AbstractStatefulMetric<BooleanGaugeDataPoint> implements BooleanGauge {
+public final class DefaultBooleanGauge extends AbstractStatefulMetric<BooleanSupplier, BooleanGaugeDataPoint>
+        implements BooleanGauge {
 
     public DefaultBooleanGauge(BooleanGauge.Builder builder) {
         super(builder);

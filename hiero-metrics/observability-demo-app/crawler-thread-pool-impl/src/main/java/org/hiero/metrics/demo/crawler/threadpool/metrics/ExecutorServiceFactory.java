@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.demo.crawler.threadpool;
+package org.hiero.metrics.demo.crawler.threadpool.metrics;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.hiero.metrics.demo.crawler.threadpool.config.ThreadPoolConfig;
-import org.hiero.metrics.demo.crawler.threadpool.metrics.MeasurableThreadPoolExecutor;
 
 public final class ExecutorServiceFactory {
 

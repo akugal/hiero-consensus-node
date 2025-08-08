@@ -2,16 +2,24 @@
 package org.hiero.metrics.internal.datapoint;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import org.hiero.metrics.api.datapoint.GaugeDataPoint;
 
 public final class AtomicReferenceGaugeDataPoint<T> implements GaugeDataPoint<T> {
 
+    private final Supplier<T> initializer;
     private final ToDoubleFunction<T> valueConverter;
     private final AtomicReference<T> container = new AtomicReference<>();
 
     public AtomicReferenceGaugeDataPoint(ToDoubleFunction<T> valueConverter) {
+        this(() -> null, valueConverter);
+    }
+
+    public AtomicReferenceGaugeDataPoint(Supplier<T> initializer, ToDoubleFunction<T> valueConverter) {
+        this.initializer = initializer;
         this.valueConverter = valueConverter;
+        container.set(this.initializer.get());
     }
 
     @Override
@@ -30,6 +38,6 @@ public final class AtomicReferenceGaugeDataPoint<T> implements GaugeDataPoint<T>
 
     @Override
     public void reset() {
-        container.set(null);
+        container.set(initializer.get());
     }
 }

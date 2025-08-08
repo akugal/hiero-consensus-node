@@ -19,7 +19,7 @@ public record JobProcessingMetrics(
         return distinctUriCount - fetchErrorsCount - fetchSuccessCount;
     }
 
-    public int parallelImprovementRatio() {
+    public int concurrencyImprovementRatio() {
         if (jobDuration.isPositive()) {
             return (int) fetchSuccessTotalDuration
                     .plus(fetchErrorTotalDuration)

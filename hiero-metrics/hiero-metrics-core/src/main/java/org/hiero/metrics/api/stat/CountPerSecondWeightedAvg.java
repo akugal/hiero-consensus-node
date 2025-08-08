@@ -2,9 +2,11 @@
 package org.hiero.metrics.api.stat;
 
 import com.swirlds.base.time.Time;
+import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
+import org.hiero.metrics.api.utils.Unit;
 
 public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
 
@@ -25,7 +27,7 @@ public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
     /**
      * estimated average calls/sec to cycle()
      */
-    private volatile double cyclesPerSecond = 0;
+    private volatile double countPerSecond = 0;
 
     /**
      * half the weight = this many sec
@@ -42,23 +44,28 @@ public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
         reset();
     }
 
-    public static GaugeAdapter.Builder<CountPerSecondWeightedAvg> metricBuilder(
-            double halfLife, Time time, MetricKey<GaugeAdapter<CountPerSecondWeightedAvg>> key) {
+    public static MetricKey<GaugeAdapter<DoubleSupplier, CountPerSecondWeightedAvg>> key(String name) {
+        return MetricKey.of(name, GaugeAdapter.class);
+    }
+
+    public static MetricKey<GaugeAdapter<DoubleSupplier, CountPerSecondWeightedAvg>> key(String category, String name) {
+        return MetricKey.of(category, name, GaugeAdapter.class);
+    }
+
+    public static GaugeAdapter.Builder<DoubleSupplier, CountPerSecondWeightedAvg> metricBuilder(
+            double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, CountPerSecondWeightedAvg>> key) {
         return GaugeAdapter.builder(
                         key,
-                        () -> new CountPerSecondWeightedAvg(halfLife, time),
+                        StatUtils.asInitializer(halfLife),
+                        init -> new CountPerSecondWeightedAvg(init.getAsDouble(), time),
                         CountPerSecondWeightedAvg::getAsDouble)
-                .withReset(CountPerSecondWeightedAvg::reset);
+                .withReset(CountPerSecondWeightedAvg::reset)
+                .withUnit(Unit.COUNT_PER_SEC_UNIT);
     }
 
-    public static GaugeAdapter.Builder<CountPerSecondWeightedAvg> metricBuilder(
-            double halfLife, MetricKey<GaugeAdapter<CountPerSecondWeightedAvg>> key) {
+    public static GaugeAdapter.Builder<DoubleSupplier, CountPerSecondWeightedAvg> metricBuilder(
+            double halfLife, MetricKey<GaugeAdapter<DoubleSupplier, CountPerSecondWeightedAvg>> key) {
         return metricBuilder(halfLife, Time.getCurrent(), key);
-    }
-
-    public static GaugeAdapter.Builder<CountPerSecondWeightedAvg> metricBuilder(
-            MetricKey<GaugeAdapter<CountPerSecondWeightedAvg>> key) {
-        return metricBuilder(7, key);
     }
 
     @Override
@@ -79,9 +86,9 @@ public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
         final double dt = (currentTime - lastTime) / 1.0e9; // seconds: last update to now
         if (t2 >= 1e-9) { // skip cases were no time has passed since last call
             if (1.0 / t2 > LN_2 / halfLife) { // during startup period, so do uniformly-weighted average
-                cyclesPerSecond = (cyclesPerSecond * t1 + count) / t2;
+                countPerSecond = (countPerSecond * t1 + count) / t2;
             } else { // after startup, so do exponentially-weighted average with given half life
-                cyclesPerSecond = cyclesPerSecond * Math.pow(0.5, dt / halfLife) + count * LN_2 / halfLife;
+                countPerSecond = countPerSecond * Math.pow(0.5, dt / halfLife) + count * LN_2 / halfLife;
             }
         }
         lastTime = currentTime;
@@ -89,12 +96,12 @@ public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
 
     @Override
     public double getAsDouble() {
-        return cyclesPerSecond;
+        return countPerSecond;
     }
 
     @Override
     public double getAndReset() {
-        final double result = cyclesPerSecond;
+        final double result = countPerSecond;
         reset();
         return result;
     }
@@ -108,6 +115,6 @@ public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
     public synchronized void reset() {
         startTime = time.nanoTime(); // find average since this time
         lastTime = startTime; // the last time update() was called
-        cyclesPerSecond = 0; // estimated average calls to cycle() per second
+        countPerSecond = 0; // estimated average calls to cycle() per second
     }
 }

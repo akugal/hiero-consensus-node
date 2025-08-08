@@ -36,7 +36,7 @@ public interface CallbackMetric extends Metric {
         private final Map<Map<String, String>, DoubleSupplier> labeledDataPoints = new HashMap<>();
 
         private Builder(MetricKey<CallbackMetric> key) {
-            super(key);
+            super(MetricType.GAUGE, key);
         }
 
         public Builder registerDataPoint(@NonNull DoubleSupplier valueSupplier, Map<String, String> labels) {
@@ -51,16 +51,13 @@ public interface CallbackMetric extends Metric {
             return labeledDataPoints;
         }
 
-        @Override
-        public MetricType getType() {
-            return MetricType.GAUGE;
-        }
-
+        @NonNull
         @Override
         protected CallbackMetric buildMetric() {
             return new DefaultCallbackMetric(this);
         }
 
+        @NonNull
         @Override
         protected Builder self() {
             return this;

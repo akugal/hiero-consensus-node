@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.demo.crawler.threadpool;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.hiero.metrics.demo.crawler.api.exception.JobException;
 import org.hiero.metrics.demo.crawler.api.job.JobResult;
 import org.hiero.metrics.demo.crawler.api.job.ScheduledJob;
 
-public final class FutureScheduledJob implements ScheduledJob {
+final class FutureScheduledJob implements ScheduledJob {
 
     private final int jobId;
     private final Future<JobResult> future;
@@ -34,11 +35,18 @@ public final class FutureScheduledJob implements ScheduledJob {
     }
 
     @Override
-    public JobResult getResult() {
+    public JobResult getResult() throws JobException {
         try {
             return future.get();
-        } catch (Exception e) {
-            throw new JobException("Failed to get job result for job ID: " + jobId, e);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof JobException) {
+                throw (JobException) e.getCause();
+            } else {
+                throw new JobException("Job failed", e);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new JobException("Job interrupted", e);
         }
     }
 

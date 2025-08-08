@@ -4,9 +4,9 @@ package org.hiero.metrics.api.core;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
-public interface StatefulMetric<D> extends Metric {
+public interface StatefulMetric<I, D> extends Metric {
 
     @NonNull
     D getNotLabeled();
@@ -14,24 +14,46 @@ public interface StatefulMetric<D> extends Metric {
     @NonNull
     D getOrCreateLabeled(Map<String, String> labels);
 
+    D getOrCreateLabeled(Map<String, String> labels, I initializer);
+
     @NonNull
     D getOrCreateLabeled(String... labelValues);
 
-    abstract class Builder<D, B extends Builder<D, B, M>, M extends StatefulMetric<D>> extends Metric.Builder<B, M> {
+    abstract class Builder<I, D, B extends Builder<I, D, B, M>, M extends StatefulMetric<I, D>>
+            extends Metric.Builder<B, M> {
 
-        private Supplier<D> dataPointFactory;
+        private I defaultInitializer;
+        private Function<I, D> dataPointFactory;
 
-        protected Builder(@NonNull MetricKey<M> key, @NonNull Supplier<D> dataPointFactory) {
-            super(key);
+        protected Builder(
+                @NonNull MetricType type,
+                @NonNull MetricKey<M> key,
+                @NonNull I defaultInitializer,
+                @NonNull Function<I, D> dataPointFactory) {
+            super(type, key);
+            withDefaultInitializer(defaultInitializer);
             withContainerFactory(dataPointFactory);
         }
 
         @NonNull
-        public Supplier<D> getDataPointFactory() {
+        public Function<I, D> getDataPointFactory() {
             return dataPointFactory;
         }
 
-        protected B withContainerFactory(Supplier<D> dataPointFactory) {
+        @NonNull
+        public I getDefaultInitializer() {
+            return defaultInitializer;
+        }
+
+        @NonNull
+        public final B withDefaultInitializer(@NonNull I defaultInitializer) {
+            this.defaultInitializer =
+                    Objects.requireNonNull(defaultInitializer, "Default initializer must not be null");
+            return self();
+        }
+
+        @NonNull
+        protected B withContainerFactory(Function<I, D> dataPointFactory) {
             this.dataPointFactory = Objects.requireNonNull(dataPointFactory, "Data point factory must not be null");
             return self();
         }

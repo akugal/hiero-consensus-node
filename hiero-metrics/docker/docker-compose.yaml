@@ -35,6 +35,33 @@ services:
       - ./grafana/dashboards:/etc/grafana/dashboards
     ports:
       - "3001:3001"
+    depends_on:
+      - prometheus
+    networks:
+      - observe-network
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki/:/etc/loki/
+    networks:
+      - observe-network
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./promtail/promtail.yaml:/etc/promtail/config.yaml:ro  # Read-only mount for config
+      # Modify this path to match your Java app's log location on the host
+      - ../observability-demo-app/crawler-cli/out/logs:/shared/logs/crawler-cli:ro
+    command:
+      - "-config.file=/etc/promtail/config.yaml"
+    depends_on:
+      - loki
+    ports:
+      - "9080:9080"
     networks:
       - observe-network
 

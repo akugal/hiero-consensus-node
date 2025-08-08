@@ -3,6 +3,7 @@ package org.hiero.metrics.api;
 
 import static org.hiero.metrics.api.stat.StatUtils.DOUBLE_INIT;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
@@ -15,7 +16,7 @@ import org.hiero.metrics.internal.DefaultDoubleGauge;
 import org.hiero.metrics.internal.datapoint.AtomicDoubleGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
 
-public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> {
+public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeDataPoint> {
 
     static MetricKey<DoubleGauge> key(String name) {
         return MetricKey.of(name, DoubleGauge.class);
@@ -41,33 +42,22 @@ public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> {
         return builder(key).withOperator(StatUtils.DOUBLE_MIN, resetOnSnapshot).withInitValue(Double.MAX_VALUE);
     }
 
-    final class Builder extends StatefulMetric.Builder<DoubleGaugeDataPoint, Builder, DoubleGauge> {
+    final class Builder extends StatefulMetric.Builder<DoubleSupplier, DoubleGaugeDataPoint, Builder, DoubleGauge> {
 
-        private DoubleSupplier initializer = DOUBLE_INIT;
         private DoubleBinaryOperator operator;
         private boolean resetOnExport = false;
 
         private Builder(MetricKey<DoubleGauge> key) {
-            super(key, () -> new AtomicDoubleGaugeDataPoint(DOUBLE_INIT));
-        }
-
-        @Override
-        public MetricType getType() {
-            return MetricType.GAUGE;
+            super(MetricType.GAUGE, key, DOUBLE_INIT, AtomicDoubleGaugeDataPoint::new);
         }
 
         public boolean isResetOnExport() {
             return resetOnExport;
         }
 
-        public Builder withInitializer(DoubleSupplier initializer) {
-            this.initializer = Objects.requireNonNull(initializer, "Initializer must not be null");
-            return this;
-        }
-
+        @NonNull
         public Builder withInitValue(double initValue) {
-            this.initializer = StatUtils.asInitializer(initValue);
-            return this;
+            return withDefaultInitializer(StatUtils.asInitializer(initValue));
         }
 
         public Builder withOperator(DoubleBinaryOperator operator) {
@@ -81,17 +71,19 @@ public interface DoubleGauge extends StatefulMetric<DoubleGaugeDataPoint> {
             return this;
         }
 
+        @NonNull
         @Override
         public DoubleGauge buildMetric() {
             if (operator != null) {
-                withContainerFactory(() -> new DoubleAccumulatorGaugeDataPoint(operator, initializer));
+                withContainerFactory(init -> new DoubleAccumulatorGaugeDataPoint(operator, init));
             } else {
-                withContainerFactory(() -> new AtomicDoubleGaugeDataPoint(initializer));
+                withContainerFactory(AtomicDoubleGaugeDataPoint::new);
             }
 
             return new DefaultDoubleGauge(this);
         }
 
+        @NonNull
         @Override
         protected Builder self() {
             return this;

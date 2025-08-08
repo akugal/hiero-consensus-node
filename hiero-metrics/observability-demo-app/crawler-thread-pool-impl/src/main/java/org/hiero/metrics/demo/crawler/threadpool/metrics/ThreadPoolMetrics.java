@@ -3,109 +3,133 @@ package org.hiero.metrics.demo.crawler.threadpool.metrics;
 
 import static org.hiero.metrics.demo.crawler.threadpool.metrics.ThreadPoolMetricsRegistration.POOL_LABEL;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Map;
-import org.hiero.metrics.api.core.IdempotentMetricRegistryAware;
 import org.hiero.metrics.api.core.MetricRegistry;
+import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
+import org.hiero.metrics.api.datapoint.LongCounterDataPoint;
 import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
-import org.hiero.metrics.api.stat.RunningAverageStat;
-import org.hiero.metrics.demo.crawler.threadpool.config.ThreadPoolConfig;
+import org.hiero.metrics.api.stat.CountPerSecondCumulativeAvg;
+import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
 
-class ThreadPoolMetrics extends IdempotentMetricRegistryAware {
+class ThreadPoolMetrics {
 
     private final MeasurableThreadPoolExecutor executor;
 
-    private LongGaugeDataPoint queueSizeMaxSpike;
-    private LongGaugeDataPoint queueSizeMinSpike;
-    private LongGaugeDataPoint poolSizeMaxSpike;
-    private LongGaugeDataPoint poolSizeMinSpike;
-    private LongGaugeDataPoint taskWaitTimeMaxSpike;
-    private LongGaugeDataPoint taskWaitTimeMinSpike;
-    private LongGaugeDataPoint taskRunTimeMaxSpike;
-    private LongGaugeDataPoint taskRunTimeMinSpike;
-    private RunningAverageStat taskRunTimeRunningAverage;
+    private final LongGaugeDataPoint queueSizeMaxSpike;
+    private final LongGaugeDataPoint queueSizeMinSpike;
+    private final CumulativeAverageIntStat queueSizeAvg;
+    private final DoubleGaugeDataPoint queueSizeAvgRunning;
 
-    public ThreadPoolMetrics(MeasurableThreadPoolExecutor executor) {
+    private final LongCounterDataPoint tasksCountTotal;
+    private final LongGaugeDataPoint tasksActiveCount;
+    private final LongCounterDataPoint tasksCompletedCountTotal;
+    private final LongGaugeDataPoint taskWaitTimeMaxSpike;
+    private final LongGaugeDataPoint taskWaitTimeMinSpike;
+    private final LongGaugeDataPoint taskDurationMaxSpike;
+    private final LongGaugeDataPoint taskDurationMinSpike;
+    private final DoubleGaugeDataPoint taskDurationRunningAvg;
+    private final DoubleGaugeDataPoint tasksPerSecondMovingAvg;
+    private final CountPerSecondCumulativeAvg tasksPerSecondAvg;
+
+    public ThreadPoolMetrics(MeasurableThreadPoolExecutor executor, MetricRegistry registry) {
         this.executor = executor;
-    }
 
-    public long currentTime() {
-        return System.nanoTime();
-    }
-
-    public long taskStarted(long enqueueTime) {
-        long startTime = currentTime();
-
-        if (isMetricsRegistered()) {
-            long waitTimeNanos = startTime - enqueueTime;
-            taskWaitTimeMaxSpike.update(waitTimeNanos);
-            taskWaitTimeMinSpike.update(waitTimeNanos);
-
-            int queueSize = executor.getQueue().size();
-            queueSizeMaxSpike.update(queueSize);
-            queueSizeMinSpike.update(queueSize);
-        }
-        return startTime;
-    }
-
-    public void taskFinished(long startTime) {
-        if (isMetricsRegistered()) {
-            long runTimeDuration = currentTime() - startTime;
-            taskRunTimeMaxSpike.update(runTimeDuration);
-            taskRunTimeMinSpike.update(runTimeDuration);
-            taskRunTimeRunningAverage.update(runTimeDuration);
-
-            int poolSize = executor.getPoolSize();
-            poolSizeMaxSpike.update(poolSize);
-            poolSizeMinSpike.update(poolSize);
-        }
-    }
-
-    @Override
-    protected void registerMetricsNonIdempotent(@NonNull MetricRegistry registry) {
-        final ThreadPoolConfig config = executor.getConfig();
         final Map<String, String> poolNameLabels = Map.of(POOL_LABEL, executor.getName());
 
+        // queue metrics
         registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_SIZE)
                 .registerDataPoint(() -> executor.getQueue().size(), poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_CONFIG_CAPACITY)
-                .registerDataPoint(config::queueSize, poolNameLabels);
+                .registerDataPoint(() -> executor.getConfig().queueSize(), poolNameLabels);
         queueSizeMaxSpike = registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_SIZE_MAX_SPIKE)
-                .getOrCreateLabeled(poolNameLabels);
+                .getOrCreateLabeled(poolNameLabels, () -> executor.getQueue().size());
         queueSizeMinSpike = registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_SIZE_MIN_SPIKE)
-                .getOrCreateLabeled(poolNameLabels);
+                .getOrCreateLabeled(poolNameLabels, () -> executor.getQueue().size());
+        queueSizeAvg = registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_SIZE_AVG)
+                .getOrCreateLabeled(poolNameLabels, () -> executor.getQueue().size());
+        queueSizeAvgRunning = registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_SIZE_AVG_RUNNING)
+                .getOrCreateLabeled(poolNameLabels, () -> executor.getQueue().size());
 
+        // pool metrics
         registry.getMetric(ThreadPoolMetricsRegistration.POOL_CONFIG_CORE_SIZE)
-                .registerDataPoint(config::coreSize, poolNameLabels);
+                .registerDataPoint(executor::getCorePoolSize, poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.POOL_CONFIG_MAX_SIZE)
-                .registerDataPoint(config::maxSize, poolNameLabels);
-
+                .registerDataPoint(executor::getMaximumPoolSize, poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.POOL_SIZE)
                 .registerDataPoint(executor::getPoolSize, poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.POOL_MAX_SIZE)
                 .registerDataPoint(executor::getLargestPoolSize, poolNameLabels);
-        poolSizeMaxSpike = registry.getMetric(ThreadPoolMetricsRegistration.POOL_SIZE_MAX_SPIKE)
-                .getOrCreateLabeled(poolNameLabels);
-        poolSizeMinSpike = registry.getMetric(ThreadPoolMetricsRegistration.POOL_SIZE_MAX_SPIKE)
-                .getOrCreateLabeled(poolNameLabels);
 
-        registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COUNT_TOTAL)
+        // task metrics
+        tasksCountTotal = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COUNT_TOTAL)
+                .getOrCreateLabeled(poolNameLabels);
+        registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COUNT_TOTAL_CALLBACK)
                 .registerDataPoint(executor::getTaskCount, poolNameLabels);
-        registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COMPLETED_COUNT_TOTAL)
+        tasksCompletedCountTotal = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COMPLETED_COUNT_TOTAL)
+                .getOrCreateLabeled(poolNameLabels);
+        registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COMPLETED_COUNT_TOTAL_CALLBACK)
                 .registerDataPoint(executor::getCompletedTaskCount, poolNameLabels);
-        registry.getMetric(ThreadPoolMetricsRegistration.TASKS_ACTIVE_COUNT)
+        tasksActiveCount = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_ACTIVE_COUNT)
+                .getOrCreateLabeled(poolNameLabels);
+        registry.getMetric(ThreadPoolMetricsRegistration.TASKS_ACTIVE_COUNT_CALLBACK)
                 .registerDataPoint(executor::getActiveCount, poolNameLabels);
 
+        // task timing metrics
         taskWaitTimeMaxSpike = registry.getMetric(ThreadPoolMetricsRegistration.TASK_WAIT_TIME_MAX_SPIKE)
                 .getOrCreateLabeled(poolNameLabels);
         taskWaitTimeMinSpike = registry.getMetric(ThreadPoolMetricsRegistration.TASK_WAIT_TIME_MIN_SPIKE)
                 .getOrCreateLabeled(poolNameLabels);
 
-        taskRunTimeMaxSpike = registry.getMetric(ThreadPoolMetricsRegistration.TASK_RUN_TIME_MAX_SPIKE)
+        taskDurationMaxSpike = registry.getMetric(ThreadPoolMetricsRegistration.TASK_DURATION_MAX_SPIKE)
                 .getOrCreateLabeled(poolNameLabels);
-        taskRunTimeMinSpike = registry.getMetric(ThreadPoolMetricsRegistration.TASK_RUN_TIME_MIN_SPIKE)
+        taskDurationMinSpike = registry.getMetric(ThreadPoolMetricsRegistration.TASK_DURATION_MIN_SPIKE)
                 .getOrCreateLabeled(poolNameLabels);
-        taskRunTimeRunningAverage = registry.getMetric(ThreadPoolMetricsRegistration.TASK_RUN_TIME_MOVING_AVG)
+        taskDurationRunningAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASK_DURATION_MOVING_AVG)
                 .getOrCreateLabeled(poolNameLabels);
+        tasksPerSecondMovingAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_PER_SECOND_MOVING_AVG)
+                .getOrCreateLabeled(poolNameLabels);
+        tasksPerSecondAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_PER_SECOND_AVG)
+                .getOrCreateLabeled(poolNameLabels);
+    }
+
+    private long currentTime() {
+        return System.nanoTime();
+    }
+
+    public long taskSubmitted() {
+        long submitTime = currentTime();
+
+        tasksCountTotal.increment();
+        tasksPerSecondAvg.count();
+        tasksPerSecondMovingAvg.update();
+
+        int queueSize = executor.getQueue().size();
+        queueSizeMaxSpike.update(queueSize);
+        queueSizeMinSpike.update(queueSize);
+        queueSizeAvg.update(queueSize);
+        queueSizeAvgRunning.update(queueSize);
+
+        return submitTime;
+    }
+
+    public long taskStarted(long submitTime) {
+        tasksActiveCount.increment();
+
+        long startTime = currentTime();
+        long waitTimeNanos = startTime - submitTime;
+        taskWaitTimeMaxSpike.update(waitTimeNanos);
+        taskWaitTimeMinSpike.update(waitTimeNanos);
+
+        return startTime;
+    }
+
+    public void taskFinished(long startTime) {
+        tasksCompletedCountTotal.increment();
+        tasksActiveCount.decrement();
+
+        long runTimeDuration = currentTime() - startTime;
+        taskDurationMaxSpike.update(runTimeDuration);
+        taskDurationMinSpike.update(runTimeDuration);
+        taskDurationRunningAvg.update(runTimeDuration);
     }
 }

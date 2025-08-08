@@ -17,7 +17,8 @@ import org.hiero.metrics.api.datapoint.StateSetDataPoint;
 import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
-public class DefaultStateSet<T> extends AbstractStatefulMetric<StateSetDataPoint<T>> implements StateSet<T> {
+public class DefaultStateSet<T> extends AbstractStatefulMetric<Map<T, Boolean>, StateSetDataPoint<T>>
+        implements StateSet<T> {
 
     private final Map<T, Label> labelsCache = new HashMap<>();
     private final Function<T, Label> stateLabelFactory;

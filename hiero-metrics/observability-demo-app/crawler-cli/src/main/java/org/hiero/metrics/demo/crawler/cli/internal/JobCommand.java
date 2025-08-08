@@ -159,8 +159,8 @@ public class JobCommand extends AbstractCommand {
                 .append('\n');
 
         builder.append(indent)
-                .append("Parallel time improvement ratio: ")
-                .append(metrics.parallelImprovementRatio())
+                .append("Concurrency improvement ratio: ")
+                .append(metrics.concurrencyImprovementRatio())
                 .append('x')
                 .append('\n');
     }

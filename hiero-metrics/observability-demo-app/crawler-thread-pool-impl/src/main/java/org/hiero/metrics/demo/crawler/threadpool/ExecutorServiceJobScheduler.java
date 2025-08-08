@@ -3,11 +3,13 @@ package org.hiero.metrics.demo.crawler.threadpool;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URI;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,6 +52,11 @@ public class ExecutorServiceJobScheduler extends IdempotentMetricRegistryAware i
     @Override
     public void shutdown() {
         executorService.shutdown();
+    }
+
+    @Override
+    public boolean awaitTermination(Duration timeout) throws InterruptedException {
+        return executorService.awaitTermination(timeout.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     @Override

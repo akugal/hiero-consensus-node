@@ -11,14 +11,15 @@ import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 
-public final class DefaultStatsGaugeAdapter<D> extends AbstractStatefulMetric<D> implements StatsGaugeAdapter<D> {
+public final class DefaultStatsGaugeAdapter<I, D> extends AbstractStatefulMetric<I, D>
+        implements StatsGaugeAdapter<I, D> {
 
     private final Label[] statLabels;
     private final Function<D, Number>[] statExportGetters;
     private final Consumer<D> reset;
 
     @SuppressWarnings("unchecked")
-    public DefaultStatsGaugeAdapter(StatsGaugeAdapter.Builder<D> builder) {
+    public DefaultStatsGaugeAdapter(StatsGaugeAdapter.Builder<I, D> builder) {
         super(builder);
 
         reset = builder.getReset() != null ? builder.getReset() : container -> {}; // no-op reset if no specified

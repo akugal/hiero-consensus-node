@@ -30,9 +30,9 @@ public class JvmMetricsRegistration implements MetricsRegistrationProvider {
                 .withDynamicLabelNames("type")
                 .withDescription("JVM memory usage")
                 .withUnit("bytes")
-                .registerDataPoint(Runtime.getRuntime()::maxMemory, Map.of("type", "max"))
-                .registerDataPoint(Runtime.getRuntime()::totalMemory, Map.of("type", "total"))
-                .registerDataPoint(Runtime.getRuntime()::freeMemory, Map.of("type", "free"))
+                .registerDataPoint(() -> Runtime.getRuntime().maxMemory(), Map.of("type", "max"))
+                .registerDataPoint(() -> Runtime.getRuntime().totalMemory(), Map.of("type", "total"))
+                .registerDataPoint(() -> Runtime.getRuntime().freeMemory(), Map.of("type", "free"))
                 .registerDataPoint(
                         () -> directMemMxBean != null ? directMemMxBean.getMemoryUsed() : -1,
                         Map.of("type", "direct")));

@@ -30,12 +30,12 @@ public class CliMain {
         CommandManager commandManager =
                 new CommandManager(List.of(new CrawlCommand(jobManager), new JobCommand(jobManager)));
 
-        System.out.println("🕷️  Web Crawler Interactive CLI");
+        System.out.println("🕷️ Crawler Interactive CLI");
         System.out.println("Type 'help' for available commands or 'exit' to quit.\n");
 
         startInteractiveLoop(commandManager);
 
-        jobManager.shootdown();
+        jobManager.shutdown();
     }
 
     private static void startInteractiveLoop(CommandManager commandManager) {
@@ -70,9 +70,9 @@ public class CliMain {
                 Command command = commandManager.getCommand(commandName);
                 command.execute(System.out, Arrays.copyOfRange(args, 1, args.length));
             } catch (InputException e) {
-                System.err.println("❌ " + e.getMessage());
+                System.out.println("❌ " + e.getMessage());
             } catch (Exception e) {
-                System.err.println("❌ " + e.getMessage());
+                System.out.println("❌ " + e.getMessage());
                 logger.error("Error executing command: " + commandName, e);
             }
         }

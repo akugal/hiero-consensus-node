@@ -26,6 +26,7 @@ public interface Metric {
 
     abstract class Builder<B extends Builder<B, M>, M extends Metric> {
 
+        private final MetricType type;
         private final MetricKey<M> key;
         private String description;
         private String unit;
@@ -34,12 +35,17 @@ public interface Metric {
         private final List<String> dynamicLabelNames = new ArrayList<>();
         private final Set<String> dynamicLabelNamesSet = new HashSet<>();
 
-        protected Builder(@NonNull MetricKey<M> key) {
+        protected Builder(@NonNull MetricType type, @NonNull MetricKey<M> key) {
+            this.type = Objects.requireNonNull(type, "type must not be null");
             this.key = Objects.requireNonNull(key, "key must not be null");
         }
 
-        public abstract MetricType getType();
+        @NonNull
+        public final MetricType getType() {
+            return type;
+        }
 
+        @NonNull
         public MetricKey<M> getKey() {
             return key;
         }
@@ -52,28 +58,34 @@ public interface Metric {
             return unit;
         }
 
+        @NonNull
         public Collection<Label> getConstantLabels() {
             return constantLabels.values();
         }
 
+        @NonNull
         public List<String> getDynamicLabelNames() {
             return dynamicLabelNames;
         }
 
+        @NonNull
         public Set<String> getDynamicLabelNamesSet() {
             return dynamicLabelNamesSet;
         }
 
+        @NonNull
         public final B withDescription(String description) {
             this.description = description;
             return self();
         }
 
+        @NonNull
         public final B withUnit(String unit) {
             this.unit = unit;
             return self();
         }
 
+        @NonNull
         public final B withDynamicLabelNames(String... labelNames) {
             for (String labelName : labelNames) {
                 if (dynamicLabelNamesSet.add(labelName)) {
@@ -84,6 +96,7 @@ public interface Metric {
             return self();
         }
 
+        @NonNull
         public final B withConstantLabel(Label label) {
             Objects.requireNonNull(label, "label must not be null");
             Label existingLabel = constantLabels.put(label.getName(), label);
@@ -93,6 +106,7 @@ public interface Metric {
             return self();
         }
 
+        @NonNull
         public final B withConstantLabels(Collection<Label> labels) {
             for (Label label : labels) {
                 withConstantLabel(label);
@@ -100,10 +114,12 @@ public interface Metric {
             return self();
         }
 
+        @NonNull
         public final B withConstantLabels(Label... labels) {
             return withConstantLabels(Arrays.asList(labels));
         }
 
+        @NonNull
         public final M build() {
             for (String dynamicLabelName : dynamicLabelNames) {
                 Label constLabel = constantLabels.get(dynamicLabelName);
@@ -115,12 +131,15 @@ public interface Metric {
             return buildMetric();
         }
 
+        @NonNull
         public final M register(MetricRegistry registry) {
             return registry.register(this);
         }
 
+        @NonNull
         protected abstract M buildMetric();
 
+        @NonNull
         protected abstract B self();
     }
 }

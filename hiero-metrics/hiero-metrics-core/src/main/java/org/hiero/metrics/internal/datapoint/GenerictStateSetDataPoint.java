@@ -10,7 +10,17 @@ import org.hiero.metrics.api.datapoint.StateSetDataPoint;
 
 public class GenerictStateSetDataPoint<T> implements StateSetDataPoint<T> {
 
+    private final Map<T, Boolean> initState;
     private final Map<T, Boolean> states = new ConcurrentHashMap<>();
+
+    public GenerictStateSetDataPoint() {
+        this(Map.of());
+    }
+
+    public GenerictStateSetDataPoint(Map<T, Boolean> initState) {
+        this.initState = initState == null ? Map.of() : initState;
+        states.putAll(this.initState);
+    }
 
     @Override
     public void setFalse(T value) {
@@ -31,5 +41,13 @@ public class GenerictStateSetDataPoint<T> implements StateSetDataPoint<T> {
     @Override
     public boolean getState(T value) {
         return states.getOrDefault(value, false);
+    }
+
+    @Override
+    public void reset() {
+        states.clear();
+        if (!initState.isEmpty()) {
+            states.putAll(initState);
+        }
     }
 }

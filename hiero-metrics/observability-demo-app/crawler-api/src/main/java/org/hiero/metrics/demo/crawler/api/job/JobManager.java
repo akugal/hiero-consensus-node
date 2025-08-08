@@ -22,14 +22,16 @@ public interface JobManager extends MetricRegistryAware {
 
         ServiceLoader<SchemeCrawler> loader = ServiceLoader.load(SchemeCrawler.class);
         for (SchemeCrawler schemeCrawler : loader) {
-            jobManager.registerScheme(schemeCrawler);
+            jobManager.registerCrawler(schemeCrawler);
         }
         return jobManager;
     }
 
-    void shootdown();
+    void shutdown();
 
-    void registerScheme(SchemeCrawler schemeCrawler);
+    boolean awaitTermination(Duration timeout) throws InterruptedException;
+
+    void registerCrawler(SchemeCrawler schemeCrawler);
 
     List<SchemeCrawler> schemes();
 

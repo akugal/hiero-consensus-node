@@ -2,6 +2,7 @@
 package org.hiero.metrics.api;
 
 import static org.hiero.metrics.api.stat.StatUtils.DEFAULT_STAT_LABEL;
+import static org.hiero.metrics.api.stat.StatUtils.NO_DEFAULT_INITIALIZER;
 import static org.hiero.metrics.api.stat.StatUtils.ZERO;
 
 import com.swirlds.base.ArgumentUtils;
@@ -23,7 +24,7 @@ import org.hiero.metrics.internal.datapoint.AtomicDoubleGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.DoubleGaugeCompositeArrayDataPoint;
 
-public interface DoubleGaugeComposite extends StatefulMetric<DoubleGaugeCompositeDataPoint> {
+public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGaugeCompositeDataPoint> {
 
     static MetricKey<DoubleGaugeComposite> key(String name) {
         return MetricKey.of(name, DoubleGaugeComposite.class);
@@ -37,7 +38,8 @@ public interface DoubleGaugeComposite extends StatefulMetric<DoubleGaugeComposit
         return new Builder(key);
     }
 
-    final class Builder extends StatefulMetric.Builder<DoubleGaugeCompositeDataPoint, Builder, DoubleGaugeComposite> {
+    final class Builder
+            extends StatefulMetric.Builder<Object, DoubleGaugeCompositeDataPoint, Builder, DoubleGaugeComposite> {
 
         private String statLabel = DEFAULT_STAT_LABEL;
         private final List<String> statNames = new ArrayList<>();
@@ -45,12 +47,11 @@ public interface DoubleGaugeComposite extends StatefulMetric<DoubleGaugeComposit
         private boolean resetOnExport = false;
 
         private Builder(MetricKey<DoubleGaugeComposite> key) {
-            super(key, () -> new DoubleGaugeCompositeArrayDataPoint(() -> new DoubleGaugeDataPoint[0]));
-        }
-
-        @Override
-        public MetricType getType() {
-            return MetricType.GAUGE;
+            super(
+                    MetricType.GAUGE,
+                    key,
+                    NO_DEFAULT_INITIALIZER,
+                    init -> new DoubleGaugeCompositeArrayDataPoint(() -> new DoubleGaugeDataPoint[0]));
         }
 
         public boolean isResetOnExport() {
@@ -114,6 +115,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<DoubleGaugeComposit
             return this;
         }
 
+        @NonNull
         @Override
         public DoubleGaugeComposite buildMetric() {
             if (dataPointFactories.isEmpty()) {
@@ -138,10 +140,11 @@ public interface DoubleGaugeComposite extends StatefulMetric<DoubleGaugeComposit
             Supplier<DoubleGaugeDataPoint[]> dataPonitsSupplier =
                     () -> suppliers.stream().map(Supplier::get).toArray(DoubleGaugeDataPoint[]::new);
 
-            withContainerFactory(() -> new DoubleGaugeCompositeArrayDataPoint(dataPonitsSupplier));
+            withContainerFactory(init -> new DoubleGaugeCompositeArrayDataPoint(dataPonitsSupplier));
             return new DefaultDoubleGaugeComposite(this);
         }
 
+        @NonNull
         @Override
         protected Builder self() {
             return this;

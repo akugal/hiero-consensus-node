@@ -11,6 +11,7 @@ import org.hiero.metrics.demo.crawler.api.document.cache.DocumentCacheFactory;
 import org.hiero.metrics.demo.crawler.api.job.JobScheduler;
 import org.hiero.metrics.demo.crawler.api.job.JobSchedulerFactory;
 import org.hiero.metrics.demo.crawler.threadpool.config.JobPoolConfig;
+import org.hiero.metrics.demo.crawler.threadpool.metrics.ExecutorServiceFactory;
 
 public class ExecutorServiceJobSchedulerFactory implements JobSchedulerFactory {
 

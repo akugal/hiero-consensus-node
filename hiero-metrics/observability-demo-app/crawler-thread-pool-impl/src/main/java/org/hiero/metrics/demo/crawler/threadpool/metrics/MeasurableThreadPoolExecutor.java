@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.demo.crawler.threadpool.metrics;
 
-import static org.hiero.metrics.demo.crawler.threadpool.ExecutorServiceFactory.buildThreadFactory;
+import static org.hiero.metrics.demo.crawler.threadpool.metrics.ExecutorServiceFactory.buildThreadFactory;
 
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -21,7 +21,7 @@ public class MeasurableThreadPoolExecutor extends ThreadPoolExecutor implements 
     private final String poolName;
     private final ThreadPoolConfig config;
 
-    private final ThreadPoolMetrics metrics;
+    private ThreadPoolMetrics metrics;
 
     public MeasurableThreadPoolExecutor(String poolName, ThreadPoolConfig config, RejectedExecutionHandler handler) {
         super(
@@ -34,7 +34,7 @@ public class MeasurableThreadPoolExecutor extends ThreadPoolExecutor implements 
                 handler);
         this.poolName = poolName;
         this.config = config;
-        this.metrics = new ThreadPoolMetrics(this);
+
     }
 
     @Override
@@ -47,13 +47,19 @@ public class MeasurableThreadPoolExecutor extends ThreadPoolExecutor implements 
     }
 
     @Override
-    public void registerMetrics(MetricRegistry registry) {
-        metrics.registerMetrics(registry);
+    public synchronized void registerMetrics(MetricRegistry registry) {
+        if (metrics == null) {
+            metrics = new ThreadPoolMetrics(this, registry);
+        }
     }
 
     @Override
     protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
-        long enqueueTime = metrics.currentTime();
+        if (metrics == null) {
+            return super.newTaskFor(runnable, value);
+        }
+
+        long submitTime = metrics.taskSubmitted();
         final Map<String, String> parentContext = ThreadContext.getImmutableContext();
 
         return super.newTaskFor(
@@ -61,7 +67,7 @@ public class MeasurableThreadPoolExecutor extends ThreadPoolExecutor implements 
                     final Map<String, String> originalContext = ThreadContext.getImmutableContext();
                     ThreadContext.putAll(parentContext);
 
-                    long startTime = metrics.taskStarted(enqueueTime);
+                    long startTime = metrics.taskStarted(submitTime);
                     try {
                         runnable.run();
                     } finally {
@@ -74,14 +80,18 @@ public class MeasurableThreadPoolExecutor extends ThreadPoolExecutor implements 
 
     @Override
     protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
-        long enqueueTime = metrics.currentTime();
+        if (metrics == null) {
+            return super.newTaskFor(callable);
+        }
+
+        long submitTime = metrics.taskSubmitted();
         final Map<String, String> parentContext = ThreadContext.getImmutableContext();
 
         return super.newTaskFor(() -> {
             final Map<String, String> originalContext = ThreadContext.getImmutableContext();
             ThreadContext.putAll(parentContext);
 
-            long startTime = metrics.taskStarted(enqueueTime);
+            long startTime = metrics.taskStarted(submitTime);
             try {
                 return callable.call();
             } finally {

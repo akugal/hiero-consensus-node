@@ -41,7 +41,7 @@ public class OpenMetricsSnapshotsWriterTest {
                 .registerDataPoint(() -> 123.45, Map.of("label1", "val1", "label2", "val2"))
                 .registerDataPoint(() -> 1.0, Map.of("label1", "1", "label2", "2"));
 
-        StatsGaugeAdapter<StatContainer> statGauge = StatsGaugeAdapter.builder(
+        StatsGaugeAdapter<Object, StatContainer> statGauge = StatsGaugeAdapter.builder(
                         StatsGaugeAdapter.key("test_stats_gauge"), StatContainer::new)
                 .withConstantLabel(new Label("env", "test"))
                 .withUnit("ms")

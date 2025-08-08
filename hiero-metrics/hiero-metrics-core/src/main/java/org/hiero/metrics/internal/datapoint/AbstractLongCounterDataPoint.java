@@ -10,7 +10,9 @@ public abstract class AbstractLongCounterDataPoint implements LongCounterDataPoi
         if (value < 0) {
             throw new IllegalArgumentException("Increment value must be non-negative, but was: " + value);
         }
-        safeIncrement(value);
+        if (value != 0) {
+            safeIncrement(value);
+        }
     }
 
     @Override
