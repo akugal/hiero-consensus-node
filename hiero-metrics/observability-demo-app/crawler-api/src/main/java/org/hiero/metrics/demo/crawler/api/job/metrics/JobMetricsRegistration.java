@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.demo.crawler.api.job;
+package org.hiero.metrics.demo.crawler.api.job.metrics;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
-
 import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.LongCounter;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricsRegistrationProvider;
-import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
 import org.hiero.metrics.api.stat.CountPerSecondCumulativeAvg;
+import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
 import org.hiero.metrics.api.stat.RunningAverageStat;
 import org.hiero.metrics.api.utils.Unit;
 

@@ -2,8 +2,10 @@
 package org.hiero.metrics.demo.crawler.threadpool;
 
 import java.net.URI;
-import org.hiero.metrics.demo.crawler.api.job.JobMetrics;
+import java.time.Duration;
+import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.demo.crawler.api.job.JobResult;
+import org.hiero.metrics.demo.crawler.api.job.metrics.JobMetrics;
 import org.hiero.metrics.demo.crawler.api.util.TypedMap;
 
 final class JobExecution {
@@ -12,23 +14,15 @@ final class JobExecution {
     private final TypedMap data = TypedMap.createThreadSafe();
 
     private final JobConcurrencyContext concurrencyContext;
+    private final JobProcessingContext processingContext;
 
-    private JobProcessingContext processingContext;
-
-    public JobExecution(URI rootUri) {
+    public JobExecution(URI rootUri, Duration timeout, Logger logger) {
         this.rootUri = rootUri;
-        concurrencyContext = new JobConcurrencyContext();
-    }
-
-    public void jobStarted() {
-        long jobStartTime = concurrencyContext.jobStarted();
-        processingContext = new JobProcessingContext(jobStartTime);
+        processingContext = new JobProcessingContext();
+        concurrencyContext = new JobConcurrencyContext(timeout, logger);
     }
 
     public JobResult buildResult() {
-        if (processingContext == null) {
-            throw new IllegalStateException("Job has not been started yet.");
-        }
         return new JobResult(
                 rootUri(), data(), new JobMetrics(processingContext.buildMetrics(), concurrencyContext.buildMetrics()));
     }

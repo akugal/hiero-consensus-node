@@ -5,4 +5,4 @@ import com.swirlds.config.api.ConfigData;
 import com.swirlds.config.api.ConfigProperty;
 
 @ConfigData("cache.doc.guava")
-public record CacheConfig(@ConfigProperty(defaultValue = "maximumSize=100") String spec) {}
+public record CacheConfig(@ConfigProperty String spec) {}

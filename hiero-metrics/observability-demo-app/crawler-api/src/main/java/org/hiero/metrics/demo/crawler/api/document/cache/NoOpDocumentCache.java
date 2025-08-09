@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.demo.crawler.internal;
+package org.hiero.metrics.demo.crawler.api.document.cache;
 
 import java.net.URI;
 import java.util.Optional;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.demo.crawler.api.document.Document;
 import org.hiero.metrics.demo.crawler.api.document.DocumentFetcher;
-import org.hiero.metrics.demo.crawler.api.document.cache.DocumentCache;
 import org.hiero.metrics.demo.crawler.api.exception.DocumentFetchException;
 
 public final class NoOpDocumentCache implements DocumentCache {

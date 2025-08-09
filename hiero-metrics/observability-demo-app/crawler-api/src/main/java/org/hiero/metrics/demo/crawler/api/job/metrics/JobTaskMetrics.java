@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.demo.crawler.api.job;
+package org.hiero.metrics.demo.crawler.api.job.metrics;
 
 import java.time.Duration;
 
-public record JobConcurrencyMetrics(
-        Duration jobDelayExecutionDuration,
+public record JobTaskMetrics(
         int totalTasksCount,
         int rejectedTasksCount,
         Duration tasksExecutionDelayTotalDuration,

@@ -18,9 +18,179 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 7,
   "links": [],
   "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "interval": "1s",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "cache_guava_document:size{test=\"$test_name\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Size",
+          "range": true,
+          "refId": "Raw",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "cache_guava_document:size_min_spike{test=\"$test_name\"}",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Min Spike",
+          "range": true,
+          "refId": "Min Spike",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "cache_guava_document:size_max_spike{test=\"$test_name\"}",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Max Spike",
+          "range": true,
+          "refId": "Max Spike",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "cache_guava_document:size_avg{test=\"$test_name\"}",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Size Avg",
+          "range": true,
+          "refId": "Avg",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "cache_guava_document:size_avg_running{test=\"$test_name\"}",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Size Avg Running",
+          "range": true,
+          "refId": "Avg Running",
+          "useBackend": false
+        }
+      ],
+      "title": "Cache Size",
+      "type": "timeseries"
+    },
     {
       "datasource": {
         "type": "prometheus",
@@ -36,31 +206,35 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "text"
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
-          }
+          },
+          "unit": "percentunit"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 5,
-        "x": 0,
+        "w": 12,
+        "x": 12,
         "y": 0
       },
-      "id": 1,
+      "id": 2,
       "interval": "1s",
-      "maxDataPoints": 300,
       "options": {
-        "colorMode": "background",
-        "graphMode": "none",
+        "colorMode": "value",
+        "graphMode": "area",
         "justifyMode": "auto",
-        "orientation": "horizontal",
+        "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "first"
+            "mean"
           ],
           "fields": "",
           "values": false
@@ -78,51 +252,18 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:pool_config_core_size{pool_name=\"$poool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Config Core Size",
-          "range": true,
-          "refId": "Pool Core Size",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:pool_config_max_size{pool_name=\"$poool_name\", test=\"$test_name\"}",
+          "expr": "avg(cache_guava_document:lookups_count{test=\"$test_name\", type=\"hit\"}) / sum(cache_guava_document:lookups_count{test=\"$test_name\"})",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Pool Max Size",
+          "legendFormat": "Hit Ratio %",
           "range": true,
-          "refId": "Pool Max Size",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:queue_config_capacity{pool_name=\"$poool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Queue Capacity",
-          "range": true,
-          "refId": "Queue Capacity",
+          "refId": "Hit Ratio",
           "useBackend": false
         }
       ],
-      "title": "Pool Config",
+      "title": "Cache Efficiency",
       "type": "stat"
     },
     {
@@ -180,17 +321,18 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ns"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 19,
-        "x": 5,
-        "y": 0
+        "w": 12,
+        "x": 0,
+        "y": 8
       },
-      "id": 3,
+      "id": 4,
       "interval": "1s",
       "options": {
         "legend": {
@@ -214,17 +356,17 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:pool_size{pool_name=\"$poool_name\", test=\"$test_name\"}",
+          "expr": "cache_guava_document:avg_load_time_ns{test=\"$test_name\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Pool Size",
+          "legendFormat": "Size",
           "range": true,
-          "refId": "Pool Size",
+          "refId": "Load Time",
           "useBackend": false
         }
       ],
-      "title": "Pool Size",
+      "title": "Miss Load Time",
       "type": "timeseries"
     },
     {
@@ -254,7 +396,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "smooth",
+            "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -270,6 +412,7 @@
               "mode": "off"
             }
           },
+          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -287,12 +430,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
+        "h": 8,
+        "w": 12,
+        "x": 12,
         "y": 8
       },
-      "id": 2,
+      "id": 3,
       "interval": "1s",
       "options": {
         "legend": {
@@ -303,7 +446,7 @@
         },
         "tooltip": {
           "hideZeros": false,
-          "mode": "multi",
+          "mode": "single",
           "sort": "none"
         }
       },
@@ -316,14 +459,14 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:queue_size{pool_name=\"$poool_name\", test=\"$test_name\"}",
+          "expr": "cache_guava_document:lookups_count{test=\"$test_name\", type=\"hit\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Size",
+          "legendFormat": "Hits",
           "range": true,
-          "refId": "Size",
+          "refId": "Hits",
           "useBackend": false
         },
         {
@@ -333,69 +476,18 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:queue_size_max_spike{pool_name=\"$poool_name\", test=\"$test_name\"}",
+          "expr": "cache_guava_document:lookups_count{test=\"$test_name\", type=\"miss\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Size Max Spike",
+          "legendFormat": "Misses",
           "range": true,
-          "refId": "Size Max Spike",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:queue_size_min_spike{pool_name=\"$poool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Size Min Spike",
-          "range": true,
-          "refId": "Size Min Spike",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:queue_size_avg{pool_name=\"$poool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Queue Size Avg",
-          "range": true,
-          "refId": "Queue Size Avg",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:queue_size_avg_running{pool_name=\"$poool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Queue Size Avg Running",
-          "range": true,
-          "refId": "Queue Size Avg Running",
+          "refId": "Misses",
           "useBackend": false
         }
       ],
-      "title": "Queue Size",
+      "title": "Cache Hits",
       "type": "timeseries"
     }
   ],
@@ -404,28 +496,6 @@
   "tags": [],
   "templating": {
     "list": [
-      {
-        "current": {
-          "text": "crawler-job-task-pool",
-          "value": "crawler-job-task-pool"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
-        "definition": "label_values(pool_name)",
-        "label": "Pool Name",
-        "name": "poool_name",
-        "options": [],
-        "query": {
-          "qryType": 1,
-          "query": "label_values(pool_name)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "type": "query"
-      },
       {
         "current": {
           "text": "cache-enabled",
@@ -456,7 +526,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Thread Pool Dashboard",
-  "uid": "c01a9025-2fc0-43fa-92d9-c109ea4eff5b",
-  "version": 5
+  "title": "Cache Stats",
+  "uid": "85486bce-c3b5-4b6d-a1a4-726647ae2460",
+  "version": 3
 }

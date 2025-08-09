@@ -10,6 +10,10 @@ mainModuleInfo {
     runtimeOnly("org.hiero.metrics.demo.crawler.cache.guava")
 }
 
+testModuleInfo {
+    requires("org.junit.jupiter.api")
+}
+
 application.mainClass = "org.hiero.metrics.demo.crawler.cli.CliMain"
 
 tasks.named<JavaExec>("run") { standardInput = System.`in` }

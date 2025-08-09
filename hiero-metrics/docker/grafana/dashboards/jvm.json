@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 9,
   "links": [],
   "panels": [
     {
@@ -29,38 +29,168 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "text"
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
-          }
+          },
+          "unit": "decbytes"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 5,
+        "h": 7,
+        "w": 22,
         "x": 0,
         "y": 0
       },
       "id": 1,
       "interval": "1s",
-      "maxDataPoints": 300,
       "options": {
-        "colorMode": "background",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "avg(jvm:memory_bytes{test=\"$test_name\", type=\"total\"}) - avg(jvm:memory_bytes{test=\"$test_name\", type=\"free\"})",
+          "format": "time_series",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Heap Used",
+          "range": true,
+          "refId": "Heap Used",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "jvm:memory_bytes{test=\"$test_name\", type=\"total\"}",
+          "format": "time_series",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Heap Total",
+          "range": true,
+          "refId": "Heap Total",
+          "useBackend": false
+        }
+      ],
+      "title": "Heap Memory",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 2,
+        "x": 22,
+        "y": 0
+      },
+      "id": 4,
+      "interval": "1s",
+      "options": {
+        "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
-        "orientation": "horizontal",
+        "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "first"
+            "firstNotNull"
           ],
           "fields": "",
           "values": false
@@ -78,51 +208,19 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:pool_config_core_size{pool_name=\"$poool_name\", test=\"$test_name\"}",
+          "exemplar": false,
+          "expr": "jvm:memory_bytes{test=\"$test_name\", type=\"max\"}",
+          "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Config Core Size",
+          "legendFormat": "-Xmx",
           "range": true,
-          "refId": "Pool Core Size",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:pool_config_max_size{pool_name=\"$poool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Pool Max Size",
-          "range": true,
-          "refId": "Pool Max Size",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:queue_config_capacity{pool_name=\"$poool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Queue Capacity",
-          "range": true,
-          "refId": "Queue Capacity",
+          "refId": "Xmx",
           "useBackend": false
         }
       ],
-      "title": "Pool Config",
+      "title": "-Xmx",
       "type": "stat"
     },
     {
@@ -152,7 +250,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "smooth",
+            "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -180,15 +278,16 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "percentunit"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 19,
-        "x": 5,
-        "y": 0
+        "w": 12,
+        "x": 0,
+        "y": 7
       },
       "id": 3,
       "interval": "1s",
@@ -197,7 +296,7 @@
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": false
         },
         "tooltip": {
           "hideZeros": false,
@@ -214,17 +313,17 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:pool_size{pool_name=\"$poool_name\", test=\"$test_name\"}",
+          "expr": "jvm:cpu_load_percent{test=\"$test_name\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Pool Size",
+          "legendFormat": "CPU Load",
           "range": true,
-          "refId": "Pool Size",
+          "refId": "CPU load",
           "useBackend": false
         }
       ],
-      "title": "Pool Size",
+      "title": "CPU Load",
       "type": "timeseries"
     },
     {
@@ -287,10 +386,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 8
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 7
       },
       "id": 2,
       "interval": "1s",
@@ -299,11 +398,11 @@
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": false
         },
         "tooltip": {
           "hideZeros": false,
-          "mode": "multi",
+          "mode": "single",
           "sort": "none"
         }
       },
@@ -316,86 +415,17 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:queue_size{pool_name=\"$poool_name\", test=\"$test_name\"}",
+          "expr": "jvm:open_file_descriptors_count{test=\"$test_name\"}",
           "fullMetaSearch": false,
-          "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Size",
+          "legendFormat": "Descriptors",
           "range": true,
-          "refId": "Size",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:queue_size_max_spike{pool_name=\"$poool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Size Max Spike",
-          "range": true,
-          "refId": "Size Max Spike",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:queue_size_min_spike{pool_name=\"$poool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Size Min Spike",
-          "range": true,
-          "refId": "Size Min Spike",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:queue_size_avg{pool_name=\"$poool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Queue Size Avg",
-          "range": true,
-          "refId": "Queue Size Avg",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:queue_size_avg_running{pool_name=\"$poool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Queue Size Avg Running",
-          "range": true,
-          "refId": "Queue Size Avg Running",
+          "refId": "Open File Descriptors",
           "useBackend": false
         }
       ],
-      "title": "Queue Size",
+      "title": "Open File Descriptors",
       "type": "timeseries"
     }
   ],
@@ -404,28 +434,6 @@
   "tags": [],
   "templating": {
     "list": [
-      {
-        "current": {
-          "text": "crawler-job-task-pool",
-          "value": "crawler-job-task-pool"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
-        "definition": "label_values(pool_name)",
-        "label": "Pool Name",
-        "name": "poool_name",
-        "options": [],
-        "query": {
-          "qryType": 1,
-          "query": "label_values(pool_name)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "type": "query"
-      },
       {
         "current": {
           "text": "cache-enabled",
@@ -456,7 +464,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Thread Pool Dashboard",
-  "uid": "c01a9025-2fc0-43fa-92d9-c109ea4eff5b",
-  "version": 5
+  "title": "JVM",
+  "uid": "2d855fe8-22a3-4124-a778-f3f1ffea8cf2",
+  "version": 3
 }

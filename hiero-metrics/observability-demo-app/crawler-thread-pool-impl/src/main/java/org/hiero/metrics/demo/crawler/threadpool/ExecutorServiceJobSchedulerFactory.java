@@ -8,9 +8,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.demo.crawler.api.document.cache.DocumentCache;
 import org.hiero.metrics.demo.crawler.api.document.cache.DocumentCacheFactory;
+import org.hiero.metrics.demo.crawler.api.job.JobExecutor;
 import org.hiero.metrics.demo.crawler.api.job.JobScheduler;
 import org.hiero.metrics.demo.crawler.api.job.JobSchedulerFactory;
 import org.hiero.metrics.demo.crawler.threadpool.config.JobPoolConfig;
+import org.hiero.metrics.demo.crawler.threadpool.config.JobTaskPoolConfig;
 import org.hiero.metrics.demo.crawler.threadpool.metrics.ExecutorServiceFactory;
 
 public class ExecutorServiceJobSchedulerFactory implements JobSchedulerFactory {
@@ -19,15 +21,24 @@ public class ExecutorServiceJobSchedulerFactory implements JobSchedulerFactory {
 
     @Override
     public JobScheduler createJobScheduler(Configuration configuration) {
+        JobPoolConfig jobPoolConfig = configuration.getConfigData(JobPoolConfig.class);
+        logger.info("Creating job tread pool executor with config: {}", jobPoolConfig);
+        ExecutorService jobExecutorService = ExecutorServiceFactory.buildExecutorService(jobPoolConfig);
+
+        return new ExecutorServiceJobScheduler(jobExecutorService, createJobExecutor(configuration));
+    }
+
+    @Override
+    public JobExecutor createJobExecutor(Configuration configuration) {
         DocumentCache documentCache = ServiceLoader.load(DocumentCacheFactory.class)
                 .findFirst()
                 .orElse(DocumentCacheFactory.NO_OP)
                 .createDocumentCache(configuration);
 
-        JobPoolConfig jobTaskPoolConfig = configuration.getConfigData(JobPoolConfig.class);
-        logger.info("Creating tread pool executor with config: {}", jobTaskPoolConfig);
-        ExecutorService jobExecutorService = ExecutorServiceFactory.buildExecutorService(jobTaskPoolConfig);
+        JobTaskPoolConfig jobTaskPoolConfig = configuration.getConfigData(JobTaskPoolConfig.class);
+        logger.info("Creating job task tread pool executor with config: {}", jobTaskPoolConfig);
+        ExecutorService jobTaskExecutorService = ExecutorServiceFactory.buildExecutorService(jobTaskPoolConfig);
 
-        return new ExecutorServiceJobScheduler(jobExecutorService, documentCache);
+        return new ExecutorServiceJobExecutor(jobTaskExecutorService, documentCache);
     }
 }

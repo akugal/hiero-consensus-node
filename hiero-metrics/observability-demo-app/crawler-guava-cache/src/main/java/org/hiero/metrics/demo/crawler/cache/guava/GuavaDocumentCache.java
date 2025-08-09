@@ -50,6 +50,10 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
     protected void registerMetricsNonIdempotent(@NonNull MetricRegistry metricRegistry) {
         final String cacheCategory = "cache_guava_" + name;
 
+        // cache size metrics
+        metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "size"))
+                .withDescription("Documents cache size")
+                .registerDataPoint(cache::size, Map.of()));
         cacheSizeMaxSpike = metricRegistry
                 .register(LongGauge.maxBuilder(LongGauge.key(cacheCategory, "size_max_spike"), true)
                         .withDescription("Documents cache size - max spike"))
@@ -68,26 +72,26 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
                         .withDescription("Documents cache size - avg running (half-life 5 sec)"))
                 .getNotLabeled();
 
-        metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "size"))
-                .withDescription("Documents cache size")
-                .registerDataPoint(cache::size, Map.of()));
-
+        // cache lookup count
         metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "lookups_count"))
                 .withDynamicLabelNames("type")
                 .withDescription("Document cache lookups count (miss or hit)")
                 .registerDataPoint(() -> cache.stats().hitCount(), Map.of("type", "hit"))
                 .registerDataPoint(() -> cache.stats().missCount(), Map.of("type", "miss")));
 
+        // cache load count
         metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "loads_count"))
                 .withDynamicLabelNames("type")
                 .withDescription("Document cache loads count (success or exception)")
                 .registerDataPoint(() -> cache.stats().loadSuccessCount(), Map.of("type", "success"))
                 .registerDataPoint(() -> cache.stats().loadExceptionCount(), Map.of("type", "exception")));
 
+        // eviction count
         metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "eviction_count"))
                 .withDescription("Document cache eviction count")
                 .registerDataPoint(() -> cache.stats().evictionCount(), Map.of()));
 
+        // avg load time
         metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "avg_load_time"))
                 .withUnit(Unit.NANOSECOND_UNIT)
                 .withDescription("Document cache average load time in nanoseconds (successful and failed loads)")

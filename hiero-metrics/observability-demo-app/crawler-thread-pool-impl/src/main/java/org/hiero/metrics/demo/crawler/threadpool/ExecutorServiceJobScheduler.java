@@ -4,11 +4,7 @@ package org.hiero.metrics.demo.crawler.threadpool;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URI;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.logging.log4j.LogManager;
@@ -17,13 +13,12 @@ import org.apache.logging.log4j.ThreadContext;
 import org.hiero.metrics.api.core.IdempotentMetricRegistryAware;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricRegistryAware;
-import org.hiero.metrics.demo.crawler.api.document.Document;
-import org.hiero.metrics.demo.crawler.api.document.DocumentFetcher;
-import org.hiero.metrics.demo.crawler.api.document.DocumentProcessor;
-import org.hiero.metrics.demo.crawler.api.document.cache.DocumentCache;
 import org.hiero.metrics.demo.crawler.api.job.JobConfig;
+import org.hiero.metrics.demo.crawler.api.job.JobExecutor;
+import org.hiero.metrics.demo.crawler.api.job.JobResult;
 import org.hiero.metrics.demo.crawler.api.job.JobScheduler;
 import org.hiero.metrics.demo.crawler.api.job.ScheduledJob;
+import org.hiero.metrics.demo.crawler.api.job.metrics.JobMetricsReporter;
 
 public class ExecutorServiceJobScheduler extends IdempotentMetricRegistryAware implements JobScheduler {
 
@@ -34,24 +29,27 @@ public class ExecutorServiceJobScheduler extends IdempotentMetricRegistryAware i
     private final AtomicInteger idGenerator = new AtomicInteger(1);
 
     private final ExecutorService executorService;
-    private final DocumentCache cache;
+    private final JobExecutor jobExecutor;
+    private JobMetricsReporter metricsReporter;
 
-    public ExecutorServiceJobScheduler(ExecutorService executorService, DocumentCache cache) {
+    public ExecutorServiceJobScheduler(ExecutorService executorService, JobExecutor jobExecutor) {
         this.executorService = executorService;
-        this.cache = cache;
+        this.jobExecutor = jobExecutor;
     }
 
     @Override
     protected void registerMetricsNonIdempotent(@NonNull MetricRegistry registry) {
-        cache.registerMetrics(registry);
+        jobExecutor.registerMetrics(registry);
         if (executorService instanceof MetricRegistryAware registryAware) {
             registryAware.registerMetrics(registry);
         }
+        metricsReporter = new JobMetricsReporter(registry);
     }
 
     @Override
     public void shutdown() {
         executorService.shutdown();
+        jobExecutor.shutdown();
     }
 
     @Override
@@ -66,122 +64,15 @@ public class ExecutorServiceJobScheduler extends IdempotentMetricRegistryAware i
         logger.info("Job submitted. uri={}", uri);
 
         try {
-            final JobExecution execution = new JobExecution(uri);
-            final JobConfig jobConfig = new JobConfig(
-                    wrapTrackingMetrics(config.fetcher(), execution),
-                    config.processors(),
-                    config.depth(),
-                    config.timeout());
-
-            return new FutureScheduledJob(
-                    jobId,
-                    executorService.submit(() -> {
-                        logger.info("Job started. uri={}", uri);
-                        execution.jobStarted();
-
-                        execution.processingContext().encounterUri(uri);
-
-                        try {
-                            executeRecursive(uri, execution, jobConfig, jobConfig.depth());
-                            execution.concurrencyContext().waitForTasksToComplete(jobConfig.timeout());
-                            return execution.buildResult();
-                        } finally {
-                            logger.info("Job finished. uri={}", uri);
-                        }
-                    }),
-                    execution.concurrencyContext());
+            return new FutureScheduledJob(jobId, executorService.submit(() -> {
+                JobResult result = jobExecutor.execute(uri, config);
+                if (metricsReporter != null) {
+                    metricsReporter.report(result);
+                }
+                return result;
+            }));
         } finally {
             ThreadContext.remove(JOB_ID_KEY);
         }
-    }
-
-    private DocumentFetcher wrapTrackingMetrics(DocumentFetcher fetcher, JobExecution execution) {
-        return uri -> {
-            long startTime = execution.processingContext().currentTime();
-            Optional<Document> doc;
-
-            try {
-                doc = fetcher.fetch(uri);
-            } catch (Exception ex) {
-                execution.processingContext().fetchError(startTime);
-                logger.error("Fetch error. uri={}", uri, ex);
-                // that will allow to cache error
-                return Optional.empty();
-            }
-
-            execution.processingContext().fetchSuccess(startTime);
-
-            if (doc.isEmpty()) {
-                execution.processingContext().unsupportedUriSeen();
-            }
-            return doc;
-        };
-    }
-
-    private Optional<Document> fetch(URI uri, DocumentFetcher fetcher) {
-        try {
-            if (cache != null) {
-                return cache.fetchIfAbsent(uri, fetcher);
-            } else {
-                return fetcher.fetch(uri);
-            }
-        } catch (Throwable ex) {
-            // should not happen due to wrapped fetcher, but just in case
-            throw new RuntimeException("Unexpected error while fetching document. uri=" + uri, ex);
-        }
-    }
-
-    private void executeRecursive(URI uri, JobExecution execution, JobConfig config, int depth) {
-        if (execution.concurrencyContext().isCancelled()
-                || Thread.currentThread().isInterrupted()) {
-            return;
-        }
-
-        Optional<Document> optionalDocument = fetch(uri, config.fetcher());
-        if (optionalDocument.isEmpty()) {
-            return;
-        }
-
-        final Document document = optionalDocument.get();
-        final List<URI> links = document.getLinks();
-
-        if (depth > 0 && !links.isEmpty()) {
-            // final Map<String, String> threadContext = ThreadContext.getContext();
-
-            for (URI link : links) {
-                if (execution.processingContext().encounterUri(link)) {
-                    try {
-                        final long submitTime = execution.concurrencyContext().currentTime();
-                        execution.concurrencyContext().taskSubmitted(executorService.submit(() -> {
-                            long startTimeNano = execution.concurrencyContext().taskStarted(submitTime);
-                            try {
-                                executeRecursive(link, execution, config, depth - 1);
-                            } finally {
-                                execution.concurrencyContext().taskEnded(startTimeNano);
-                            }
-                        }));
-                    } catch (RejectedExecutionException ex) {
-                        execution.concurrencyContext().taskRejected();
-                    }
-                } else {
-                    logger.debug("Duplicate URI. uri={}", link);
-                }
-            }
-        }
-
-        safeProcess(document, execution, config.processors());
-    }
-
-    private void safeProcess(Document document, JobExecution execution, Collection<DocumentProcessor> processors) {
-        long startTime = execution.processingContext().currentTime();
-        for (DocumentProcessor processor : processors) {
-            try {
-                processor.process(document, execution.data());
-            } catch (Throwable ex) {
-                execution.processingContext().processError();
-                logger.error("Process failed. processor={}, uri={}", processor.getName(), document.getUri(), ex);
-            }
-        }
-        execution.processingContext().processFinished(startTime);
     }
 }

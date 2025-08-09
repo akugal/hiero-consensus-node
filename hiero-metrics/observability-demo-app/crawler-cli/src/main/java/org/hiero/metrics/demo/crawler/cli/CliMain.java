@@ -1,19 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.demo.crawler.cli;
 
-import com.swirlds.config.api.Configuration;
-import com.swirlds.config.api.ConfigurationBuilder;
-import com.swirlds.config.extensions.sources.ClasspathFileConfigSource;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.core.MetricsFacade;
-import org.hiero.metrics.api.export.MetricsExportManager;
+import org.hiero.metrics.demo.crawler.Utils;
 import org.hiero.metrics.demo.crawler.api.job.JobManager;
 import org.hiero.metrics.demo.crawler.cli.internal.Command;
 import org.hiero.metrics.demo.crawler.cli.internal.CommandManager;
@@ -25,8 +19,8 @@ public class CliMain {
 
     private static final Logger logger = LogManager.getLogger(CliMain.class);
 
-    public static void main(String[] args) throws IOException {
-        JobManager jobManager = initializeJobManager();
+    public static void main(String[] args) {
+        JobManager jobManager = Utils.initializeJobManager("cli");
         CommandManager commandManager =
                 new CommandManager(List.of(new CrawlCommand(jobManager), new JobCommand(jobManager)));
 
@@ -78,21 +72,5 @@ public class CliMain {
         }
 
         scanner.close();
-    }
-
-    private static JobManager initializeJobManager() throws IOException {
-        MetricRegistry registry = MetricsFacade.createRegistryWithDiscoveredProviders();
-        MetricsExportManager exportManager = MetricsFacade.getDefaultExportManager();
-        exportManager.manageMetricRegistry(registry);
-
-        Configuration configuration = ConfigurationBuilder.create()
-                .autoDiscoverExtensions()
-                .withSources(new ClasspathFileConfigSource(Path.of("application.properties")))
-                .build();
-
-        JobManager jobManager = JobManager.create(configuration);
-        jobManager.registerMetrics(registry);
-
-        return jobManager;
     }
 }

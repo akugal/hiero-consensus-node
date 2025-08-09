@@ -1,21 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.demo.crawler.internal;
+package org.hiero.metrics.demo.crawler.api.job.metrics;
 
 import java.util.Map;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
-
 import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.LongCounter;
 import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
 import org.hiero.metrics.api.stat.CountPerSecondCumulativeAvg;
+import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
 import org.hiero.metrics.api.stat.RunningAverageStat;
-import org.hiero.metrics.demo.crawler.api.job.JobMetrics;
-import org.hiero.metrics.demo.crawler.api.job.JobMetricsRegistration;
 import org.hiero.metrics.demo.crawler.api.job.JobResult;
 
-class JobMetricsReporter {
+public class JobMetricsReporter {
 
     private final LongCounter countTotal;
     private final GaugeAdapter<DoubleSupplier, RunningAverageStat> durationMovingAvg;

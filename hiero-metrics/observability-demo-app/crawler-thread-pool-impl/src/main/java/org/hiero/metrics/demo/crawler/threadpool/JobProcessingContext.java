@@ -25,8 +25,8 @@ final class JobProcessingContext {
 
     private final Set<URI> distinctUriSet = ConcurrentHashMap.newKeySet();
 
-    JobProcessingContext(long jobStartTime) {
-        this.jobStartTime = jobStartTime;
+    JobProcessingContext() {
+        this.jobStartTime = currentTime();
     }
 
     public long currentTime() {
