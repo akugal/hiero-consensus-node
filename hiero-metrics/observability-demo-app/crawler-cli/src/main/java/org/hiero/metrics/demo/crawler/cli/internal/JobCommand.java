@@ -5,11 +5,11 @@ import java.io.PrintStream;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
-import org.hiero.metrics.demo.crawler.api.job.JobConcurrencyMetrics;
 import org.hiero.metrics.demo.crawler.api.job.JobManager;
 import org.hiero.metrics.demo.crawler.api.job.JobProcessingMetrics;
 import org.hiero.metrics.demo.crawler.api.job.JobResult;
 import org.hiero.metrics.demo.crawler.api.job.ScheduledJob;
+import org.hiero.metrics.demo.crawler.api.job.metrics.JobTaskMetrics;
 import org.hiero.metrics.demo.crawler.api.util.TypedMap;
 
 public class JobCommand extends AbstractCommand {
@@ -165,11 +165,7 @@ public class JobCommand extends AbstractCommand {
                 .append('\n');
     }
 
-    private void printMetrics(StringBuilder builder, JobConcurrencyMetrics metrics, String indent) {
-        builder.append(indent)
-                .append("Job delay execution:         ")
-                .append(durationToString(metrics.jobDelayExecutionDuration()))
-                .append('\n');
+    private void printMetrics(StringBuilder builder, JobTaskMetrics metrics, String indent) {
         builder.append(indent)
                 .append("Total tasks count:           ")
                 .append(metrics.totalTasksCount())

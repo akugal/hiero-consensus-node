@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.demo.crawler.threadpool;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.hiero.metrics.demo.crawler.api.exception.JobException;
@@ -10,13 +11,11 @@ import org.hiero.metrics.demo.crawler.api.job.ScheduledJob;
 final class FutureScheduledJob implements ScheduledJob {
 
     private final int jobId;
-    private final Future<JobResult> future;
-    private final JobConcurrencyContext context;
+    private final Future<JobResult> jobFuture;
 
-    public FutureScheduledJob(int jobId, Future<JobResult> future, JobConcurrencyContext context) {
+    public FutureScheduledJob(int jobId, Future<JobResult> jobFuture) {
         this.jobId = jobId;
-        this.future = future;
-        this.context = context;
+        this.jobFuture = jobFuture;
     }
 
     @Override
@@ -26,18 +25,30 @@ final class FutureScheduledJob implements ScheduledJob {
 
     @Override
     public boolean isDone() {
-        return future.isDone();
+        return jobFuture.isDone();
     }
 
     @Override
     public boolean isCancelled() {
-        return context.isCancelled() || future.isCancelled();
+        return jobFuture.isCancelled();
+    }
+
+    @Override
+    public Optional<JobResult> tryGetResult() {
+        if (!isDone()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(getResult());
+        } catch (JobException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public JobResult getResult() throws JobException {
         try {
-            return future.get();
+            return jobFuture.get();
         } catch (ExecutionException e) {
             if (e.getCause() instanceof JobException) {
                 throw (JobException) e.getCause();
@@ -52,7 +63,6 @@ final class FutureScheduledJob implements ScheduledJob {
 
     @Override
     public void cancel() {
-        context.cancel();
-        future.cancel(true);
+        jobFuture.cancel(true);
     }
 }

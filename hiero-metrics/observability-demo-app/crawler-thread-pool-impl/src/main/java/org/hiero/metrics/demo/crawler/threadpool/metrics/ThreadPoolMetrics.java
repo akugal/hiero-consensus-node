@@ -36,11 +36,19 @@ class ThreadPoolMetrics {
 
         final Map<String, String> poolNameLabels = Map.of(POOL_LABEL, executor.getName());
 
+        //config metrics
+        registry.getMetric(ThreadPoolMetricsRegistration.POOL_CONFIG_CORE_SIZE)
+                .registerDataPoint(executor::getCorePoolSize, poolNameLabels);
+        registry.getMetric(ThreadPoolMetricsRegistration.POOL_CONFIG_MAX_SIZE)
+                .registerDataPoint(executor::getMaximumPoolSize, poolNameLabels);
+        registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_CONFIG_CAPACITY)
+                .registerDataPoint(() -> executor.getConfig().queueSize(), poolNameLabels);
+        registry.getMetric(ThreadPoolMetricsRegistration.POOL_CONFIG_KEEP_ALIVE)
+                .registerDataPoint(() -> executor.getConfig().keepAliveSeconds(), poolNameLabels);
+
         // queue metrics
         registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_SIZE)
                 .registerDataPoint(() -> executor.getQueue().size(), poolNameLabels);
-        registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_CONFIG_CAPACITY)
-                .registerDataPoint(() -> executor.getConfig().queueSize(), poolNameLabels);
         queueSizeMaxSpike = registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_SIZE_MAX_SPIKE)
                 .getOrCreateLabeled(poolNameLabels, () -> executor.getQueue().size());
         queueSizeMinSpike = registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_SIZE_MIN_SPIKE)
@@ -51,10 +59,6 @@ class ThreadPoolMetrics {
                 .getOrCreateLabeled(poolNameLabels, () -> executor.getQueue().size());
 
         // pool metrics
-        registry.getMetric(ThreadPoolMetricsRegistration.POOL_CONFIG_CORE_SIZE)
-                .registerDataPoint(executor::getCorePoolSize, poolNameLabels);
-        registry.getMetric(ThreadPoolMetricsRegistration.POOL_CONFIG_MAX_SIZE)
-                .registerDataPoint(executor::getMaximumPoolSize, poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.POOL_SIZE)
                 .registerDataPoint(executor::getPoolSize, poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.POOL_MAX_SIZE)

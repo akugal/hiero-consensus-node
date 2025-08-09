@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 module org.hiero.metrics.demo.crawler.cli {
+    exports org.hiero.metrics.demo.crawler;
     exports org.hiero.metrics.demo.crawler.cli;
 
     uses org.hiero.metrics.demo.crawler.api.job.JobSchedulerFactory;

@@ -34,7 +34,6 @@ public class MeasurableThreadPoolExecutor extends ThreadPoolExecutor implements 
                 handler);
         this.poolName = poolName;
         this.config = config;
-
     }
 
     @Override

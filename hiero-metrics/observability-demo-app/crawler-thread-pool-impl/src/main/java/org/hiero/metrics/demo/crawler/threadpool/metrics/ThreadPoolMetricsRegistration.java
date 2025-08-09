@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
-
 import org.hiero.metrics.api.CallbackMetric;
 import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.LongCounter;
@@ -25,25 +24,29 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
     public static final String CATEGORY = "thread_pool";
     public static final String POOL_LABEL = "pool_name";
 
-    // queue metrics
-    public static final MetricKey<CallbackMetric> QUEUE_SIZE = CallbackMetric.key(CATEGORY, "queue_size");
+    // config metrics
     public static final MetricKey<CallbackMetric> QUEUE_CONFIG_CAPACITY =
             CallbackMetric.key(CATEGORY, "queue_config_capacity");
-    public static final MetricKey<LongGauge> QUEUE_SIZE_MAX_SPIKE = LongGauge.key(CATEGORY, "queue_size_max_spike");
-    public static final MetricKey<LongGauge> QUEUE_SIZE_MIN_SPIKE = LongGauge.key(CATEGORY, "queue_size_min_spike");
-    public static final MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> QUEUE_SIZE_AVG = CumulativeAverageIntStat.key(CATEGORY, "queue_size_avg");
-    public static final MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> QUEUE_SIZE_AVG_RUNNING = RunningAverageStat.key(CATEGORY, "queue_size_avg_running");
-
-    // pool metrics
     public static final MetricKey<CallbackMetric> POOL_CONFIG_CORE_SIZE =
             CallbackMetric.key(CATEGORY, "pool_config_core_size");
     public static final MetricKey<CallbackMetric> POOL_CONFIG_MAX_SIZE =
             CallbackMetric.key(CATEGORY, "pool_config_max_size");
+    public static final MetricKey<CallbackMetric> POOL_CONFIG_KEEP_ALIVE =
+            CallbackMetric.key(CATEGORY, "pool_config_keep_alive");
 
+    // queue metrics
+    public static final MetricKey<CallbackMetric> QUEUE_SIZE = CallbackMetric.key(CATEGORY, "queue_size");
+
+    public static final MetricKey<LongGauge> QUEUE_SIZE_MAX_SPIKE = LongGauge.key(CATEGORY, "queue_size_max_spike");
+    public static final MetricKey<LongGauge> QUEUE_SIZE_MIN_SPIKE = LongGauge.key(CATEGORY, "queue_size_min_spike");
+    public static final MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> QUEUE_SIZE_AVG =
+            CumulativeAverageIntStat.key(CATEGORY, "queue_size_avg");
+    public static final MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> QUEUE_SIZE_AVG_RUNNING =
+            RunningAverageStat.key(CATEGORY, "queue_size_avg_running");
+
+    // pool metrics
     public static final MetricKey<CallbackMetric> POOL_SIZE = CallbackMetric.key(CATEGORY, "pool_size");
     public static final MetricKey<CallbackMetric> POOL_MAX_SIZE = CallbackMetric.key(CATEGORY, "pool_size_max");
-    public static final MetricKey<LongGauge> POOL_SIZE_MAX_SPIKE = LongGauge.key(CATEGORY, "pool_size_max_spike");
-    public static final MetricKey<LongGauge> POOL_SIZE_MIN_SPIKE = LongGauge.key(CATEGORY, "pool_size_min_spike");
 
     // tasks metrics
     public static final MetricKey<LongCounter> TASKS_COUNT_TOTAL = LongCounter.key(CATEGORY, "tasks_count_total");
@@ -77,10 +80,21 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
     @Override
     public Collection<Metric.Builder<?, ?>> getMetricsToRegister() {
         return List.of(
-                // queue metrics
+                //config metrics
                 CallbackMetric.builder(QUEUE_CONFIG_CAPACITY)
-                        .withDescription("Thread pool queue config capacity")
+                        .withDescription("Thread pool config - queue capacity")
                         .withDynamicLabelNames(POOL_LABEL),
+                CallbackMetric.builder(POOL_CONFIG_CORE_SIZE)
+                        .withDescription("Thread pool config - core size")
+                        .withDynamicLabelNames(POOL_LABEL),
+                CallbackMetric.builder(POOL_CONFIG_MAX_SIZE)
+                        .withDescription("Thread pool config - max size")
+                        .withDynamicLabelNames(POOL_LABEL),
+                CallbackMetric.builder(POOL_CONFIG_KEEP_ALIVE)
+                        .withDescription("Thread pool config - keep alive time in seconds")
+                        .withUnit(Unit.SECOND_UNIT)
+                        .withDynamicLabelNames(POOL_LABEL),
+                // queue metrics
                 CallbackMetric.builder(QUEUE_SIZE)
                         .withDescription("Thread pool queue size")
                         .withDynamicLabelNames(POOL_LABEL),
@@ -95,13 +109,6 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
                         .withDynamicLabelNames(POOL_LABEL),
                 RunningAverageStat.metricBuilder(5, QUEUE_SIZE_AVG_RUNNING)
                         .withDescription("Thread pool queue running avg size (half-life of 5 seconds)")
-                        .withDynamicLabelNames(POOL_LABEL),
-                // pool config metrics
-                CallbackMetric.builder(POOL_CONFIG_CORE_SIZE)
-                        .withDescription("Thread pool config core size")
-                        .withDynamicLabelNames(POOL_LABEL),
-                CallbackMetric.builder(POOL_CONFIG_MAX_SIZE)
-                        .withDescription("Thread pool config max size")
                         .withDynamicLabelNames(POOL_LABEL),
                 // pool metrics
                 CallbackMetric.builder(POOL_SIZE)

@@ -10,6 +10,6 @@ public class TrheadPoolConfigurationExtension implements ConfigurationExtension 
     @NonNull
     @Override
     public Set<Class<? extends Record>> getConfigDataTypes() {
-        return Set.of(JobPoolConfig.class);
+        return Set.of(JobPoolConfig.class, JobTaskPoolConfig.class);
     }
 }

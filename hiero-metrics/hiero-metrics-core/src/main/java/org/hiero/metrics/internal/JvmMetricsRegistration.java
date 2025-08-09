@@ -47,10 +47,7 @@ public class JvmMetricsRegistration implements MetricsRegistrationProvider {
             builders.add(CallbackMetric.builder(CallbackMetric.key(category, "cpu_load"))
                     .withDescription("CPU load of the JVM process")
                     .withUnit("percent")
-                    .registerDataPoint(
-                            () -> mBean.getProcessCpuLoad()
-                                    * Runtime.getRuntime().availableProcessors(),
-                            Map.of()));
+                    .registerDataPoint(mBean::getProcessCpuLoad, Map.of()));
         }
 
         return builders;
