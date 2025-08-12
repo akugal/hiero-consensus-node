@@ -11,12 +11,12 @@ public class RunningAverageStat implements DoubleGaugeDataPoint {
     /**
      * each recordValue(X) counts as X calls to values.cycle()
      */
-    private final CountPerSecondWeightedAvg values;
+    private final RateWeightedAvg values;
 
     /**
      * each recordValue(X) counts as 1 call to times.cycle()
      */
-    private final CountPerSecondWeightedAvg times;
+    private final RateWeightedAvg times;
 
     /**
      * the estimated running average
@@ -30,8 +30,8 @@ public class RunningAverageStat implements DoubleGaugeDataPoint {
 
     public RunningAverageStat(final double halfLife, Time time) {
         firstRecord = true;
-        values = new CountPerSecondWeightedAvg(halfLife, time);
-        times = new CountPerSecondWeightedAvg(halfLife, time);
+        values = new RateWeightedAvg(halfLife, time);
+        times = new RateWeightedAvg(halfLife, time);
         reset();
     }
 

@@ -8,35 +8,40 @@ import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.api.datapoint.LongCounterDataPoint;
 import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
-import org.hiero.metrics.api.stat.CountPerSecondCumulativeAvg;
 import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
+import org.hiero.metrics.api.stat.RateCumulativeAvg;
 
 class ThreadPoolMetrics {
 
     private final MeasurableThreadPoolExecutor executor;
 
+    // queue metrics
     private final LongGaugeDataPoint queueSizeMaxSpike;
     private final LongGaugeDataPoint queueSizeMinSpike;
     private final CumulativeAverageIntStat queueSizeAvg;
     private final DoubleGaugeDataPoint queueSizeAvgRunning;
 
-    private final LongCounterDataPoint tasksCountTotal;
+    // task metrics
+    private final LongCounterDataPoint tasksCount;
+    private final LongCounterDataPoint tasksCompletedCount;
+    private final LongCounterDataPoint tasksRejectedCount;
     private final LongGaugeDataPoint tasksActiveCount;
-    private final LongCounterDataPoint tasksCompletedCountTotal;
+    private final DoubleGaugeDataPoint tasksPerSecondMovingAvg;
+    private final RateCumulativeAvg tasksPerSecondAvg;
+
+    // task timing metrics
     private final LongGaugeDataPoint taskWaitTimeMaxSpike;
     private final LongGaugeDataPoint taskWaitTimeMinSpike;
     private final LongGaugeDataPoint taskDurationMaxSpike;
     private final LongGaugeDataPoint taskDurationMinSpike;
     private final DoubleGaugeDataPoint taskDurationRunningAvg;
-    private final DoubleGaugeDataPoint tasksPerSecondMovingAvg;
-    private final CountPerSecondCumulativeAvg tasksPerSecondAvg;
 
     public ThreadPoolMetrics(MeasurableThreadPoolExecutor executor, MetricRegistry registry) {
         this.executor = executor;
 
         final Map<String, String> poolNameLabels = Map.of(POOL_LABEL, executor.getName());
 
-        //config metrics
+        // config metrics
         registry.getMetric(ThreadPoolMetricsRegistration.POOL_CONFIG_CORE_SIZE)
                 .registerDataPoint(executor::getCorePoolSize, poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.POOL_CONFIG_MAX_SIZE)
@@ -65,11 +70,13 @@ class ThreadPoolMetrics {
                 .registerDataPoint(executor::getLargestPoolSize, poolNameLabels);
 
         // task metrics
-        tasksCountTotal = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COUNT_TOTAL)
+        tasksCount = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COUNT_TOTAL)
                 .getOrCreateLabeled(poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COUNT_TOTAL_CALLBACK)
                 .registerDataPoint(executor::getTaskCount, poolNameLabels);
-        tasksCompletedCountTotal = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COMPLETED_COUNT_TOTAL)
+        tasksRejectedCount = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_REJECTED_COUNT_TOTAL)
+                .getOrCreateLabeled(poolNameLabels);
+        tasksCompletedCount = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COMPLETED_COUNT_TOTAL)
                 .getOrCreateLabeled(poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COMPLETED_COUNT_TOTAL_CALLBACK)
                 .registerDataPoint(executor::getCompletedTaskCount, poolNameLabels);
@@ -77,6 +84,10 @@ class ThreadPoolMetrics {
                 .getOrCreateLabeled(poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.TASKS_ACTIVE_COUNT_CALLBACK)
                 .registerDataPoint(executor::getActiveCount, poolNameLabels);
+        tasksPerSecondMovingAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_PER_SECOND_MOVING_AVG)
+                .getOrCreateLabeled(poolNameLabels);
+        tasksPerSecondAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_PER_SECOND_AVG)
+                .getOrCreateLabeled(poolNameLabels);
 
         // task timing metrics
         taskWaitTimeMaxSpike = registry.getMetric(ThreadPoolMetricsRegistration.TASK_WAIT_TIME_MAX_SPIKE)
@@ -90,10 +101,6 @@ class ThreadPoolMetrics {
                 .getOrCreateLabeled(poolNameLabels);
         taskDurationRunningAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASK_DURATION_MOVING_AVG)
                 .getOrCreateLabeled(poolNameLabels);
-        tasksPerSecondMovingAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_PER_SECOND_MOVING_AVG)
-                .getOrCreateLabeled(poolNameLabels);
-        tasksPerSecondAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_PER_SECOND_AVG)
-                .getOrCreateLabeled(poolNameLabels);
     }
 
     private long currentTime() {
@@ -103,7 +110,7 @@ class ThreadPoolMetrics {
     public long taskSubmitted() {
         long submitTime = currentTime();
 
-        tasksCountTotal.increment();
+        tasksCount.increment();
         tasksPerSecondAvg.count();
         tasksPerSecondMovingAvg.update();
 
@@ -114,6 +121,10 @@ class ThreadPoolMetrics {
         queueSizeAvgRunning.update(queueSize);
 
         return submitTime;
+    }
+
+    public void taskRejected() {
+        tasksRejectedCount.increment();
     }
 
     public long taskStarted(long submitTime) {
@@ -128,7 +139,7 @@ class ThreadPoolMetrics {
     }
 
     public void taskFinished(long startTime) {
-        tasksCompletedCountTotal.increment();
+        tasksCompletedCount.increment();
         tasksActiveCount.decrement();
 
         long runTimeDuration = currentTime() - startTime;

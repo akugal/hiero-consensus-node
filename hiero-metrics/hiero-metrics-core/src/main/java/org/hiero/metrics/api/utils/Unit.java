@@ -9,7 +9,6 @@ public final class Unit {
 
     private Unit() {}
 
-
     public static final String COUNT_PER_SEC_UNIT = "Hz";
 
     /**

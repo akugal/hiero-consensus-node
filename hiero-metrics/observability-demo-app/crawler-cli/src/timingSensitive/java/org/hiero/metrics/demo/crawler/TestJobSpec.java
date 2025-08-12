@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
+package org.hiero.metrics.demo.crawler; // SPDX-License-Identifier: Apache-2.0
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -6,18 +7,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public final class TestItem {
+public final class TestJobSpec {
 
     private final String uri;
     private Duration timeout = Duration.ofSeconds(30); // Default timeout
     private int depth = 1; // Default depth
     private final List<String> processors = new ArrayList<>();
 
-    public TestItem(String uri) {
+    public TestJobSpec(String uri) {
         this.uri = Objects.requireNonNull(uri, "URI must not be null");
     }
 
-    public TestItem withTimeout(Duration timeout) {
+    public TestJobSpec withTimeout(Duration timeout) {
         Objects.requireNonNull(timeout, "Timeout must not be null");
         if (timeout.isNegative() || timeout.isZero()) {
             throw new IllegalArgumentException("Timeout must be positive");
@@ -26,7 +27,7 @@ public final class TestItem {
         return this;
     }
 
-    public TestItem withDepth(int depth) {
+    public TestJobSpec withDepth(int depth) {
         if (depth < 0) {
             throw new IllegalArgumentException("Depth must be non-negative");
         }
@@ -34,7 +35,7 @@ public final class TestItem {
         return this;
     }
 
-    public TestItem withProcessors(String... processors) {
+    public TestJobSpec withProcessors(String... processors) {
         this.processors.addAll(Arrays.asList(processors));
         return this;
     }
