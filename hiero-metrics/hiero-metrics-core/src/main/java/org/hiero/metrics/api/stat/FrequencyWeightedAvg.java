@@ -8,7 +8,7 @@ import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.api.utils.Unit;
 
-public class RateWeightedAvg implements DoubleGaugeDataPoint {
+public class FrequencyWeightedAvg implements DoubleGaugeDataPoint {
 
     private static final double LN_2 = Math.log(2);
 
@@ -34,7 +34,7 @@ public class RateWeightedAvg implements DoubleGaugeDataPoint {
      */
     private final double halfLife;
 
-    public RateWeightedAvg(final double halfLife, Time time) {
+    public FrequencyWeightedAvg(final double halfLife, Time time) {
         this.time = time;
         this.halfLife = Math.max(0.01, halfLife);
 
@@ -44,27 +44,27 @@ public class RateWeightedAvg implements DoubleGaugeDataPoint {
         reset();
     }
 
-    public static MetricKey<GaugeAdapter<DoubleSupplier, RateWeightedAvg>> key(String name) {
+    public static MetricKey<GaugeAdapter<DoubleSupplier, FrequencyWeightedAvg>> key(String name) {
         return MetricKey.of(name, GaugeAdapter.class);
     }
 
-    public static MetricKey<GaugeAdapter<DoubleSupplier, RateWeightedAvg>> key(String category, String name) {
+    public static MetricKey<GaugeAdapter<DoubleSupplier, FrequencyWeightedAvg>> key(String category, String name) {
         return MetricKey.of(category, name, GaugeAdapter.class);
     }
 
-    public static GaugeAdapter.Builder<DoubleSupplier, RateWeightedAvg> metricBuilder(
-            double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, RateWeightedAvg>> key) {
+    public static GaugeAdapter.Builder<DoubleSupplier, FrequencyWeightedAvg> metricBuilder(
+            double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, FrequencyWeightedAvg>> key) {
         return GaugeAdapter.builder(
                         key,
                         StatUtils.asInitializer(halfLife),
-                        init -> new RateWeightedAvg(init.getAsDouble(), time),
-                        RateWeightedAvg::getAsDouble)
-                .withReset(RateWeightedAvg::reset)
-                .withUnit(Unit.COUNT_PER_SEC_UNIT);
+                        init -> new FrequencyWeightedAvg(init.getAsDouble(), time),
+                        FrequencyWeightedAvg::getAsDouble)
+                .withReset(FrequencyWeightedAvg::reset)
+                .withUnit(Unit.FREQUENCY_UNIT);
     }
 
-    public static GaugeAdapter.Builder<DoubleSupplier, RateWeightedAvg> metricBuilder(
-            double halfLife, MetricKey<GaugeAdapter<DoubleSupplier, RateWeightedAvg>> key) {
+    public static GaugeAdapter.Builder<DoubleSupplier, FrequencyWeightedAvg> metricBuilder(
+            double halfLife, MetricKey<GaugeAdapter<DoubleSupplier, FrequencyWeightedAvg>> key) {
         return metricBuilder(halfLife, Time.getCurrent(), key);
     }
 
@@ -97,15 +97,13 @@ public class RateWeightedAvg implements DoubleGaugeDataPoint {
     @Override
     public double getAsDouble() {
         // update rate with zero to make it running when no calls have been made
-        update(0.0);
+        update(StatUtils.ZERO);
         return rate;
     }
 
     @Override
     public double getAndReset() {
-        // update rate with zero to make it running when no calls have been made
-        update(0.0);
-        final double result = rate;
+        final double result = getAsDouble();
         reset();
         return result;
     }

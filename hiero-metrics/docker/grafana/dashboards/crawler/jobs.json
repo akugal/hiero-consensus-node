@@ -18,6 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -47,7 +48,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -86,7 +87,7 @@
         "y": 0
       },
       "id": 1,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -149,7 +150,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -171,16 +172,28 @@
             "steps": [
               {
                 "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
           "unit": "ms"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration Moving Avg"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -189,7 +202,7 @@
         "y": 8
       },
       "id": 2,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -555,6 +568,18 @@
         "refresh": 1,
         "regex": "",
         "type": "query"
+      },
+      {
+        "current": {
+          "text": "3s",
+          "value": "3s"
+        },
+        "description": "",
+        "hide": 2,
+        "name": "interval",
+        "query": "3s",
+        "skipUrlSync": true,
+        "type": "constant"
       }
     ]
   },
@@ -565,5 +590,6 @@
   "timepicker": {},
   "timezone": "browser",
   "title": "Job Stats",
-  "version": 0
+  "uid": "a5abfb14-3d92-402b-8299-642927b05741",
+  "version": 1
 }

@@ -17,15 +17,19 @@ public class TestRandomDocumentFetcher implements DocumentFetcher {
     private final IdempotentTimedProcessor fetcher;
     private final Function<URI, Document> docGenerator;
 
-    public TestRandomDocumentFetcher(IdempotentTimedProcessor fetcher, double repeatedLinksProbability) {
+    public TestRandomDocumentFetcher(IdempotentTimedProcessor fetcher, double repeatedLinksProbability,
+                                     int linksMin, int linksMax) {
         this.fetcher = fetcher;
-        docGenerator = uri -> new TestRandomDocument(uri, repeatedLinksProbability);
+        IdGenerator linkIdGenerator = new IdGenerator(repeatedLinksProbability);
+        docGenerator = uri -> new TestRandomDocument(uri, linkIdGenerator, linksMin, linksMax);
     }
 
     @Override
     public Optional<Document> fetch(URI uri) throws DocumentFetchException {
+        // take doc from cache to be consistent and have the same next links for the same URI, but vary only fetch time
         Document document = docCache.computeIfAbsent(uri, docGenerator);
         try {
+            // simulate fetching the document
             fetcher.process(uri);
         } catch (InterruptedException e) {
             throw new DocumentFetchException("Interrupted while fetching document: " + uri, e);

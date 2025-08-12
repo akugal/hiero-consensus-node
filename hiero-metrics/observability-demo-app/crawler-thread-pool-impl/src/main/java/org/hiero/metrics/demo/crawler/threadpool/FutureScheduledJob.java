@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.demo.crawler.threadpool;
 
-import java.util.Optional;
+import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.hiero.metrics.demo.crawler.api.exception.JobException;
+import org.hiero.metrics.demo.crawler.api.exception.JobTimeoutException;
 import org.hiero.metrics.demo.crawler.api.job.JobResult;
 import org.hiero.metrics.demo.crawler.api.job.ScheduledJob;
 
@@ -34,14 +38,20 @@ final class FutureScheduledJob implements ScheduledJob {
     }
 
     @Override
-    public Optional<JobResult> tryGetResult() {
-        if (!isDone()) {
-            return Optional.empty();
-        }
+    public JobResult getResult(Duration timeout) throws JobException {
         try {
-            return Optional.of(getResult());
-        } catch (JobException e) {
-            return Optional.empty();
+            return jobFuture.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof JobException) {
+                throw (JobException) e.getCause();
+            } else {
+                throw new JobException("Job failed", e);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new JobException("Job interrupted", e);
+        } catch (TimeoutException e) {
+            throw new JobTimeoutException("Timeout on getting job result", e);
         }
     }
 

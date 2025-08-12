@@ -3,11 +3,10 @@ package org.hiero.metrics.demo.crawler.threadpool.metrics;
 
 import static org.hiero.metrics.demo.crawler.threadpool.metrics.ExecutorServiceFactory.buildThreadFactory;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.ThreadContext;
@@ -59,50 +58,37 @@ public class MeasurableThreadPoolExecutor extends ThreadPoolExecutor implements 
     }
 
     @Override
-    protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
-        if (metrics == null) {
-            return super.newTaskFor(runnable, value);
-        }
-
-        long submitTime = metrics.taskSubmitted();
-        final Map<String, String> parentContext = ThreadContext.getImmutableContext();
-
-        return super.newTaskFor(
-                () -> {
-                    final Map<String, String> originalContext = ThreadContext.getImmutableContext();
-                    ThreadContext.putAll(parentContext);
-
-                    long startTime = metrics.taskStarted(submitTime);
-                    try {
-                        runnable.run();
-                    } finally {
-                        ThreadContext.putAll(originalContext);
-                        metrics.taskFinished(startTime);
-                    }
-                },
-                value);
+    public void execute(@NonNull Runnable command) {
+        super.execute(wrap(command));
     }
 
-    @Override
-    protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
-        if (metrics == null) {
-            return super.newTaskFor(callable);
-        }
-
-        long submitTime = metrics.taskSubmitted();
+    private Runnable wrap(Runnable command) {
         final Map<String, String> parentContext = ThreadContext.getImmutableContext();
 
-        return super.newTaskFor(() -> {
-            final Map<String, String> originalContext = ThreadContext.getImmutableContext();
-            ThreadContext.putAll(parentContext);
+        if (metrics == null) {
+            return () -> {
+                final Map<String, String> originalContext = ThreadContext.getImmutableContext();
+                ThreadContext.putAll(parentContext);
+                try {
+                    command.run();
+                } finally {
+                    ThreadContext.putAll(originalContext);
+                }
+            };
+        } else {
+            long submitTime = metrics.taskSubmitted();
+            return () -> {
+                final Map<String, String> originalContext = ThreadContext.getImmutableContext();
+                ThreadContext.putAll(parentContext);
 
-            long startTime = metrics.taskStarted(submitTime);
-            try {
-                return callable.call();
-            } finally {
-                ThreadContext.putAll(originalContext);
-                metrics.taskFinished(startTime);
-            }
-        });
+                long startTime = metrics.taskStarted(submitTime);
+                try {
+                    command.run();
+                } finally {
+                    ThreadContext.putAll(originalContext);
+                    metrics.taskFinished(startTime);
+                }
+            };
+        }
     }
 }

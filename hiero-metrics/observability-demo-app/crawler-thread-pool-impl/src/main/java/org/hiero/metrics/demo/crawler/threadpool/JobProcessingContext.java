@@ -75,8 +75,8 @@ final class JobProcessingContext {
                 toDuration(fetchErrorTotalTime.get()),
                 toDuration(processSuccessTotalTime.get()),
                 distinctUriSet.size(),
-                unsupportedUriCount.get(),
                 duplicateUriCount.get(),
+                unsupportedUriCount.get(),
                 fetchErrorsCount.get(),
                 fetchSuccessCount.get(),
                 processErrorsCount.get());
