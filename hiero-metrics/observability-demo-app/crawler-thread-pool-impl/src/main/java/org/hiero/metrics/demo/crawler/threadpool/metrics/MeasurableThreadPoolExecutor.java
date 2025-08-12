@@ -49,6 +49,12 @@ public class MeasurableThreadPoolExecutor extends ThreadPoolExecutor implements 
     public synchronized void registerMetrics(MetricRegistry registry) {
         if (metrics == null) {
             metrics = new ThreadPoolMetrics(this, registry);
+
+            final RejectedExecutionHandler handler = getRejectedExecutionHandler();
+            setRejectedExecutionHandler((r, executor) -> {
+                metrics.taskRejected();
+                handler.rejectedExecution(r, executor);
+            });
         }
     }
 

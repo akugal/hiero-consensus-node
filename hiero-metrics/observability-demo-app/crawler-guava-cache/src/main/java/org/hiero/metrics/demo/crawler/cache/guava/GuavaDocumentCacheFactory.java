@@ -6,8 +6,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.demo.crawler.api.document.cache.DocumentCache;
 import org.hiero.metrics.demo.crawler.api.document.cache.DocumentCacheFactory;
-import org.hiero.metrics.demo.crawler.cache.guava.config.CacheConfig;
 import org.hiero.metrics.demo.crawler.api.document.cache.NoOpDocumentCache;
+import org.hiero.metrics.demo.crawler.cache.guava.config.CacheConfig;
 
 public class GuavaDocumentCacheFactory implements DocumentCacheFactory {
 

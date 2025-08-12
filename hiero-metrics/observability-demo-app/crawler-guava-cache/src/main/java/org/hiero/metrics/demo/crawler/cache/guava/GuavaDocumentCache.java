@@ -64,12 +64,13 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
                 .getNotLabeled();
         // next stats are just to compare average behavior
         cacheSizeAvgCumulative = metricRegistry
-                .register(CumulativeAverageIntStat.metricBuilder(CumulativeAverageIntStat.key(cacheCategory, "size_avg"))
-                        .withDescription("Documents cache size - avg cumulative"))
+                .register(
+                        CumulativeAverageIntStat.metricBuilder(CumulativeAverageIntStat.key(cacheCategory, "size_avg"))
+                                .withDescription("Documents cache size - avg cumulative"))
                 .getNotLabeled();
         cacheSizeAvgRunning = metricRegistry
-                .register(RunningAverageStat.metricBuilder(5, RunningAverageStat.key(cacheCategory, "size_avg_running"))
-                        .withDescription("Documents cache size - avg running (half-life 5 sec)"))
+                .register(RunningAverageStat.metricBuilder(1, RunningAverageStat.key(cacheCategory, "size_avg_running"))
+                        .withDescription("Documents cache size - avg running (half-life 1 sec)"))
                 .getNotLabeled();
 
         // cache lookup count
@@ -105,7 +106,8 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
             long size = cache.size();
             cacheSizeMinSpike.update(size);
             cacheSizeMaxSpike.update(size);
-            cacheSizeAvgCumulative.update((int) size); // we assume no config will have more than Integer.MAX_VALUE entries
+            // we assume no config will have more than Integer.MAX_VALUE entries
+            cacheSizeAvgCumulative.update((int) size);
             cacheSizeAvgRunning.update(size);
         }
 

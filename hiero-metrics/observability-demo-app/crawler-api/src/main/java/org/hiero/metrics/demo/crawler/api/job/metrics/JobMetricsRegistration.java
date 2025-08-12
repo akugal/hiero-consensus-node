@@ -11,7 +11,7 @@ import org.hiero.metrics.api.LongCounter;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricsRegistrationProvider;
-import org.hiero.metrics.api.stat.CountPerSecondCumulativeAvg;
+import org.hiero.metrics.api.stat.RateCumulativeAvg;
 import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
 import org.hiero.metrics.api.stat.RunningAverageStat;
 import org.hiero.metrics.api.utils.Unit;
@@ -24,8 +24,8 @@ public class JobMetricsRegistration implements MetricsRegistrationProvider {
     public static final MetricKey<LongCounter> JOBS_COUNT_TOTAL = LongCounter.key(CATEGORY, "jobs_count");
     public static final MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> JOB_DURATION_MOVING_AVG =
             RunningAverageStat.key(CATEGORY, "job_duration_moving_avg");
-    public static final MetricKey<GaugeAdapter<Object, CountPerSecondCumulativeAvg>> JOBS_COUNT_PER_SEC_AVG =
-            CountPerSecondCumulativeAvg.key(CATEGORY, "job_count_per_second_avg");
+    public static final MetricKey<GaugeAdapter<Object, RateCumulativeAvg>> JOBS_COUNT_PER_SEC_AVG =
+            RateCumulativeAvg.key(CATEGORY, "job_count_per_second_avg");
     public static final MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> JOB_CONCURRENCY_IMPROVEMENT_AVG =
             CumulativeAverageIntStat.key(CATEGORY, "job_concurrency_improvement_avg");
     public static final MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> JOB_URI_CACHE_HIT_AVG =
@@ -38,11 +38,11 @@ public class JobMetricsRegistration implements MetricsRegistrationProvider {
                 LongCounter.builder(JOBS_COUNT_TOTAL)
                         .withDescription("Total number of jobs executed")
                         .withDynamicLabelNames(SCHEME_LABEL),
-                RunningAverageStat.metricBuilder(5, JOB_DURATION_MOVING_AVG)
-                        .withDescription("Job run time moving average with 5 seconds half-life")
+                RunningAverageStat.metricBuilder(2, JOB_DURATION_MOVING_AVG)
+                        .withDescription("Job run time moving average with 2 seconds half-life")
                         .withUnit(Unit.MILLISECOND_UNIT)
                         .withDynamicLabelNames(SCHEME_LABEL),
-                CountPerSecondCumulativeAvg.metricBuilder(JOBS_COUNT_PER_SEC_AVG)
+                RateCumulativeAvg.metricBuilder(JOBS_COUNT_PER_SEC_AVG)
                         .withDescription("Jobs cont per second average")
                         .withDynamicLabelNames(SCHEME_LABEL),
                 CumulativeAverageIntStat.metricBuilder(JOB_CONCURRENCY_IMPROVEMENT_AVG)

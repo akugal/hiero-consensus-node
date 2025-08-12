@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.api.export.MetricsSnapshot;
@@ -27,7 +25,6 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
 
     private final AtomicInteger lastResponseSize = new AtomicInteger(4096);
     private final OpenMetricsSnapshotsWriter exporter = new OpenMetricsSnapshotsWriter();
-    private final AtomicReference<Supplier<MetricsSnapshot>> snapshotSupplierRef = new AtomicReference<>(null);
 
     public OpenMetricsHttpEndpoint() throws IOException {
         this(8888);

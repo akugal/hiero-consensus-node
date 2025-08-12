@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-plugins { id("org.hiero.gradle.module.application") }
+plugins {
+    id("org.hiero.gradle.module.application")
+    id("org.hiero.gradle.feature.test-timing-sensitive")
+}
 
 mainModuleInfo {
     runtimeOnly("com.swirlds.config.impl")
@@ -10,9 +13,7 @@ mainModuleInfo {
     runtimeOnly("org.hiero.metrics.demo.crawler.cache.guava")
 }
 
-testModuleInfo {
-    requires("org.junit.jupiter.api")
-}
+timingSensitiveModuleInfo { requires("org.junit.jupiter.api") }
 
 application.mainClass = "org.hiero.metrics.demo.crawler.cli.CliMain"
 

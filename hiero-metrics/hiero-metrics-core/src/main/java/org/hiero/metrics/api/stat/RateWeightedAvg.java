@@ -8,7 +8,7 @@ import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.api.utils.Unit;
 
-public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
+public class RateWeightedAvg implements DoubleGaugeDataPoint {
 
     private static final double LN_2 = Math.log(2);
 
@@ -27,14 +27,14 @@ public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
     /**
      * estimated average calls/sec to cycle()
      */
-    private volatile double countPerSecond = 0;
+    private volatile double rate = 0;
 
     /**
      * half the weight = this many sec
      */
     private final double halfLife;
 
-    public CountPerSecondWeightedAvg(final double halfLife, Time time) {
+    public RateWeightedAvg(final double halfLife, Time time) {
         this.time = time;
         this.halfLife = Math.max(0.01, halfLife);
 
@@ -44,27 +44,27 @@ public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
         reset();
     }
 
-    public static MetricKey<GaugeAdapter<DoubleSupplier, CountPerSecondWeightedAvg>> key(String name) {
+    public static MetricKey<GaugeAdapter<DoubleSupplier, RateWeightedAvg>> key(String name) {
         return MetricKey.of(name, GaugeAdapter.class);
     }
 
-    public static MetricKey<GaugeAdapter<DoubleSupplier, CountPerSecondWeightedAvg>> key(String category, String name) {
+    public static MetricKey<GaugeAdapter<DoubleSupplier, RateWeightedAvg>> key(String category, String name) {
         return MetricKey.of(category, name, GaugeAdapter.class);
     }
 
-    public static GaugeAdapter.Builder<DoubleSupplier, CountPerSecondWeightedAvg> metricBuilder(
-            double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, CountPerSecondWeightedAvg>> key) {
+    public static GaugeAdapter.Builder<DoubleSupplier, RateWeightedAvg> metricBuilder(
+            double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, RateWeightedAvg>> key) {
         return GaugeAdapter.builder(
                         key,
                         StatUtils.asInitializer(halfLife),
-                        init -> new CountPerSecondWeightedAvg(init.getAsDouble(), time),
-                        CountPerSecondWeightedAvg::getAsDouble)
-                .withReset(CountPerSecondWeightedAvg::reset)
+                        init -> new RateWeightedAvg(init.getAsDouble(), time),
+                        RateWeightedAvg::getAsDouble)
+                .withReset(RateWeightedAvg::reset)
                 .withUnit(Unit.COUNT_PER_SEC_UNIT);
     }
 
-    public static GaugeAdapter.Builder<DoubleSupplier, CountPerSecondWeightedAvg> metricBuilder(
-            double halfLife, MetricKey<GaugeAdapter<DoubleSupplier, CountPerSecondWeightedAvg>> key) {
+    public static GaugeAdapter.Builder<DoubleSupplier, RateWeightedAvg> metricBuilder(
+            double halfLife, MetricKey<GaugeAdapter<DoubleSupplier, RateWeightedAvg>> key) {
         return metricBuilder(halfLife, Time.getCurrent(), key);
     }
 
@@ -86,9 +86,9 @@ public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
         final double dt = (currentTime - lastTime) / 1.0e9; // seconds: last update to now
         if (t2 >= 1e-9) { // skip cases were no time has passed since last call
             if (1.0 / t2 > LN_2 / halfLife) { // during startup period, so do uniformly-weighted average
-                countPerSecond = (countPerSecond * t1 + count) / t2;
+                rate = (rate * t1 + count) / t2;
             } else { // after startup, so do exponentially-weighted average with given half life
-                countPerSecond = countPerSecond * Math.pow(0.5, dt / halfLife) + count * LN_2 / halfLife;
+                rate = rate * Math.pow(0.5, dt / halfLife) + count * LN_2 / halfLife;
             }
         }
         lastTime = currentTime;
@@ -96,12 +96,16 @@ public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
 
     @Override
     public double getAsDouble() {
-        return countPerSecond;
+        // update rate with zero to make it running when no calls have been made
+        update(0.0);
+        return rate;
     }
 
     @Override
     public double getAndReset() {
-        final double result = countPerSecond;
+        // update rate with zero to make it running when no calls have been made
+        update(0.0);
+        final double result = rate;
         reset();
         return result;
     }
@@ -115,6 +119,6 @@ public class CountPerSecondWeightedAvg implements DoubleGaugeDataPoint {
     public synchronized void reset() {
         startTime = time.nanoTime(); // find average since this time
         lastTime = startTime; // the last time update() was called
-        countPerSecond = 0; // estimated average calls to cycle() per second
+        rate = 0; // estimated average calls to cycle() per second
     }
 }

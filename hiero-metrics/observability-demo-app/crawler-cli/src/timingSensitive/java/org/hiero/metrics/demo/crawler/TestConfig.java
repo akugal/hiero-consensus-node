@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
+package org.hiero.metrics.demo.crawler; // SPDX-License-Identifier: Apache-2.0
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -7,22 +8,28 @@ import java.util.Objects;
 
 public final class TestConfig {
 
-    private final List<TestItem> items = new ArrayList<>();
+    private final List<TestJobSpec> jobSpecs;
     private Duration timeout = Duration.ofSeconds(60); // Default timeout
     private int concurrentUsers = 4; // Default concurrent users
     private int throughputPerSecond = 0; // Default throughput, 0 means no limit
 
-    public TestConfig() {}
+    public TestConfig() {
+        jobSpecs = new ArrayList<>();
+    }
 
-    public TestConfig(List<TestItem> items, Duration timeout, int concurrentUsers, int throughputPerSecond) {
-        this.items.addAll(items);
+    public TestConfig(List<TestJobSpec> jobSpecs) {
+        this.jobSpecs = jobSpecs;
+    }
+
+    public TestConfig(List<TestJobSpec> jobSpecs, Duration timeout, int concurrentUsers, int throughputPerSecond) {
+        this(jobSpecs);
         this.timeout = timeout;
         this.concurrentUsers = concurrentUsers;
         this.throughputPerSecond = throughputPerSecond;
     }
 
-    public TestConfig withItem(TestItem item) {
-        items.add(Objects.requireNonNull(item, "Test item must not be null"));
+    public TestConfig withJobSpec(TestJobSpec jobSpec) {
+        jobSpecs.add(Objects.requireNonNull(jobSpec, "Job spec must not be null"));
         return this;
     }
 
@@ -51,8 +58,8 @@ public final class TestConfig {
         return this;
     }
 
-    public List<TestItem> items() {
-        return items;
+    public List<TestJobSpec> items() {
+        return jobSpecs;
     }
 
     public Duration timeout() {

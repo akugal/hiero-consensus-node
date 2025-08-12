@@ -4,7 +4,6 @@ package org.hiero.metrics.demo.crawler.cli;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.demo.crawler.Utils;
