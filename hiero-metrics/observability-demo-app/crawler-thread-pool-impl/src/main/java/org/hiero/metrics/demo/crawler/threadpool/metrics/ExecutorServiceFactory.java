@@ -21,14 +21,15 @@ public final class ExecutorServiceFactory {
 
     public static <C extends ThreadPoolConfig> ThreadFactory buildThreadFactory(C config) {
         Thread.Builder builder;
+        String prefix = config.getName() + '-';
+
         if (config.useVirtualThreads()) {
             builder = Thread.ofVirtual();
+            prefix += "v-";
         } else {
             builder = Thread.ofPlatform().daemon().priority(Thread.MIN_PRIORITY);
         }
 
-        return builder.inheritInheritableThreadLocals(true)
-                .name(config.getName() + '-', 1)
-                .factory();
+        return builder.inheritInheritableThreadLocals(true).name(prefix, 1).factory();
     }
 }

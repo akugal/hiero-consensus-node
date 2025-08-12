@@ -7,7 +7,7 @@ import java.util.function.IntSupplier;
 import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.LongCounter;
 import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.stat.RateCumulativeAvg;
+import org.hiero.metrics.api.stat.FrequencyCumulativeAvg;
 import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
 import org.hiero.metrics.api.stat.RunningAverageStat;
 import org.hiero.metrics.demo.crawler.api.job.JobResult;
@@ -16,14 +16,14 @@ public class JobMetricsReporter {
 
     private final LongCounter countTotal;
     private final GaugeAdapter<DoubleSupplier, RunningAverageStat> durationMovingAvg;
-    private final GaugeAdapter<Object, RateCumulativeAvg> countPerSec;
+    private final GaugeAdapter<Object, FrequencyCumulativeAvg> countPerSec;
     private final GaugeAdapter<IntSupplier, CumulativeAverageIntStat> concurrencyImprovementAvg;
     private final GaugeAdapter<IntSupplier, CumulativeAverageIntStat> cacheHitAvg;
 
     public JobMetricsReporter(MetricRegistry registry) {
         countTotal = registry.getMetric(JobMetricsRegistration.JOBS_COUNT_TOTAL);
         durationMovingAvg = registry.getMetric(JobMetricsRegistration.JOB_DURATION_MOVING_AVG);
-        countPerSec = registry.getMetric(JobMetricsRegistration.JOBS_COUNT_PER_SEC_AVG);
+        countPerSec = registry.getMetric(JobMetricsRegistration.JOBS_FREQUENCY_AVG);
         concurrencyImprovementAvg = registry.getMetric(JobMetricsRegistration.JOB_CONCURRENCY_IMPROVEMENT_AVG);
         cacheHitAvg = registry.getMetric(JobMetricsRegistration.JOB_URI_CACHE_HIT_AVG);
     }

@@ -49,7 +49,11 @@ public class ExecutorServiceJobExecutor extends IdempotentMetricRegistryAware im
 
     @Override
     public JobResult execute(URI uri, JobConfig config) throws JobException {
-        logger.info("Job started. uri={}", uri);
+        logger.info(
+                "Job started. uri={}, depth={}, timeoutMs={}",
+                uri,
+                config.depth(),
+                config.timeout().toMillis());
 
         final JobExecution execution = new JobExecution(uri, config.timeout(), logger);
         final JobConfig jobConfig = new JobConfig(
@@ -58,16 +62,30 @@ public class ExecutorServiceJobExecutor extends IdempotentMetricRegistryAware im
                 config.depth(),
                 config.timeout());
 
-        execution.processingContext().encounterUri(uri);
-
-        Future<?> rootFuture = executorService.submit(new JobTask(uri, execution, jobConfig, jobConfig.depth()));
-        execution.concurrencyContext().taskSubmitted(rootFuture);
+        submitTask(uri, jobConfig, execution, jobConfig.depth());
 
         logger.debug("Waiting for tasks to complete. uri={}", uri);
         execution.concurrencyContext().waitForTasksToComplete();
 
         logger.info("Job finished. uri={}", uri);
         return execution.buildResult();
+    }
+
+    private void submitTask(URI uri, JobConfig config, JobExecution execution, int depth) {
+        logger.debug("Submitting job task. uri={}, depth={}", uri, depth);
+        if (execution.processingContext().encounterUri(uri)) {
+            execution.concurrencyContext().registerNewTask();
+            try {
+                Future<?> rootFuture = executorService.submit(new JobTask(uri, execution, config, depth));
+                execution.concurrencyContext().taskSubmitted(rootFuture);
+            } catch (RejectedExecutionException ex) {
+                logger.warn("Job task execution rejected for uri={}", uri);
+                execution.concurrencyContext().taskRejected();
+                execution.concurrencyContext().deregisterTask();
+            }
+        } else {
+            logger.debug("Duplicate URI. uri={}", uri);
+        }
     }
 
     private DocumentFetcher wrapTrackingMetrics(DocumentFetcher fetcher, JobExecution execution) {
@@ -111,17 +129,17 @@ public class ExecutorServiceJobExecutor extends IdempotentMetricRegistryAware im
 
         @Override
         public void run() {
-            if (execution.concurrencyContext().isCancelled()) {
-                logger.debug("Job cancelled. Skipping task. uri={}", uri);
-                return;
-            }
-            if (Thread.currentThread().isInterrupted()) {
-                logger.debug("Job interrupted. Skipping task. uri={}", uri);
-                return;
-            }
-
             long startTimeNano = execution.concurrencyContext().taskStarted(submitTime);
             try {
+                if (execution.concurrencyContext().isCancelled()) {
+                    logger.debug("Job cancelled. Skipping task. uri={}", uri);
+                    return;
+                }
+                if (Thread.currentThread().isInterrupted()) {
+                    logger.debug("Job interrupted. Skipping task. uri={}", uri);
+                    return;
+                }
+
                 crawl();
             } finally {
                 execution.concurrencyContext().taskEnded(startTimeNano);
@@ -129,6 +147,8 @@ public class ExecutorServiceJobExecutor extends IdempotentMetricRegistryAware im
         }
 
         private void crawl() {
+            logger.debug("Crawling job task. depth={}, uri={}", depth, uri);
+
             Optional<Document> optionalDocument = fetch();
             if (optionalDocument.isEmpty()) {
                 return;
@@ -141,16 +161,7 @@ public class ExecutorServiceJobExecutor extends IdempotentMetricRegistryAware im
                 logger.debug("Discovered {} nested links. uri={}", links.size(), uri);
 
                 for (URI link : links) {
-                    if (execution.processingContext().encounterUri(link)) {
-                        try {
-                            Future<?> submit = executorService.submit(new JobTask(link, execution, config, depth - 1));
-                            execution.concurrencyContext().taskSubmitted(submit);
-                        } catch (RejectedExecutionException ex) {
-                            execution.concurrencyContext().taskRejected();
-                        }
-                    } else {
-                        logger.debug("Duplicate URI. uri={}", link);
-                    }
+                    submitTask(link, config, execution, depth - 1);
                 }
             }
 

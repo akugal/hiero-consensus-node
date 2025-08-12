@@ -9,7 +9,7 @@ public final class Unit {
 
     private Unit() {}
 
-    public static final String COUNT_PER_SEC_UNIT = "Hz";
+    public static final String FREQUENCY_UNIT = "Hz";
 
     /**
      * Unit of nanoseconds.

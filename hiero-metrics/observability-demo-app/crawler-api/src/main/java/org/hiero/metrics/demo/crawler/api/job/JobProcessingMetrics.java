@@ -9,8 +9,7 @@ public record JobProcessingMetrics(
         Duration fetchErrorTotalDuration,
         Duration processSuccessTotalDuration,
         int distinctUriCount,
-        int unsupportedUriCount,
-        int duplicateUriCount,
+        int duplicateUriCount, int unsupportedUriCount,
         int fetchErrorsCount,
         int fetchSuccessCount,
         int processErrorsCount) {

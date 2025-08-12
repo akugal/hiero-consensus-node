@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -44,13 +44,13 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 2,
+        "h": 4,
+        "w": 24,
         "x": 0,
         "y": 0
       },
       "id": 1,
-      "interval": "1s",
+      "interval": "$interval",
       "maxDataPoints": 300,
       "options": {
         "colorMode": "background",
@@ -186,12 +186,12 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 22,
-        "x": 2,
-        "y": 0
+        "w": 24,
+        "x": 0,
+        "y": 4
       },
       "id": 3,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -290,10 +290,10 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 12
       },
       "id": 2,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -341,23 +341,6 @@
           "legendFormat": "Size Max Spike",
           "range": true,
           "refId": "Size Max Spike",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:queue_size_min_spike{pool_name=\"$pool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Size Min Spike",
-          "range": true,
-          "refId": "Size Min Spike",
           "useBackend": false
         },
         {
@@ -461,10 +444,10 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 22
       },
       "id": 5,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -614,10 +597,10 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 30
       },
       "id": 4,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -752,10 +735,10 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 40
       },
       "id": 6,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -778,7 +761,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:task_queue_wait_time_max_spike_ns{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:task_queue_wait_duration_max_spike_ns{pool_name=\"$pool_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -786,23 +769,6 @@
           "legendFormat": "Wait Max Spike",
           "range": true,
           "refId": "Wait Max Spike",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:task_queue_wait_time_min_spike_ns{pool_name=\"$pool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Wait Min Spike",
-          "range": true,
-          "refId": "Wait Min Spike",
           "useBackend": false
         },
         {
@@ -820,23 +786,6 @@
           "legendFormat": "Duration Max Spike",
           "range": true,
           "refId": "Duration Max Spike",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:task_duration__min_spike_ns{pool_name=\"$pool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Duration Min Spike",
-          "range": true,
-          "refId": "Duration Min Spike",
           "useBackend": false
         },
         {
@@ -905,6 +854,19 @@
         "refresh": 1,
         "regex": "",
         "type": "query"
+      },
+      {
+        "current": {
+          "text": "3s",
+          "value": "3s"
+        },
+        "description": "",
+        "hide": 2,
+        "label": "Interval",
+        "name": "interval",
+        "query": "3s",
+        "skipUrlSync": true,
+        "type": "constant"
       }
     ]
   },
@@ -916,5 +878,5 @@
   "timezone": "browser",
   "title": "Thread Pool Stats",
   "uid": "c01a9025-2fc0-43fa-92d9-c109ea4eff5b",
-  "version": 2
+  "version": 1
 }

@@ -10,7 +10,6 @@ public final class TestConfig {
 
     private final List<TestJobSpec> jobSpecs;
     private Duration timeout = Duration.ofSeconds(60); // Default timeout
-    private int concurrentUsers = 4; // Default concurrent users
     private int throughputPerSecond = 0; // Default throughput, 0 means no limit
 
     public TestConfig() {
@@ -21,10 +20,9 @@ public final class TestConfig {
         this.jobSpecs = jobSpecs;
     }
 
-    public TestConfig(List<TestJobSpec> jobSpecs, Duration timeout, int concurrentUsers, int throughputPerSecond) {
+    public TestConfig(List<TestJobSpec> jobSpecs, Duration timeout, int throughputPerSecond) {
         this(jobSpecs);
         this.timeout = timeout;
-        this.concurrentUsers = concurrentUsers;
         this.throughputPerSecond = throughputPerSecond;
     }
 
@@ -42,14 +40,6 @@ public final class TestConfig {
         return this;
     }
 
-    public TestConfig withConcurrentUsers(int concurrentUsers) {
-        if (concurrentUsers <= 0) {
-            throw new IllegalArgumentException("Concurrent users must be greater than zero");
-        }
-        this.concurrentUsers = concurrentUsers;
-        return this;
-    }
-
     public TestConfig withThroughputPerSecond(int throughputPerSecond) {
         if (throughputPerSecond < 0) {
             throw new IllegalArgumentException("Throughput per second must be non-negative");
@@ -64,10 +54,6 @@ public final class TestConfig {
 
     public Duration timeout() {
         return timeout;
-    }
-
-    public int concurrentUsers() {
-        return concurrentUsers;
     }
 
     public int throughputPerSecond() {

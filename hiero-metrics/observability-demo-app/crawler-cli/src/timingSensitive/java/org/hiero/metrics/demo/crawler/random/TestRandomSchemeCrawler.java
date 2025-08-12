@@ -15,8 +15,9 @@ public class TestRandomSchemeCrawler implements SchemeCrawler {
     private final Map<String, DocumentProcessor> processors;
 
     public TestRandomSchemeCrawler(
-            IdempotentTimedProcessor fetcher, double repeatedLinksProbability, IdempotentTimedProcessor processor) {
-        this.fetcher = new TestRandomDocumentFetcher(fetcher, repeatedLinksProbability);
+            IdempotentTimedProcessor fetcher, double repeatedLinksProbability, int linksMin, int linksMax,
+            IdempotentTimedProcessor processor) {
+        this.fetcher = new TestRandomDocumentFetcher(fetcher, repeatedLinksProbability, linksMin, linksMax);
         this.processors = SchemeCrawler.asMap(new TestRandomDocumentProcessor(processor));
     }
 

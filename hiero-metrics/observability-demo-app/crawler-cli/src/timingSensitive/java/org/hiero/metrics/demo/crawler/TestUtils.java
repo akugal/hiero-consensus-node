@@ -8,18 +8,18 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.api.stat.StatUtils;
 import org.hiero.metrics.demo.crawler.api.document.SchemeCrawler;
+import org.hiero.metrics.demo.crawler.api.exception.JobException;
 import org.hiero.metrics.demo.crawler.api.job.JobManager;
+import org.hiero.metrics.demo.crawler.api.job.JobResult;
 import org.hiero.metrics.demo.crawler.api.job.ScheduledJob;
+import org.hiero.metrics.demo.crawler.api.job.metrics.JobMetrics;
 
 public class TestUtils {
 
@@ -44,39 +44,70 @@ public class TestUtils {
         Objects.requireNonNull(jobManager, "jobManager cannot be null");
         Objects.requireNonNull(config, "org.hiero.metrics.demo.crawler.TestConfig cannot be null");
 
-        try (ExecutorService executor = Executors.newFixedThreadPool(config.concurrentUsers())) {
-            int throughputDelay = config.throughputPerSecond() > 0 ? 1000 / config.throughputPerSecond() : 0;
+        int throughputDelay = config.throughputPerSecond() > 0 ? 1000 / config.throughputPerSecond() : 0;
 
-            List<Future<ScheduledJob>> submissions = new ArrayList<>();
+        List<ScheduledJob> jobs = new ArrayList<>();
 
-            long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
+        long timeoutMs = config.timeout().toMillis();
 
-            for (TestJobSpec item : config.items()) {
-                Future<ScheduledJob> submit = executor.submit(() -> jobManager.schedule(
-                        item.uri(),
-                        item.timeout(),
-                        item.depth(),
-                        item.processors().toArray(new String[0])));
-                submissions.add(submit);
-                if (throughputDelay > 0) Thread.sleep(throughputDelay);
-            }
-
-            for (Future<ScheduledJob> submission : submissions) {
-                try {
-                    submission.get().getResult();
-                } catch (ExecutionException e) {
-                    System.out.println("Job failed: " + e.getCause().getMessage());
-                }
-            }
-
-            long duration = System.currentTimeMillis() - startTime;
-            logger.info("Test finished in {} ms", duration);
-            System.out.println("Test finished in " + duration + " ms");
-
-            jobManager.shutdown();
-            jobManager.awaitTermination(config.timeout());
-            executor.shutdown();
+        for (TestJobSpec item : config.items()) {
+            ScheduledJob scheduledJob = jobManager.schedule(
+                    item.uri(),
+                    item.timeout(),
+                    item.depth(),
+                    item.processors().toArray(new String[0]));
+            jobs.add(scheduledJob);
+            if (throughputDelay > 0) Thread.sleep(throughputDelay);
         }
+
+        for (ScheduledJob job : jobs) {
+            try {
+                long remainingTime = timeoutMs - (System.currentTimeMillis() - startTime);
+                if (remainingTime <= 0) {
+                    System.out.println("Test timeout reached before all jobs completed");
+                    jobManager.shutdown();
+                    return;
+                }
+
+                JobResult result = job.getResult(Duration.ofMillis(remainingTime));
+                printJobResults(job.getJobId(), result);
+
+            } catch (JobException e) {
+                System.out.println("Test timeout reached before all jobs completed");
+                jobManager.shutdown();
+                return;
+            }
+        }
+
+        long duration = System.currentTimeMillis() - startTime;
+        logger.info("Test finished in {} ms", duration);
+        System.out.println("Test finished in " + duration + " ms");
+
+        jobManager.shutdown();
+        jobManager.awaitTermination(config.timeout());
+    }
+
+    public static void printJobResults(int jobId, JobResult result) {
+        JobMetrics metrics = result.jobMetrics();
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Job id=").append(jobId).append(" uri=").append(result.rootUri()).append("\n");
+        sb.append("Duration:          ").append(metrics.processingMetrics().jobDuration().toMillis()).append(" ms\n");
+        sb.append("Concurrency ratio: ").append(metrics.processingMetrics().concurrencyImprovementRatio()).append("x\n");
+        sb.append("Tasks total:       ").append(metrics.concurrencyMetrics().totalTasksCount()).append("\n");
+        sb.append("Tasks rejected:    ").append(metrics.concurrencyMetrics().rejectedTasksCount()).append("\n");
+        sb.append("Task avg duration: ").append(metrics.concurrencyMetrics().taskExecutionAverageDuration().toMillis()).append(" ms\n");
+        sb.append("Task avg delay:    ").append(metrics.concurrencyMetrics().tasksExecutionDelayTotalDuration().toMillis()).append(" ms\n");
+        sb.append("Distinct uris:     ").append(metrics.processingMetrics().distinctUriCount()).append("\n");
+        sb.append("Duplicate uris:    ").append(metrics.processingMetrics().duplicateUriCount()).append("\n");
+        sb.append("Uri cache hit:     ").append(metrics.processingMetrics().getUriCacheHitCount()).append("\n");
+
+        System.out.println(sb);
+    }
+
+    private static String toString(Duration duration) {
+        return duration.toMillis() + " ms";
     }
 
     public static void simulateBlockingIO(Duration duration) throws InterruptedException {
@@ -85,15 +116,15 @@ public class TestUtils {
         latch.await();
     }
 
-    public static List<TestJobSpec> createRandomTestJobsSpecs(int count) {
+    public static List<TestJobSpec> createRandomTestJobsSpecs(int count, int depth, Duration timeout) {
         if (count <= 0) {
             throw new IllegalArgumentException("Count must be greater than zero");
         }
         List<TestJobSpec> jobSpecs = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             jobSpecs.add(new TestJobSpec("random://url/" + UUID.randomUUID())
-                    .withTimeout(Duration.ofSeconds(60))
-                    .withDepth((int) randomLong(2, 5)));
+                    .withTimeout(timeout)
+                    .withDepth(depth));
         }
         return jobSpecs;
     }

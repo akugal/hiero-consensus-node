@@ -59,8 +59,15 @@ final class JobConcurrencyContext {
         }
     }
 
-    public long taskStarted(long submittedTime) {
+    public void registerNewTask() {
         phaser.register();
+    }
+
+    public void deregisterTask() {
+        phaser.arrive();
+    }
+
+    public long taskStarted(long submittedTime) {
         long startTime = currentTime();
         taskExecutionTimeDelayTotal.addAndGet(startTime - submittedTime);
         return startTime;
@@ -74,7 +81,7 @@ final class JobConcurrencyContext {
             cleanUpDoneTasks();
         }
 
-        phaser.arriveAndDeregister();
+        deregisterTask();
     }
 
     public void waitForTasksToComplete() throws JobException {
@@ -86,8 +93,9 @@ final class JobConcurrencyContext {
             cancel();
             throw new JobException("Job interrupted", e);
         } catch (TimeoutException e) {
+            logger.error("Job timeout. timeoutMs={}, unarrived={}, arrived={}",
+                    timeout.toMillis(),  phaser.getUnarrivedParties(), phaser.getArrivedParties());
             cancel();
-            logger.error("Job timeout ({} ms) on waiting for tasks to complete", timeout.toMillis(), e);
             throw new JobTimeoutException(
                     "Timeout reached (" + timeout.toMillis() + " ms) waiting for tasks to complete");
         }

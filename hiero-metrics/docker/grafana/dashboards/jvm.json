@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 6,
+  "id": 5,
   "links": [],
   "panels": [
     {
@@ -52,7 +52,7 @@
         "y": 0
       },
       "id": 4,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -165,7 +165,7 @@
         "y": 0
       },
       "id": 1,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -250,7 +250,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -290,7 +290,7 @@
         "y": 7
       },
       "id": 3,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -392,7 +392,7 @@
         "y": 7
       },
       "id": 2,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -451,6 +451,18 @@
         "refresh": 1,
         "regex": "",
         "type": "query"
+      },
+      {
+        "current": {
+          "text": "3s",
+          "value": "3s"
+        },
+        "description": "",
+        "hide": 2,
+        "name": "interval",
+        "query": "3s",
+        "skipUrlSync": true,
+        "type": "constant"
       }
     ]
   },

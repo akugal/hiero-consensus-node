@@ -28,7 +28,6 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
     private final Cache<URI, Optional<Document>> cache;
 
     private LongGaugeDataPoint cacheSizeMaxSpike;
-    private LongGaugeDataPoint cacheSizeMinSpike;
     private CumulativeAverageIntStat cacheSizeAvgCumulative;
     private RunningAverageStat cacheSizeAvgRunning;
 
@@ -57,10 +56,6 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
         cacheSizeMaxSpike = metricRegistry
                 .register(LongGauge.maxBuilder(LongGauge.key(cacheCategory, "size_max_spike"), true)
                         .withDescription("Documents cache size - max spike"))
-                .getNotLabeled();
-        cacheSizeMinSpike = metricRegistry
-                .register(LongGauge.minBuilder(LongGauge.key(cacheCategory, "size_min_spike"), true)
-                        .withDescription("Documents cache size - min spike"))
                 .getNotLabeled();
         // next stats are just to compare average behavior
         cacheSizeAvgCumulative = metricRegistry
@@ -104,7 +99,6 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
     public Optional<Document> fetchIfAbsent(URI uri, DocumentFetcher fetcher) throws DocumentFetchException {
         if (isMetricsRegistered()) {
             long size = cache.size();
-            cacheSizeMinSpike.update(size);
             cacheSizeMaxSpike.update(size);
             // we assume no config will have more than Integer.MAX_VALUE entries
             cacheSizeAvgCumulative.update((int) size);
