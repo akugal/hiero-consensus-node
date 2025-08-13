@@ -18,7 +18,7 @@ class ThreadPoolMetrics {
     // queue metrics
     private final LongGaugeDataPoint queueSizeMaxSpike;
     private final CumulativeAverageIntStat queueSizeAvg;
-    private final DoubleGaugeDataPoint queueSizeAvgRunning;
+    private final DoubleGaugeDataPoint queueSizeAvgMoving;
 
     // task metrics
     private final LongCounterDataPoint tasksCount;
@@ -55,8 +55,8 @@ class ThreadPoolMetrics {
                 .getOrCreateLabeled(poolNameLabels, () -> executor.getQueue().size());
         queueSizeAvg = registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_SIZE_AVG)
                 .getOrCreateLabeled(poolNameLabels, () -> executor.getQueue().size());
-        queueSizeAvgRunning = registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_SIZE_AVG_RUNNING)
-                .getOrCreateLabeled(poolNameLabels, () -> executor.getQueue().size());
+        queueSizeAvgMoving = registry.getMetric(ThreadPoolMetricsRegistration.QUEUE_SIZE_AVG_MOVING)
+                .getOrCreateLabeled(poolNameLabels);
 
         // pool metrics
         registry.getMetric(ThreadPoolMetricsRegistration.POOL_SIZE)
@@ -79,9 +79,9 @@ class ThreadPoolMetrics {
                 .getOrCreateLabeled(poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.TASKS_ACTIVE_COUNT_CALLBACK)
                 .registerDataPoint(executor::getActiveCount, poolNameLabels);
-        tasksFrequencyMovingAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_FREQUENCY_MOVING_AVG)
-                .getOrCreateLabeled(poolNameLabels);
         tasksFrequencyAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_FREQUENCY_AVG)
+                .getOrCreateLabeled(poolNameLabels);
+        tasksFrequencyMovingAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_FREQUENCY_MOVING_AVG)
                 .getOrCreateLabeled(poolNameLabels);
 
         // task timing metrics
@@ -107,7 +107,7 @@ class ThreadPoolMetrics {
         int queueSize = executor.getQueue().size();
         queueSizeMaxSpike.update(queueSize);
         queueSizeAvg.update(queueSize);
-        queueSizeAvgRunning.update(queueSize);
+        queueSizeAvgMoving.update(queueSize);
 
         return submitTime;
     }

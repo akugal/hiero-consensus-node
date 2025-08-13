@@ -9,12 +9,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import org.hiero.metrics.api.CallbackMetric;
-import org.hiero.metrics.api.LongGauge;
 import org.hiero.metrics.api.core.IdempotentMetricRegistryAware;
 import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
 import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
-import org.hiero.metrics.api.stat.RunningAverageStat;
+import org.hiero.metrics.api.stat.MovingAverageStat;
 import org.hiero.metrics.api.utils.Unit;
 import org.hiero.metrics.demo.crawler.api.document.Document;
 import org.hiero.metrics.demo.crawler.api.document.DocumentFetcher;
@@ -27,9 +25,8 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
     private final String name;
     private final Cache<URI, Optional<Document>> cache;
 
-    private LongGaugeDataPoint cacheSizeMaxSpike;
-    private CumulativeAverageIntStat cacheSizeAvgCumulative;
-    private RunningAverageStat cacheSizeAvgRunning;
+    private CumulativeAverageIntStat cacheSizeAvg;
+    private MovingAverageStat cacheSizeMovingAvg;
 
     public GuavaDocumentCache(CacheConfig cacheConfig) {
         this("document", cacheConfig);
@@ -53,19 +50,18 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
         metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "size"))
                 .withDescription("Documents cache size")
                 .registerDataPoint(cache::size, Map.of()));
-        cacheSizeMaxSpike = metricRegistry
-                .register(LongGauge.maxBuilder(LongGauge.key(cacheCategory, "size_max_spike"), true)
-                        .withDescription("Documents cache size - max spike"))
-                .getNotLabeled();
-        // next stats are just to compare average behavior
-        cacheSizeAvgCumulative = metricRegistry
+        // accumulates cache size over time and rest betwee exports; starts with current cache size
+        cacheSizeAvg = metricRegistry
                 .register(
                         CumulativeAverageIntStat.metricBuilder(CumulativeAverageIntStat.key(cacheCategory, "size_avg"))
+                                .withDefaultInitializer(() -> (int) cache.size())
                                 .withDescription("Documents cache size - avg cumulative"))
                 .getNotLabeled();
-        cacheSizeAvgRunning = metricRegistry
-                .register(RunningAverageStat.metricBuilder(1, RunningAverageStat.key(cacheCategory, "size_avg_running"))
-                        .withDescription("Documents cache size - avg running (half-life 1 sec)"))
+        // moving average that also starts
+        cacheSizeMovingAvg = metricRegistry
+                .register(MovingAverageStat.metricBuilder(1, MovingAverageStat.key(cacheCategory, "size_moving_avg"))
+                        .withDefaultInitializer(() -> (int) cache.size())
+                        .withDescription("Documents cache size - avg moving (half-life 1 sec)"))
                 .getNotLabeled();
 
         // cache lookup count
@@ -97,14 +93,6 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
     @Override
     @NonNull
     public Optional<Document> fetchIfAbsent(URI uri, DocumentFetcher fetcher) throws DocumentFetchException {
-        if (isMetricsRegistered()) {
-            long size = cache.size();
-            cacheSizeMaxSpike.update(size);
-            // we assume no config will have more than Integer.MAX_VALUE entries
-            cacheSizeAvgCumulative.update((int) size);
-            cacheSizeAvgRunning.update(size);
-        }
-
         try {
             return cache.get(uri, () -> fetcher.fetch(uri));
         } catch (ExecutionException e) {
@@ -113,6 +101,13 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
                 throw (DocumentFetchException) e.getCause();
             }
             throw new DocumentFetchException(e);
+        } finally {
+            if (isMetricsRegistered()) {
+                long size = cache.size();
+                // we assume no config will have more than Integer.MAX_VALUE entries
+                cacheSizeAvg.update((int) size);
+                cacheSizeMovingAvg.update(size);
+            }
         }
     }
 }

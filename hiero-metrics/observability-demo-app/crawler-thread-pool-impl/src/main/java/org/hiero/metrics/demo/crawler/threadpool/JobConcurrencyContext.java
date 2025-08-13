@@ -93,8 +93,11 @@ final class JobConcurrencyContext {
             cancel();
             throw new JobException("Job interrupted", e);
         } catch (TimeoutException e) {
-            logger.error("Job timeout. timeoutMs={}, unarrived={}, arrived={}",
-                    timeout.toMillis(),  phaser.getUnarrivedParties(), phaser.getArrivedParties());
+            logger.error(
+                    "Job timeout. timeoutMs={}, unarrived={}, arrived={}",
+                    timeout.toMillis(),
+                    phaser.getUnarrivedParties(),
+                    phaser.getArrivedParties());
             cancel();
             throw new JobTimeoutException(
                     "Timeout reached (" + timeout.toMillis() + " ms) waiting for tasks to complete");

@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.demo.crawler.random;
 
-import org.hiero.metrics.demo.crawler.TestUtils;
-
 import java.util.concurrent.atomic.AtomicInteger;
+import org.hiero.metrics.demo.crawler.TestUtils;
 
 public class IdGenerator {
 

@@ -9,7 +9,8 @@ public record JobProcessingMetrics(
         Duration fetchErrorTotalDuration,
         Duration processSuccessTotalDuration,
         int distinctUriCount,
-        int duplicateUriCount, int unsupportedUriCount,
+        int duplicateUriCount,
+        int unsupportedUriCount,
         int fetchErrorsCount,
         int fetchSuccessCount,
         int processErrorsCount) {
@@ -18,9 +19,9 @@ public record JobProcessingMetrics(
         return distinctUriCount - fetchErrorsCount - fetchSuccessCount;
     }
 
-    public int concurrencyImprovementRatio() {
+    public double concurrencyFactor() {
         if (jobDuration.isPositive()) {
-            return (int) fetchSuccessTotalDuration
+            return fetchSuccessTotalDuration
                     .plus(fetchErrorTotalDuration)
                     .plus(processSuccessTotalDuration)
                     .dividedBy(jobDuration);

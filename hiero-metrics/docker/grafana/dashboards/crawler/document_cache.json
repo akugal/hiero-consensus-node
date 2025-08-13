@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 6,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -48,7 +48,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -160,14 +160,14 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "cache_guava_document:size_avg_running{test=\"$test_name\"}",
+          "expr": "cache_guava_document:size_moving_avg{test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Size Avg Running",
+          "legendFormat": "Size Avg Moving",
           "range": true,
-          "refId": "Avg Running",
+          "refId": "Avg Moving",
           "useBackend": false
         }
       ],
@@ -190,10 +190,6 @@
             "steps": [
               {
                 "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
@@ -235,7 +231,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "avg(cache_guava_document:lookups_count{test=\"$test_name\", type=\"hit\"}) / sum(cache_guava_document:lookups_count{test=\"$test_name\"})",
+          "expr": "sum(cache_guava_document:lookups_count{test=\"$test_name\", type=\"hit\"}) / sum(cache_guava_document:lookups_count{test=\"$test_name\"})",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -379,7 +375,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
