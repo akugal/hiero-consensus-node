@@ -7,16 +7,17 @@ import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 
-public class RunningAverageStat implements DoubleGaugeDataPoint {
+// similar to com.swirlds.common.metrics.statistics.StatsRunningAverage
+public class MovingAverageStat implements DoubleGaugeDataPoint {
     /**
      * each recordValue(X) counts as X calls to values.cycle()
      */
-    private final FrequencyWeightedAvg values;
+    private final FrequencyMovingAvg values;
 
     /**
      * each recordValue(X) counts as 1 call to times.cycle()
      */
-    private final FrequencyWeightedAvg times;
+    private final FrequencyMovingAvg times;
 
     /**
      * the estimated running average
@@ -28,33 +29,33 @@ public class RunningAverageStat implements DoubleGaugeDataPoint {
      */
     private boolean firstRecord;
 
-    public RunningAverageStat(final double halfLife, Time time) {
+    public MovingAverageStat(final double halfLife, Time time) {
         firstRecord = true;
-        values = new FrequencyWeightedAvg(halfLife, time);
-        times = new FrequencyWeightedAvg(halfLife, time);
+        values = new FrequencyMovingAvg(halfLife, time);
+        times = new FrequencyMovingAvg(halfLife, time);
         reset();
     }
 
-    public static MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> key(String name) {
+    public static MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> key(String name) {
         return MetricKey.of(name, GaugeAdapter.class);
     }
 
-    public static MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> key(String category, String name) {
+    public static MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> key(String category, String name) {
         return MetricKey.of(category, name, GaugeAdapter.class);
     }
 
-    public static GaugeAdapter.Builder<DoubleSupplier, RunningAverageStat> metricBuilder(
-            double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> key) {
+    public static GaugeAdapter.Builder<DoubleSupplier, MovingAverageStat> metricBuilder(
+            double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> key) {
         return GaugeAdapter.builder(
                         key,
                         StatUtils.asInitializer(halfLife),
-                        init -> new RunningAverageStat(init.getAsDouble(), time),
-                        RunningAverageStat::getAsDouble)
-                .withReset(RunningAverageStat::reset);
+                        init -> new MovingAverageStat(init.getAsDouble(), time),
+                        MovingAverageStat::getAsDouble)
+                .withReset(MovingAverageStat::reset);
     }
 
-    public static GaugeAdapter.Builder<DoubleSupplier, RunningAverageStat> metricBuilder(
-            double halfLife, MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> key) {
+    public static GaugeAdapter.Builder<DoubleSupplier, MovingAverageStat> metricBuilder(
+            double halfLife, MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> key) {
         return metricBuilder(halfLife, Time.getCurrent(), key);
     }
 

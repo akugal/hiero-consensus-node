@@ -367,14 +367,14 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:queue_size_avg_running{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:queue_size_moving_avg{pool_name=\"$pool_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Queue Size Avg Running",
+          "legendFormat": "Queue Size Avg Moving",
           "range": true,
-          "refId": "Queue Size Avg Running",
+          "refId": "Queue Size Avg Moving",
           "useBackend": false
         }
       ],

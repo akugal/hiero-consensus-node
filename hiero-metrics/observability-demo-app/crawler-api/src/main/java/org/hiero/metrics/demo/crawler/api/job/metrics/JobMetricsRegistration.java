@@ -11,9 +11,10 @@ import org.hiero.metrics.api.LongCounter;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricsRegistrationProvider;
-import org.hiero.metrics.api.stat.FrequencyCumulativeAvg;
 import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
-import org.hiero.metrics.api.stat.RunningAverageStat;
+import org.hiero.metrics.api.stat.FrequencyCumulativeAvg;
+import org.hiero.metrics.api.stat.FrequencyMovingAvg;
+import org.hiero.metrics.api.stat.MovingAverageStat;
 import org.hiero.metrics.api.utils.Unit;
 
 public class JobMetricsRegistration implements MetricsRegistrationProvider {
@@ -21,15 +22,17 @@ public class JobMetricsRegistration implements MetricsRegistrationProvider {
     public static final String CATEGORY = "job";
     public static final String SCHEME_LABEL = "scheme";
 
-    public static final MetricKey<LongCounter> JOBS_COUNT_TOTAL = LongCounter.key(CATEGORY, "jobs_count");
-    public static final MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> JOB_DURATION_MOVING_AVG =
-            RunningAverageStat.key(CATEGORY, "job_duration_moving_avg");
+    public static final MetricKey<LongCounter> JOBS_COUNT_TOTAL = LongCounter.key(CATEGORY, "count");
+    public static final MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> JOB_DURATION_AVG_MOVING =
+            MovingAverageStat.key(CATEGORY, "duration_moving_avg");
     public static final MetricKey<GaugeAdapter<Object, FrequencyCumulativeAvg>> JOBS_FREQUENCY_AVG =
-            FrequencyCumulativeAvg.key(CATEGORY, "job_frequency_avg");
-    public static final MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> JOB_CONCURRENCY_IMPROVEMENT_AVG =
-            CumulativeAverageIntStat.key(CATEGORY, "job_concurrency_improvement_avg");
+            FrequencyCumulativeAvg.key(CATEGORY, "frequency_avg");
+    public static final MetricKey<GaugeAdapter<DoubleSupplier, FrequencyMovingAvg>> JOBS_FREQUENCY_AVG_MOVING =
+            FrequencyMovingAvg.key(CATEGORY, "frequency_moving_avg");
+    public static final MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> JOB_CONCURRENCY_FACTOR_AVG =
+            CumulativeAverageIntStat.key(CATEGORY, "concurrency_factor_avg");
     public static final MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> JOB_URI_CACHE_HIT_AVG =
-            CumulativeAverageIntStat.key(CATEGORY, "job_uri_cache_hit_avg");
+            CumulativeAverageIntStat.key(CATEGORY, "uri_cache_hit_avg");
 
     @NonNull
     @Override
@@ -38,18 +41,22 @@ public class JobMetricsRegistration implements MetricsRegistrationProvider {
                 LongCounter.builder(JOBS_COUNT_TOTAL)
                         .withDescription("Total number of jobs executed")
                         .withDynamicLabelNames(SCHEME_LABEL),
-                RunningAverageStat.metricBuilder(2, JOB_DURATION_MOVING_AVG)
-                        .withDescription("Job run time moving average with 2 seconds half-life")
+                MovingAverageStat.metricBuilder(1, JOB_DURATION_AVG_MOVING)
+                        .withDescription("Job run time moving average with 1 second half-life")
                         .withUnit(Unit.MILLISECOND_UNIT)
                         .withDynamicLabelNames(SCHEME_LABEL),
                 FrequencyCumulativeAvg.metricBuilder(JOBS_FREQUENCY_AVG)
                         .withDescription("Jobs frequency average")
                         .withDynamicLabelNames(SCHEME_LABEL),
-                CumulativeAverageIntStat.metricBuilder(JOB_CONCURRENCY_IMPROVEMENT_AVG)
-                        .withDescription("Job concurrency improvement average (total tasks processing time divided by total job run time)")
+                FrequencyMovingAvg.metricBuilder(5, JOBS_FREQUENCY_AVG_MOVING)
+                        .withDescription("Job frequency moving average (half-life of 5 seconds)")
+                        .withDynamicLabelNames(SCHEME_LABEL),
+                CumulativeAverageIntStat.metricBuilder(JOB_CONCURRENCY_FACTOR_AVG)
+                        .withDescription(
+                                "Job concurrency factor average (total tasks processing time divided by job run time)")
                         .withDynamicLabelNames(SCHEME_LABEL),
                 CumulativeAverageIntStat.metricBuilder(JOB_URI_CACHE_HIT_AVG)
-                        .withDescription("Job uri  cache hit average")
+                        .withDescription("Job uri cache hit average")
                         .withDynamicLabelNames(SCHEME_LABEL));
     }
 }

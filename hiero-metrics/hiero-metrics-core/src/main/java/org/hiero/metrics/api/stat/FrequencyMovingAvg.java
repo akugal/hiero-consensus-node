@@ -8,7 +8,8 @@ import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.api.utils.Unit;
 
-public class FrequencyWeightedAvg implements DoubleGaugeDataPoint {
+// Similar to com.swirlds.common.metrics.statistics.StatsSpeedometer
+public class FrequencyMovingAvg implements DoubleGaugeDataPoint {
 
     private static final double LN_2 = Math.log(2);
 
@@ -34,7 +35,7 @@ public class FrequencyWeightedAvg implements DoubleGaugeDataPoint {
      */
     private final double halfLife;
 
-    public FrequencyWeightedAvg(final double halfLife, Time time) {
+    public FrequencyMovingAvg(final double halfLife, Time time) {
         this.time = time;
         this.halfLife = Math.max(0.01, halfLife);
 
@@ -44,27 +45,27 @@ public class FrequencyWeightedAvg implements DoubleGaugeDataPoint {
         reset();
     }
 
-    public static MetricKey<GaugeAdapter<DoubleSupplier, FrequencyWeightedAvg>> key(String name) {
+    public static MetricKey<GaugeAdapter<DoubleSupplier, FrequencyMovingAvg>> key(String name) {
         return MetricKey.of(name, GaugeAdapter.class);
     }
 
-    public static MetricKey<GaugeAdapter<DoubleSupplier, FrequencyWeightedAvg>> key(String category, String name) {
+    public static MetricKey<GaugeAdapter<DoubleSupplier, FrequencyMovingAvg>> key(String category, String name) {
         return MetricKey.of(category, name, GaugeAdapter.class);
     }
 
-    public static GaugeAdapter.Builder<DoubleSupplier, FrequencyWeightedAvg> metricBuilder(
-            double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, FrequencyWeightedAvg>> key) {
+    public static GaugeAdapter.Builder<DoubleSupplier, FrequencyMovingAvg> metricBuilder(
+            double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, FrequencyMovingAvg>> key) {
         return GaugeAdapter.builder(
                         key,
                         StatUtils.asInitializer(halfLife),
-                        init -> new FrequencyWeightedAvg(init.getAsDouble(), time),
-                        FrequencyWeightedAvg::getAsDouble)
-                .withReset(FrequencyWeightedAvg::reset)
+                        init -> new FrequencyMovingAvg(init.getAsDouble(), time),
+                        FrequencyMovingAvg::getAsDouble)
+                .withReset(FrequencyMovingAvg::reset)
                 .withUnit(Unit.FREQUENCY_UNIT);
     }
 
-    public static GaugeAdapter.Builder<DoubleSupplier, FrequencyWeightedAvg> metricBuilder(
-            double halfLife, MetricKey<GaugeAdapter<DoubleSupplier, FrequencyWeightedAvg>> key) {
+    public static GaugeAdapter.Builder<DoubleSupplier, FrequencyMovingAvg> metricBuilder(
+            double halfLife, MetricKey<GaugeAdapter<DoubleSupplier, FrequencyMovingAvg>> key) {
         return metricBuilder(halfLife, Time.getCurrent(), key);
     }
 

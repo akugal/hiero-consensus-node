@@ -21,6 +21,7 @@ public class CumulativeAverageIntStat implements DoubleSupplier {
 
     public CumulativeAverageIntStat(IntSupplier initializer) {
         this.initializer = Objects.requireNonNull(initializer, "Initializer must not be null");
+        update(initializer.getAsInt());
     }
 
     public static MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> key(String name) {
@@ -54,7 +55,6 @@ public class CumulativeAverageIntStat implements DoubleSupplier {
         } else {
             container.set(init, 1);
         }
-        container.reset();
     }
 
     @Override

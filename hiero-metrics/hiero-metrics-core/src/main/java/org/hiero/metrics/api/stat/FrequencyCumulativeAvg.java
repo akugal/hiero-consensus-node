@@ -13,6 +13,7 @@ import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.stat.container.AtomicIntPair;
 import org.hiero.metrics.api.utils.Unit;
 
+// Similar to com.swirlds.common.metrics.extensions.CountPerSecond
 // has to be reset periodically, otherwise it will overflow!
 public class FrequencyCumulativeAvg implements DoubleSupplier {
 

@@ -64,13 +64,17 @@ public class ExecutorServiceJobScheduler extends IdempotentMetricRegistryAware i
         logger.info("Job submitted. uri={}", uri);
 
         try {
-            return new FutureScheduledJob(jobId, executorService.submit(() -> {
-                JobResult result = jobExecutor.execute(uri, config);
-                if (metricsReporter != null) {
-                    metricsReporter.report(result);
-                }
-                return result;
-            }));
+            if (metricsReporter != null) {
+                metricsReporter.onJobSubmit(uri);
+                return new FutureScheduledJob(jobId, executorService.submit(() -> {
+                    JobResult result = jobExecutor.execute(uri, config);
+                    metricsReporter.onJobFinish(result);
+                    return result;
+                }));
+            } else {
+                logger.debug("Metrics are not available, executing job without metrics reporting. uri={}", uri);
+                return new FutureScheduledJob(jobId, executorService.submit(() -> jobExecutor.execute(uri, config)));
+            }
         } finally {
             ThreadContext.remove(JOB_ID_KEY);
         }

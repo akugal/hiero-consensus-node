@@ -15,8 +15,8 @@ import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricsRegistrationProvider;
 import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
 import org.hiero.metrics.api.stat.FrequencyCumulativeAvg;
-import org.hiero.metrics.api.stat.FrequencyWeightedAvg;
-import org.hiero.metrics.api.stat.RunningAverageStat;
+import org.hiero.metrics.api.stat.FrequencyMovingAvg;
+import org.hiero.metrics.api.stat.MovingAverageStat;
 import org.hiero.metrics.api.utils.Unit;
 
 public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvider {
@@ -40,8 +40,8 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
     public static final MetricKey<LongGauge> QUEUE_SIZE_MAX_SPIKE = LongGauge.key(CATEGORY, "queue_size_max_spike");
     public static final MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> QUEUE_SIZE_AVG =
             CumulativeAverageIntStat.key(CATEGORY, "queue_size_avg");
-    public static final MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> QUEUE_SIZE_AVG_RUNNING =
-            RunningAverageStat.key(CATEGORY, "queue_size_avg_running");
+    public static final MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> QUEUE_SIZE_AVG_MOVING =
+            MovingAverageStat.key(CATEGORY, "queue_size_moving_avg");
 
     // pool metrics
     public static final MetricKey<CallbackMetric> POOL_SIZE = CallbackMetric.key(CATEGORY, "pool_size");
@@ -63,15 +63,15 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
             CallbackMetric.key(CATEGORY, "tasks_active_count_callback");
     public static final MetricKey<GaugeAdapter<Object, FrequencyCumulativeAvg>> TASKS_FREQUENCY_AVG =
             FrequencyCumulativeAvg.key(CATEGORY, "tasks_frequency_avg");
-    public static final MetricKey<GaugeAdapter<DoubleSupplier, FrequencyWeightedAvg>> TASKS_FREQUENCY_MOVING_AVG =
-            FrequencyWeightedAvg.key(CATEGORY, "tasks_frequency_moving_avg");
+    public static final MetricKey<GaugeAdapter<DoubleSupplier, FrequencyMovingAvg>> TASKS_FREQUENCY_MOVING_AVG =
+            FrequencyMovingAvg.key(CATEGORY, "tasks_frequency_moving_avg");
 
     // Timing metrics
     public static final MetricKey<LongGauge> TASK_WAIT_DURATION_MAX_SPIKE =
             LongGauge.key(CATEGORY, "task_queue_wait_duration_max_spike");
     public static final MetricKey<LongGauge> TASK_DURATION_MAX_SPIKE =
             LongGauge.key(CATEGORY, "task_duration_max_spike");
-    public static final MetricKey<GaugeAdapter<DoubleSupplier, RunningAverageStat>> TASK_DURATION_MOVING_AVG =
+    public static final MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> TASK_DURATION_MOVING_AVG =
             GaugeAdapter.key(CATEGORY, "task_duration_moving_avg");
 
     @NonNull
@@ -102,7 +102,7 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
                 CumulativeAverageIntStat.metricBuilder(QUEUE_SIZE_AVG)
                         .withDescription("Thread pool queue avg size")
                         .withDynamicLabelNames(POOL_LABEL),
-                RunningAverageStat.metricBuilder(1, QUEUE_SIZE_AVG_RUNNING)
+                MovingAverageStat.metricBuilder(1, QUEUE_SIZE_AVG_MOVING)
                         .withDescription("Thread pool queue running avg size (half-life of 1 sec)")
                         .withDynamicLabelNames(POOL_LABEL),
                 // pool metrics
@@ -137,19 +137,21 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
                 FrequencyCumulativeAvg.metricBuilder(TASKS_FREQUENCY_AVG)
                         .withDescription("Thread pool tasks frequency cumulative average")
                         .withDynamicLabelNames(POOL_LABEL),
-                FrequencyWeightedAvg.metricBuilder(1, TASKS_FREQUENCY_MOVING_AVG)
+                FrequencyMovingAvg.metricBuilder(1, TASKS_FREQUENCY_MOVING_AVG)
                         .withDescription("Thread pool tasks frequency weighted moving average (half-life of 1 sec)")
                         .withDynamicLabelNames(POOL_LABEL),
                 // task timing metrics
                 LongGauge.maxBuilder(TASK_WAIT_DURATION_MAX_SPIKE, true)
+                        .withInitValue(0L)
                         .withDescription("Thread pool queue task wait duration max spike")
                         .withUnit(Unit.NANOSECOND_UNIT)
                         .withDynamicLabelNames(POOL_LABEL),
                 LongGauge.maxBuilder(TASK_DURATION_MAX_SPIKE, true)
+                        .withInitValue(0L)
                         .withDescription("Thread pool task duration time max spike")
                         .withUnit(Unit.NANOSECOND_UNIT)
                         .withDynamicLabelNames(POOL_LABEL),
-                RunningAverageStat.metricBuilder(1, TASK_DURATION_MOVING_AVG)
+                MovingAverageStat.metricBuilder(1, TASK_DURATION_MOVING_AVG)
                         .withDescription("Thread pool task run time moving average (half-life of 1 sec)")
                         .withUnit(Unit.NANOSECOND_UNIT)
                         .withDynamicLabelNames(POOL_LABEL));

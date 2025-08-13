@@ -17,8 +17,8 @@ public class TestRandomDocumentFetcher implements DocumentFetcher {
     private final IdempotentTimedProcessor fetcher;
     private final Function<URI, Document> docGenerator;
 
-    public TestRandomDocumentFetcher(IdempotentTimedProcessor fetcher, double repeatedLinksProbability,
-                                     int linksMin, int linksMax) {
+    public TestRandomDocumentFetcher(
+            IdempotentTimedProcessor fetcher, double repeatedLinksProbability, int linksMin, int linksMax) {
         this.fetcher = fetcher;
         IdGenerator linkIdGenerator = new IdGenerator(repeatedLinksProbability);
         docGenerator = uri -> new TestRandomDocument(uri, linkIdGenerator, linksMin, linksMax);

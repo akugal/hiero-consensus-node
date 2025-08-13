@@ -10,7 +10,7 @@ public final class TestConfig {
 
     private final List<TestJobSpec> jobSpecs;
     private Duration timeout = Duration.ofSeconds(60); // Default timeout
-    private int throughputPerSecond = 0; // Default throughput, 0 means no limit
+    private double throughputPerSecond = 0.0; // Default throughput, 0 means no limit
 
     public TestConfig() {
         jobSpecs = new ArrayList<>();
@@ -40,7 +40,7 @@ public final class TestConfig {
         return this;
     }
 
-    public TestConfig withThroughputPerSecond(int throughputPerSecond) {
+    public TestConfig withThroughputPerSecond(double throughputPerSecond) {
         if (throughputPerSecond < 0) {
             throw new IllegalArgumentException("Throughput per second must be non-negative");
         }
@@ -56,7 +56,7 @@ public final class TestConfig {
         return timeout;
     }
 
-    public int throughputPerSecond() {
+    public double throughputPerSecond() {
         return throughputPerSecond;
     }
 }

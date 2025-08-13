@@ -6,7 +6,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.hiero.metrics.demo.crawler.api.exception.JobException;
 import org.hiero.metrics.demo.crawler.api.exception.JobTimeoutException;
 import org.hiero.metrics.demo.crawler.api.job.JobResult;

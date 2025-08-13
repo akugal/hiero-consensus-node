@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -110,7 +110,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "job:jobs_count_total{test=\"$test_name\"}",
+          "expr": "job:count_total{test=\"$test_name\", scheme=\"$scheme\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -121,6 +121,161 @@
         }
       ],
       "title": "Jobs Count",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "rothz"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Frequency"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "interval": "$interval",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "job:frequency_avg_Hz{test=\"$test_name\", scheme=\"$scheme\"}",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Frequency",
+          "range": true,
+          "refId": "Frequency",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "job:frequency_moving_avg_Hz{test=\"$test_name\", scheme=\"$scheme\"}",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Frequency Moving Avg",
+          "range": true,
+          "refId": "Frequency Moving Avg",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "irate(job:count_total{test=\"$test_name\", scheme=\"$scheme\"}[$__rate_interval])",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Rate Grafana",
+          "range": true,
+          "refId": "Rate Grafana",
+          "useBackend": false
+        }
+      ],
+      "title": "Frequency",
       "type": "timeseries"
     },
     {
@@ -199,7 +354,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 16
       },
       "id": 2,
       "interval": "$interval",
@@ -225,7 +380,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "job:job_duration_moving_avg_ms{test=\"$test_name\"}",
+          "expr": "job:duration_moving_avg_ms{test=\"$test_name\", scheme=\"$scheme\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -265,110 +420,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "rothz"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 16
-      },
-      "id": 3,
-      "interval": "1s",
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "job:job_count_per_second_avg_Hz{test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Rate",
-          "range": true,
-          "refId": "Rate",
-          "useBackend": false
-        }
-      ],
-      "title": "Rate",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -407,7 +459,7 @@
         "y": 24
       },
       "id": 4,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -430,7 +482,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "job:job_uri_cache_hit_avg{test=\"$test_name\"}",
+          "expr": "job:uri_cache_hit_avg{test=\"$test_name\", scheme=\"$scheme\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -470,7 +522,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -500,7 +552,23 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Factor"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -509,7 +577,7 @@
         "y": 32
       },
       "id": 5,
-      "interval": "1s",
+      "interval": "$interval",
       "options": {
         "legend": {
           "calcs": [],
@@ -532,17 +600,17 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "job:job_concurrency_improvement_avg{test=\"$test_name\"}",
+          "expr": "job:concurrency_factor_avg{test=\"$test_name\", scheme=\"$scheme\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "x",
+          "legendFormat": "Factor",
           "range": true,
-          "refId": "Concurrency Improvement",
+          "refId": "Concurrency Factor",
           "useBackend": false
         }
       ],
-      "title": "Concurrency Improvement Avg",
+      "title": "Concurrency Factor = SUM(task_duration) / job_duration",
       "type": "timeseries"
     }
   ],
@@ -580,6 +648,24 @@
         "query": "3s",
         "skipUrlSync": true,
         "type": "constant"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
+        "definition": "label_values(scheme)",
+        "label": "Scheme",
+        "name": "scheme",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(scheme)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
       }
     ]
   },
