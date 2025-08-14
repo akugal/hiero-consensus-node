@@ -25,10 +25,6 @@ public interface StatsGaugeAdapter<I, D> extends StatefulMetric<I, D> {
         return MetricKey.of(name, StatsGaugeAdapter.class);
     }
 
-    static <I, D> MetricKey<StatsGaugeAdapter<I, D>> key(String category, String name) {
-        return MetricKey.of(category, name, StatsGaugeAdapter.class);
-    }
-
     static <I, D> Builder<I, D> builder(
             MetricKey<StatsGaugeAdapter<I, D>> key,
             @NonNull I defaultInitializer,

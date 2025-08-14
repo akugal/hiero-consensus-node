@@ -18,10 +18,6 @@ public interface LongCounter extends StatefulMetric<LongSupplier, LongCounterDat
         return MetricKey.of(name, LongCounter.class);
     }
 
-    static MetricKey<LongCounter> key(String category, String name) {
-        return MetricKey.of(category, name, LongCounter.class);
-    }
-
     static Builder builder(MetricKey<LongCounter> key) {
         return new Builder(key);
     }

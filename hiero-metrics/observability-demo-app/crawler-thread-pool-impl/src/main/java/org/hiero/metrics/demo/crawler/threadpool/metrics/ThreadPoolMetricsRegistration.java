@@ -26,53 +26,56 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
 
     // config metrics
     public static final MetricKey<CallbackMetric> QUEUE_CONFIG_CAPACITY =
-            CallbackMetric.key(CATEGORY, "queue_config_capacity");
+            CallbackMetric.key("queue_config_capacity").withCategory(CATEGORY);
     public static final MetricKey<CallbackMetric> POOL_CONFIG_CORE_SIZE =
-            CallbackMetric.key(CATEGORY, "pool_config_core_size");
+            CallbackMetric.key("pool_config_core_size").withCategory(CATEGORY);
     public static final MetricKey<CallbackMetric> POOL_CONFIG_MAX_SIZE =
-            CallbackMetric.key(CATEGORY, "pool_config_max_size");
+            CallbackMetric.key("pool_config_max_size").withCategory(CATEGORY);
     public static final MetricKey<CallbackMetric> POOL_CONFIG_KEEP_ALIVE =
-            CallbackMetric.key(CATEGORY, "pool_config_keep_alive");
+            CallbackMetric.key("pool_config_keep_alive").withCategory(CATEGORY);
 
     // queue metrics
-    public static final MetricKey<CallbackMetric> QUEUE_SIZE = CallbackMetric.key(CATEGORY, "queue_size");
+    public static final MetricKey<CallbackMetric> QUEUE_SIZE =
+            CallbackMetric.key("queue_size").withCategory(CATEGORY);
 
-    public static final MetricKey<LongGauge> QUEUE_SIZE_MAX_SPIKE = LongGauge.key(CATEGORY, "queue_size_max_spike");
+    public static final MetricKey<LongGauge> QUEUE_SIZE_MAX_SPIKE =
+            LongGauge.key("queue_size_max_spike").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> QUEUE_SIZE_AVG =
-            CumulativeAverageIntStat.key(CATEGORY, "queue_size_avg");
+            CumulativeAverageIntStat.key("queue_size_avg").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> QUEUE_SIZE_AVG_MOVING =
-            MovingAverageStat.key(CATEGORY, "queue_size_moving_avg");
+            MovingAverageStat.key("queue_size_moving_avg").withCategory(CATEGORY);
 
     // pool metrics
-    public static final MetricKey<CallbackMetric> POOL_SIZE = CallbackMetric.key(CATEGORY, "pool_size");
-    public static final MetricKey<CallbackMetric> POOL_MAX_SIZE = CallbackMetric.key(CATEGORY, "pool_size_max");
+    public static final MetricKey<CallbackMetric> POOL_SIZE =
+            CallbackMetric.key("pool_size").withCategory(CATEGORY);
+    public static final MetricKey<CallbackMetric> POOL_MAX_SIZE =
+            CallbackMetric.key("pool_size_max").withCategory(CATEGORY);
 
     // tasks metrics
-    public static final MetricKey<LongCounter> TASKS_COUNT_TOTAL = LongCounter.key(CATEGORY, "tasks_count");
+    public static final MetricKey<LongCounter> TASKS_COUNT_TOTAL =
+            LongCounter.key("tasks_count").withCategory(CATEGORY);
     public static final MetricKey<CallbackMetric> TASKS_COUNT_TOTAL_CALLBACK =
-            CallbackMetric.key(CATEGORY, "tasks_count_callback");
+            CallbackMetric.key("tasks_count_callback").withCategory(CATEGORY);
     public static final MetricKey<LongCounter> TASKS_COMPLETED_COUNT_TOTAL =
-            LongCounter.key(CATEGORY, "tasks_completed_count");
+            LongCounter.key("tasks_completed_count").withCategory(CATEGORY);
     public static final MetricKey<LongCounter> TASKS_REJECTED_COUNT_TOTAL =
-            LongCounter.key(CATEGORY, "tasks_rejected_count");
+            LongCounter.key("tasks_rejected_count").withCategory(CATEGORY);
     public static final MetricKey<CallbackMetric> TASKS_COMPLETED_COUNT_TOTAL_CALLBACK =
-            CallbackMetric.key(CATEGORY, "tasks_completed_count_callback");
-    // TODO this can be removed
-    public static final MetricKey<LongGauge> TASKS_ACTIVE_COUNT = LongGauge.key(CATEGORY, "tasks_active_count");
+            CallbackMetric.key("tasks_completed_count_callback").withCategory(CATEGORY);
     public static final MetricKey<CallbackMetric> TASKS_ACTIVE_COUNT_CALLBACK =
-            CallbackMetric.key(CATEGORY, "tasks_active_count_callback");
+            CallbackMetric.key("tasks_active_count_callback").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<Object, FrequencyCumulativeAvg>> TASKS_FREQUENCY_AVG =
-            FrequencyCumulativeAvg.key(CATEGORY, "tasks_frequency_avg");
+            FrequencyCumulativeAvg.key("tasks_frequency_avg").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<DoubleSupplier, FrequencyMovingAvg>> TASKS_FREQUENCY_MOVING_AVG =
-            FrequencyMovingAvg.key(CATEGORY, "tasks_frequency_moving_avg");
+            FrequencyMovingAvg.key("tasks_frequency_moving_avg").withCategory(CATEGORY);
 
     // Timing metrics
     public static final MetricKey<LongGauge> TASK_WAIT_DURATION_MAX_SPIKE =
-            LongGauge.key(CATEGORY, "task_queue_wait_duration_max_spike");
+            LongGauge.key("task_queue_wait_duration_max_spike").withCategory(CATEGORY);
     public static final MetricKey<LongGauge> TASK_DURATION_MAX_SPIKE =
-            LongGauge.key(CATEGORY, "task_duration_max_spike");
+            LongGauge.key("task_duration_max_spike").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> TASK_DURATION_MOVING_AVG =
-            GaugeAdapter.key(CATEGORY, "task_duration_moving_avg");
+            GaugeAdapter.key("task_duration_moving_avg");
 
     @NonNull
     @Override
@@ -127,9 +130,6 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
                         .withDynamicLabelNames(POOL_LABEL),
                 LongCounter.builder(TASKS_REJECTED_COUNT_TOTAL)
                         .withDescription("Thread pool rejected tasks count")
-                        .withDynamicLabelNames(POOL_LABEL),
-                LongGauge.builder(TASKS_ACTIVE_COUNT)
-                        .withDescription("Thread pool active tasks count")
                         .withDynamicLabelNames(POOL_LABEL),
                 CallbackMetric.builder(TASKS_ACTIVE_COUNT_CALLBACK)
                         .withDescription("Thread pool active tasks count from callback")

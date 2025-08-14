@@ -18,10 +18,6 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
         return MetricKey.of(name, StateSet.class);
     }
 
-    static <T> MetricKey<StateSet<T>> key(String category, String name) {
-        return MetricKey.of(category, name, StateSet.class);
-    }
-
     static <T> Builder<T> builder(MetricKey<StateSet<T>> key) {
         return new Builder<>(key);
     }

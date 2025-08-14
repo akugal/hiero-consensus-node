@@ -40,10 +40,6 @@ public class FrequencyCumulativeAvg implements DoubleSupplier {
         return MetricKey.of(name, GaugeAdapter.class);
     }
 
-    public static MetricKey<GaugeAdapter<Object, FrequencyCumulativeAvg>> key(String category, String name) {
-        return MetricKey.of(category, name, GaugeAdapter.class);
-    }
-
     public static GaugeAdapter.Builder<Object, FrequencyCumulativeAvg> metricBuilder(
             Time time, MetricKey<GaugeAdapter<Object, FrequencyCumulativeAvg>> key) {
         return GaugeAdapter.builder(key, () -> new FrequencyCumulativeAvg(time), FrequencyCumulativeAvg::getAndReset)

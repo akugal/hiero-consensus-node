@@ -22,17 +22,18 @@ public class JobMetricsRegistration implements MetricsRegistrationProvider {
     public static final String CATEGORY = "job";
     public static final String SCHEME_LABEL = "scheme";
 
-    public static final MetricKey<LongCounter> JOBS_COUNT_TOTAL = LongCounter.key(CATEGORY, "count");
+    public static final MetricKey<LongCounter> JOBS_COUNT_TOTAL =
+            LongCounter.key("count").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> JOB_DURATION_AVG_MOVING =
-            MovingAverageStat.key(CATEGORY, "duration_moving_avg");
+            MovingAverageStat.key("duration_moving_avg").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<Object, FrequencyCumulativeAvg>> JOBS_FREQUENCY_AVG =
-            FrequencyCumulativeAvg.key(CATEGORY, "frequency_avg");
+            FrequencyCumulativeAvg.key("frequency_avg").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<DoubleSupplier, FrequencyMovingAvg>> JOBS_FREQUENCY_AVG_MOVING =
-            FrequencyMovingAvg.key(CATEGORY, "frequency_moving_avg");
+            FrequencyMovingAvg.key("frequency_moving_avg").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> JOB_CONCURRENCY_FACTOR_AVG =
-            CumulativeAverageIntStat.key(CATEGORY, "concurrency_factor_avg");
+            CumulativeAverageIntStat.key("concurrency_factor_avg").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> JOB_URI_CACHE_HIT_AVG =
-            CumulativeAverageIntStat.key(CATEGORY, "uri_cache_hit_avg");
+            CumulativeAverageIntStat.key("uri_cache_hit_avg").withCategory(CATEGORY);
 
     @NonNull
     @Override

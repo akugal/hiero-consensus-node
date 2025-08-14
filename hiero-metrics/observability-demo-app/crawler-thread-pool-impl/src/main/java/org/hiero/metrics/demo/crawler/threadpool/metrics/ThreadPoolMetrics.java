@@ -24,7 +24,6 @@ class ThreadPoolMetrics {
     private final LongCounterDataPoint tasksCount;
     private final LongCounterDataPoint tasksCompletedCount;
     private final LongCounterDataPoint tasksRejectedCount;
-    private final LongGaugeDataPoint tasksActiveCount;
     private final FrequencyCumulativeAvg tasksFrequencyAvg;
     private final DoubleGaugeDataPoint tasksFrequencyMovingAvg;
 
@@ -75,8 +74,6 @@ class ThreadPoolMetrics {
                 .getOrCreateLabeled(poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.TASKS_COMPLETED_COUNT_TOTAL_CALLBACK)
                 .registerDataPoint(executor::getCompletedTaskCount, poolNameLabels);
-        tasksActiveCount = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_ACTIVE_COUNT)
-                .getOrCreateLabeled(poolNameLabels);
         registry.getMetric(ThreadPoolMetricsRegistration.TASKS_ACTIVE_COUNT_CALLBACK)
                 .registerDataPoint(executor::getActiveCount, poolNameLabels);
         tasksFrequencyAvg = registry.getMetric(ThreadPoolMetricsRegistration.TASKS_FREQUENCY_AVG)
@@ -117,8 +114,6 @@ class ThreadPoolMetrics {
     }
 
     public long taskStarted(long submitTime) {
-        tasksActiveCount.increment();
-
         long startTime = currentTime();
         long waitTimeNanos = startTime - submitTime;
         taskWaitTimeMaxSpike.update(waitTimeNanos);
@@ -128,7 +123,6 @@ class ThreadPoolMetrics {
 
     public void taskFinished(long startTime) {
         tasksCompletedCount.increment();
-        tasksActiveCount.decrement();
 
         long runTimeDuration = currentTime() - startTime;
         taskDurationMaxSpike.update(runTimeDuration);

@@ -17,10 +17,6 @@ public interface DoubleCounter extends StatefulMetric<DoubleSupplier, DoubleCoun
         return MetricKey.of(name, DoubleCounter.class);
     }
 
-    static MetricKey<DoubleCounter> key(String category, String name) {
-        return MetricKey.of(category, name, DoubleCounter.class);
-    }
-
     static Builder builder(MetricKey<DoubleCounter> key) {
         return new Builder(key);
     }

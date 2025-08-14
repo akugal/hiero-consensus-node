@@ -44,47 +44,53 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
 
     @Override
     protected void registerMetricsNonIdempotent(@NonNull MetricRegistry metricRegistry) {
-        final String cacheCategory = "cache_guava_" + name;
+        final String category = "cache_guava_" + name;
 
         // cache size metrics
-        metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "size"))
-                .withDescription("Documents cache size")
-                .registerDataPoint(cache::size, Map.of()));
+        metricRegistry.register(
+                CallbackMetric.builder(CallbackMetric.key("size").withCategory(category))
+                        .withDescription("Documents cache size")
+                        .registerDataPoint(cache::size, Map.of()));
         // accumulates cache size over time and rest betwee exports; starts with current cache size
         cacheSizeAvg = metricRegistry
-                .register(
-                        CumulativeAverageIntStat.metricBuilder(CumulativeAverageIntStat.key(cacheCategory, "size_avg"))
-                                .withDefaultInitializer(() -> (int) cache.size())
-                                .withDescription("Documents cache size - avg cumulative"))
+                .register(CumulativeAverageIntStat.metricBuilder(
+                                CumulativeAverageIntStat.key("size_avg").withCategory(category))
+                        .withDefaultInitializer(() -> (int) cache.size())
+                        .withDescription("Documents cache size - avg cumulative"))
                 .getNotLabeled();
         // moving average that also starts
         cacheSizeMovingAvg = metricRegistry
-                .register(MovingAverageStat.metricBuilder(1, MovingAverageStat.key(cacheCategory, "size_moving_avg"))
+                .register(MovingAverageStat.metricBuilder(
+                                1, MovingAverageStat.key("size_moving_avg").withCategory(category))
                         .withDefaultInitializer(() -> (int) cache.size())
                         .withDescription("Documents cache size - avg moving (half-life 1 sec)"))
                 .getNotLabeled();
 
         // cache lookup count
-        metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "lookups_count"))
-                .withDynamicLabelNames("type")
-                .withDescription("Document cache lookups count (miss or hit)")
-                .registerDataPoint(() -> cache.stats().hitCount(), Map.of("type", "hit"))
-                .registerDataPoint(() -> cache.stats().missCount(), Map.of("type", "miss")));
+        metricRegistry.register(
+                CallbackMetric.builder(CallbackMetric.key("lookups_count").withCategory(category))
+                        .withDynamicLabelNames("type")
+                        .withDescription("Document cache lookups count (miss or hit)")
+                        .registerDataPoint(() -> cache.stats().hitCount(), Map.of("type", "hit"))
+                        .registerDataPoint(() -> cache.stats().missCount(), Map.of("type", "miss")));
 
         // cache load count
-        metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "loads_count"))
-                .withDynamicLabelNames("type")
-                .withDescription("Document cache loads count (success or exception)")
-                .registerDataPoint(() -> cache.stats().loadSuccessCount(), Map.of("type", "success"))
-                .registerDataPoint(() -> cache.stats().loadExceptionCount(), Map.of("type", "exception")));
+        metricRegistry.register(
+                CallbackMetric.builder(CallbackMetric.key("loads_count").withCategory(category))
+                        .withDynamicLabelNames("type")
+                        .withDescription("Document cache loads count (success or exception)")
+                        .registerDataPoint(() -> cache.stats().loadSuccessCount(), Map.of("type", "success"))
+                        .registerDataPoint(() -> cache.stats().loadExceptionCount(), Map.of("type", "exception")));
 
         // eviction count
-        metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "eviction_count"))
-                .withDescription("Document cache eviction count")
-                .registerDataPoint(() -> cache.stats().evictionCount(), Map.of()));
+        metricRegistry.register(
+                CallbackMetric.builder(CallbackMetric.key("eviction_count").withCategory(category))
+                        .withDescription("Document cache eviction count")
+                        .registerDataPoint(() -> cache.stats().evictionCount(), Map.of()));
 
         // avg load time
-        metricRegistry.register(CallbackMetric.builder(CallbackMetric.key(cacheCategory, "avg_load_time"))
+        metricRegistry.register(CallbackMetric.builder(
+                        CallbackMetric.key("avg_load_time").withCategory(category))
                 .withUnit(Unit.NANOSECOND_UNIT)
                 .withDescription("Document cache average load time in nanoseconds (successful and failed loads)")
                 .registerDataPoint(() -> cache.stats().averageLoadPenalty(), Map.of()));

@@ -11,6 +11,7 @@ public final class TestConfig {
     private final List<TestJobSpec> jobSpecs;
     private Duration timeout = Duration.ofSeconds(60); // Default timeout
     private double throughputPerSecond = 0.0; // Default throughput, 0 means no limit
+    private int rampUpSeconds = 0; // No ramp-up by default
 
     public TestConfig() {
         jobSpecs = new ArrayList<>();
@@ -40,6 +41,14 @@ public final class TestConfig {
         return this;
     }
 
+    public TestConfig withRampUpSeconds(int rampUpSeconds) {
+        if (rampUpSeconds < 0) {
+            throw new IllegalArgumentException("Ramp-up seconds should be non-negative");
+        }
+        this.rampUpSeconds = rampUpSeconds;
+        return this;
+    }
+
     public TestConfig withThroughputPerSecond(double throughputPerSecond) {
         if (throughputPerSecond < 0) {
             throw new IllegalArgumentException("Throughput per second must be non-negative");
@@ -58,5 +67,9 @@ public final class TestConfig {
 
     public double throughputPerSecond() {
         return throughputPerSecond;
+    }
+
+    public int rampUpSeconds() {
+        return rampUpSeconds;
     }
 }

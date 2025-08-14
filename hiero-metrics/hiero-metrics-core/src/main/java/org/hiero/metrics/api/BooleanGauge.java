@@ -17,10 +17,6 @@ public interface BooleanGauge extends StatefulMetric<BooleanSupplier, BooleanGau
         return MetricKey.of(name, BooleanGauge.class);
     }
 
-    static MetricKey<BooleanGauge> key(String category, String name) {
-        return MetricKey.of(category, name, BooleanGauge.class);
-    }
-
     static Builder builder(MetricKey<BooleanGauge> key) {
         return new Builder(key);
     }
