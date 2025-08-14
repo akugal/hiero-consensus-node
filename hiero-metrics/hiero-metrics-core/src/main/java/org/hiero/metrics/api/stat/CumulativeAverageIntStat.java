@@ -28,10 +28,6 @@ public class CumulativeAverageIntStat implements DoubleSupplier {
         return MetricKey.of(name, GaugeAdapter.class);
     }
 
-    public static MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> key(String category, String name) {
-        return MetricKey.of(category, name, GaugeAdapter.class);
-    }
-
     public static GaugeAdapter.Builder<IntSupplier, CumulativeAverageIntStat> metricBuilder(
             MetricKey<GaugeAdapter<IntSupplier, CumulativeAverageIntStat>> key) {
         return metricBuilder(key, StatUtils.INT_INIT);

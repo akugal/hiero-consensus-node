@@ -49,10 +49,6 @@ public class FrequencyMovingAvg implements DoubleGaugeDataPoint {
         return MetricKey.of(name, GaugeAdapter.class);
     }
 
-    public static MetricKey<GaugeAdapter<DoubleSupplier, FrequencyMovingAvg>> key(String category, String name) {
-        return MetricKey.of(category, name, GaugeAdapter.class);
-    }
-
     public static GaugeAdapter.Builder<DoubleSupplier, FrequencyMovingAvg> metricBuilder(
             double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, FrequencyMovingAvg>> key) {
         return GaugeAdapter.builder(

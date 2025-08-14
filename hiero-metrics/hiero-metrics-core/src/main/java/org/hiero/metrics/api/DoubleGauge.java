@@ -22,10 +22,6 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
         return MetricKey.of(name, DoubleGauge.class);
     }
 
-    static MetricKey<DoubleGauge> key(String category, String name) {
-        return MetricKey.of(category, name, DoubleGauge.class);
-    }
-
     static Builder builder(MetricKey<DoubleGauge> key) {
         return new Builder(key);
     }

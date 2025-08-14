@@ -26,7 +26,7 @@ public class JvmMetricsRegistration implements MetricsRegistrationProvider {
         final BufferPoolMXBean directMemMxBean = getDirectMemMxBean();
         final String category = "jvm";
 
-        builders.add(CallbackMetric.builder(CallbackMetric.key(category, "memory"))
+        builders.add(CallbackMetric.builder(CallbackMetric.key("memory").withCategory(category))
                 .withDynamicLabelNames("type")
                 .withDescription("JVM memory usage")
                 .withUnit("bytes")
@@ -38,13 +38,14 @@ public class JvmMetricsRegistration implements MetricsRegistrationProvider {
                         Map.of("type", "direct")));
 
         if (osBean instanceof UnixOperatingSystemMXBean mBean) {
-            builders.add(CallbackMetric.builder(CallbackMetric.key(category, "open_file_descriptors"))
+            builders.add(CallbackMetric.builder(
+                            CallbackMetric.key("open_file_descriptors").withCategory(category))
                     .withDescription("Number of open file descriptors")
                     .withUnit("count")
                     .registerDataPoint(mBean::getOpenFileDescriptorCount, Map.of()));
         }
         if (osBean instanceof com.sun.management.OperatingSystemMXBean mBean) {
-            builders.add(CallbackMetric.builder(CallbackMetric.key(category, "cpu_load"))
+            builders.add(CallbackMetric.builder(CallbackMetric.key("cpu_load").withCategory(category))
                     .withDescription("CPU load of the JVM process")
                     .withUnit("percent")
                     .registerDataPoint(mBean::getProcessCpuLoad, Map.of()));

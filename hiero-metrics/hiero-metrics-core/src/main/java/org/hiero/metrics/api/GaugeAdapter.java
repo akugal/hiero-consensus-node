@@ -21,7 +21,7 @@ public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
     }
 
     static <I, D> MetricKey<GaugeAdapter<I, D>> key(String category, String name) {
-        return MetricKey.of(category, name, GaugeAdapter.class);
+        return MetricKey.<GaugeAdapter<I, D>>of(name, GaugeAdapter.class).withCategory(category);
     }
 
     static <I, D> Builder<I, D> builder(

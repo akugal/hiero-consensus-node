@@ -20,10 +20,6 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
         return MetricKey.of(name, LongGauge.class);
     }
 
-    static MetricKey<LongGauge> key(String category, String name) {
-        return MetricKey.of(category, name, LongGauge.class);
-    }
-
     static Builder builder(MetricKey<LongGauge> key) {
         return new Builder(key);
     }

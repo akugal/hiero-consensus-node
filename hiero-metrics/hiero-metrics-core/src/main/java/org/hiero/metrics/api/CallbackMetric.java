@@ -16,10 +16,6 @@ public interface CallbackMetric extends Metric {
         return MetricKey.of(name, CallbackMetric.class);
     }
 
-    static MetricKey<CallbackMetric> key(String category, String name) {
-        return MetricKey.of(category, name, CallbackMetric.class);
-    }
-
     static Builder builder(MetricKey<CallbackMetric> key) {
         return new Builder(key);
     }

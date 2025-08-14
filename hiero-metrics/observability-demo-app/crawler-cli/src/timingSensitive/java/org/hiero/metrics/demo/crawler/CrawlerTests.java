@@ -16,6 +16,7 @@ public class CrawlerTests {
 
         TestConfig config = new TestConfig(TestUtils.createRandomTestJobsSpecs(50, 2, Duration.ofSeconds(30)))
                 .withTimeout(Duration.ofSeconds(300))
+                .withRampUpSeconds(5)
                 .withThroughputPerSecond(6);
 
         // Provide spec for Guava cache
@@ -34,20 +35,28 @@ public class CrawlerTests {
         // since cache is disabled, we will do low throughput to avoid overwhelming the system
         System.setProperty("cache.doc.guava.spec", "");
 
-        IdempotentTimedProcessor fetcher = new IdempotentTimedProcessor(250, 250, 0.0);
-        IdempotentTimedProcessor processor = new IdempotentTimedProcessor(50, 50, 0.0);
-        SchemeCrawler crawler = new TestRandomSchemeCrawler(fetcher, 0.0, 10, 10, processor);
+        IdempotentTimedProcessor fetcher = new IdempotentTimedProcessor(300, 400, 0.1);
+        IdempotentTimedProcessor processor = new IdempotentTimedProcessor(20, 50, 0.1);
+        SchemeCrawler crawler = new TestRandomSchemeCrawler(fetcher, 0.0, 10, 15, processor);
 
-        TestConfig config = new TestConfig(TestUtils.createRandomTestJobsSpecs(200, 2, Duration.ofSeconds(30)))
+        TestConfig config = new TestConfig(TestUtils.createRandomTestJobsSpecs(100, 2, Duration.ofSeconds(30)))
                 .withTimeout(Duration.ofSeconds(300))
+                .withRampUpSeconds(3)
                 .withThroughputPerSecond(2);
 
-        // Use thread pool for tasks
+        // adjust thread pool for jobs
+        System.setProperty("job.pool.useVirtualThreads", "false");
+        System.setProperty("job.pool.coreSize", "4");
+        System.setProperty("job.pool.maxSize", "64");
+        System.setProperty("job.pool.keepAliveSeconds", "3");
+        System.setProperty("job.pool.queueSize", "40"); // low queue size to see pool increase
+
+        // Adjust thread pool for job tasks
         System.setProperty("job.task.pool.useVirtualThreads", "false");
         System.setProperty("job.task.pool.coreSize", "8");
         System.setProperty("job.task.pool.maxSize", "64");
         System.setProperty("job.task.pool.keepAliveSeconds", "3");
-        System.setProperty("job.task.pool.queueSize", "200"); // low queue size to see pool increase
+        System.setProperty("job.task.pool.queueSize", "1024");
         TestUtils.run("tasks-thread-pool", config, crawler);
 
         // Use virtual thread for tasks

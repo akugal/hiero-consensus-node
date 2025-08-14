@@ -30,10 +30,6 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
         return MetricKey.of(name, DoubleGaugeComposite.class);
     }
 
-    static MetricKey<DoubleGaugeComposite> key(String category, String name) {
-        return MetricKey.of(category, name, DoubleGaugeComposite.class);
-    }
-
     static Builder builder(MetricKey<DoubleGaugeComposite> key) {
         return new Builder(key);
     }

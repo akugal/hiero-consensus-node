@@ -44,9 +44,12 @@ public class TestUtils {
         System.out.println("  jobs = " + config.items().size());
         System.out.println("  timeout = " + toString(config.timeout()));
         System.out.println("  throughput = " + config.throughputPerSecond() + " per second");
+        System.out.println("  ramp-up = " + config.rampUpSeconds() + " seconds, starting with 5x slower throughput");
         System.out.println("---------------------------------------------");
 
-        int throughputDelay = config.throughputPerSecond() > 0 ? (int) (1000 / config.throughputPerSecond()) : 0;
+        int rampUpMs = config.rampUpSeconds() * 1000;
+        int finalDelay = config.throughputPerSecond() > 0 ? (int) (1000 / config.throughputPerSecond()) : 0;
+        int initialDelay = finalDelay * 5; // 5x slower at start
 
         List<ScheduledJob> jobs = new ArrayList<>();
 
@@ -57,7 +60,20 @@ public class TestUtils {
             ScheduledJob scheduledJob = jobManager.schedule(
                     item.uri(), item.timeout(), item.depth(), item.processors().toArray(new String[0]));
             jobs.add(scheduledJob);
-            if (throughputDelay > 0) Thread.sleep(throughputDelay);
+
+            // Calculate delay based on ramp-up progress
+            int delay;
+            long elapsedTime = System.currentTimeMillis() - startTime;
+
+            if (rampUpMs > 0 && elapsedTime < rampUpMs) {
+                // Linear ramp-up from initialDelay to finalDelay
+                double progress = (double) elapsedTime / rampUpMs;
+                delay = (int) (initialDelay - (progress * (initialDelay - finalDelay)));
+            } else {
+                delay = finalDelay;
+            }
+
+            if (delay > 0) Thread.sleep(delay);
         }
 
         long remainingTime;

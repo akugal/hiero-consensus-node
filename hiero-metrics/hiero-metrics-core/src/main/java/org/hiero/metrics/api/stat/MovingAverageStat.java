@@ -40,10 +40,6 @@ public class MovingAverageStat implements DoubleGaugeDataPoint {
         return MetricKey.of(name, GaugeAdapter.class);
     }
 
-    public static MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> key(String category, String name) {
-        return MetricKey.of(category, name, GaugeAdapter.class);
-    }
-
     public static GaugeAdapter.Builder<DoubleSupplier, MovingAverageStat> metricBuilder(
             double halfLife, Time time, MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> key) {
         return GaugeAdapter.builder(

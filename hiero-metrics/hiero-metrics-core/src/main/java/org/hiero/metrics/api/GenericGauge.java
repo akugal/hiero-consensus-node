@@ -20,10 +20,6 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
         return MetricKey.of(name, GenericGauge.class);
     }
 
-    static <T> MetricKey<GenericGauge<T>> key(String category, String name) {
-        return MetricKey.of(category, name, GenericGauge.class);
-    }
-
     static <T> Builder<T> builder(MetricKey<GenericGauge<T>> key, ToDoubleFunction<T> valueConverter) {
         return new Builder<>(key, valueConverter);
     }
