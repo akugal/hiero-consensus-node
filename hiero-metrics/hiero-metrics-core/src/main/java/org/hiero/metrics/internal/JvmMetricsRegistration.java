@@ -51,6 +51,10 @@ public class JvmMetricsRegistration implements MetricsRegistrationProvider {
                     .registerDataPoint(mBean::getProcessCpuLoad, Map.of()));
         }
 
+        builders.add(CallbackMetric.builder(CallbackMetric.key("available_processors").withCategory(category))
+                .withDescription("Available processors")
+                .registerDataPoint(() -> Runtime.getRuntime().availableProcessors(), Map.of()));
+
         return builders;
     }
 

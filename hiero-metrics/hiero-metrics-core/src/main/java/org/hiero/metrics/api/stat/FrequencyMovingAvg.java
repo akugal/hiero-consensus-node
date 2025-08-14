@@ -5,11 +5,10 @@ import com.swirlds.base.time.Time;
 import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.core.MetricKey;
-import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.api.utils.Unit;
 
 // Similar to com.swirlds.common.metrics.statistics.StatsSpeedometer
-public class FrequencyMovingAvg implements DoubleGaugeDataPoint {
+public class FrequencyMovingAvg implements DoubleSupplier {
 
     private static final double LN_2 = Math.log(2);
 
@@ -28,7 +27,7 @@ public class FrequencyMovingAvg implements DoubleGaugeDataPoint {
     /**
      * estimated average calls/sec to cycle()
      */
-    private volatile double rate = 0;
+    private volatile double frequency = 0;
 
     /**
      * half the weight = this many sec
@@ -65,9 +64,8 @@ public class FrequencyMovingAvg implements DoubleGaugeDataPoint {
         return metricBuilder(halfLife, Time.getCurrent(), key);
     }
 
-    @Override
-    public double getInitValue() {
-        return StatUtils.ZERO;
+    public double update() {
+        return update(StatUtils.ONE);
     }
 
     /**
@@ -75,30 +73,28 @@ public class FrequencyMovingAvg implements DoubleGaugeDataPoint {
      *
      * @param count the amount to increase the count by
      */
-    @Override
-    public synchronized void update(final double count) {
+    public synchronized double update(final double count) {
         final long currentTime = time.nanoTime();
         final double t1 = (lastTime - startTime) / 1.0e9; // seconds: start to last update
         final double t2 = (currentTime - startTime) / 1.0e9; // seconds: start to now
         final double dt = (currentTime - lastTime) / 1.0e9; // seconds: last update to now
         if (t2 >= 1e-9) { // skip cases were no time has passed since last call
             if (1.0 / t2 > LN_2 / halfLife) { // during startup period, so do uniformly-weighted average
-                rate = (rate * t1 + count) / t2;
+                frequency = (frequency * t1 + count) / t2;
             } else { // after startup, so do exponentially-weighted average with given half life
-                rate = rate * Math.pow(0.5, dt / halfLife) + count * LN_2 / halfLife;
+                frequency = frequency * Math.pow(0.5, dt / halfLife) + count * LN_2 / halfLife;
             }
         }
         lastTime = currentTime;
+        return frequency;
     }
 
     @Override
     public double getAsDouble() {
         // update rate with zero to make it running when no calls have been made
-        update(StatUtils.ZERO);
-        return rate;
+        return update(StatUtils.ZERO);
     }
 
-    @Override
     public double getAndReset() {
         final double result = getAsDouble();
         reset();
@@ -110,10 +106,9 @@ public class FrequencyMovingAvg implements DoubleGaugeDataPoint {
      * to cycle() per second, with the weighting having a half life of halfLife seconds. This is equivalent
      * to instantiating a new instance of the class. If halfLife &lt; 0.01 then 0.01 will be used.
      */
-    @Override
     public synchronized void reset() {
         startTime = time.nanoTime(); // find average since this time
         lastTime = startTime; // the last time update() was called
-        rate = 0; // estimated average calls to cycle() per second
+        frequency = 0; // estimated average calls to cycle() per second
     }
 }

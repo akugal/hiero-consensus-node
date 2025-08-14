@@ -19,18 +19,6 @@ public final class StatUtils {
     public static final double ZERO = 0.0;
     public static final double ONE = 1.0;
 
-    /**
-     * changes average very slowly
-     */
-    public static final double WEIGHT_SMOOTH = 0.01;
-
-    /**
-     * changes average quite rapidly
-     */
-    public static final double WEIGHT_VOLATILE = 0.1;
-
-    public static final double WEIGHT_DEFAULT = 0.5;
-
     public static final BooleanSupplier BOOL_INIT_FALSE = () -> false;
     public static final BooleanSupplier BOOL_INIT_TRUE = () -> true;
 
@@ -57,14 +45,18 @@ public final class StatUtils {
     public static final DoubleBinaryOperator DOUBLE_LAST = (current, supplied) -> supplied;
     public static final DoubleBinaryOperator DOUBLE_NO_OP = (current, supplied) -> current;
 
-    public static final DoubleBinaryOperator DOUBLE_AVG_DEFAULT =
-            (prev, cur) -> prev * (1 - WEIGHT_DEFAULT) + cur * WEIGHT_DEFAULT;
-    public static final DoubleBinaryOperator DOUBLE_AVG_VOLATILE =
-            (prev, cur) -> prev * (1 - WEIGHT_VOLATILE) + cur * WEIGHT_VOLATILE;
-    public static final DoubleBinaryOperator DOUBLE_AVG_SMOOTH =
-            (prev, cur) -> prev * (1 - WEIGHT_SMOOTH) + cur * WEIGHT_SMOOTH;
+    public static final DoubleBinaryOperator DOUBLE_AVG_DEFAULT = exponentialAverage(0.5);
+    public static final DoubleBinaryOperator DOUBLE_AVG_VOLATILE = exponentialAverage(0.1);
+    public static final DoubleBinaryOperator DOUBLE_AVG_SMOOTH = exponentialAverage(0.01);
 
     private StatUtils() {}
+
+    public static DoubleBinaryOperator exponentialAverage(double weight) {
+        if (weight <= 0 || weight >= 1) {
+            throw new IllegalArgumentException("Weight must be greater than 0 and less than 1");
+        }
+        return (prev, cur) -> prev * (1 - weight) + cur * weight;
+    }
 
     public static BooleanSupplier asInitializer(boolean value) {
         return value ? BOOL_INIT_TRUE : BOOL_INIT_FALSE;

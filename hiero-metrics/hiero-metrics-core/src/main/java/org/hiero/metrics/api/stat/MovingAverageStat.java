@@ -5,10 +5,9 @@ import com.swirlds.base.time.Time;
 import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.core.MetricKey;
-import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 
 // similar to com.swirlds.common.metrics.statistics.StatsRunningAverage
-public class MovingAverageStat implements DoubleGaugeDataPoint {
+public class MovingAverageStat implements DoubleSupplier {
     /**
      * each recordValue(X) counts as X calls to values.cycle()
      */
@@ -55,21 +54,17 @@ public class MovingAverageStat implements DoubleGaugeDataPoint {
         return metricBuilder(halfLife, Time.getCurrent(), key);
     }
 
-    @Override
-    public double getInitValue() {
-        return 0;
+    public double update() {
+        return update(StatUtils.ONE);
     }
 
-    @Override
-    public synchronized void update(double value) {
-        if (Double.isNaN(value)) { // java getSystemCpuLoad returns NaN at beginning
-            return;
+    public synchronized double update(double value) {
+        if (Double.isNaN(value)) {
+            return StatUtils.ZERO;
         }
-        // StatsRunningAverage is not thread safe, despite this, it is accessed by many threads throughout the platform
-        // Until we do a full statistics refactor, this try catch is a safeguard against any issues that might occur
-        // from this issue
+
         values.update(value);
-        times.update();
+        times.update(StatUtils.ONE);
 
         if (firstRecord || value == mean) {
             // if the same value is always given since the beginning, then avoid roundoff errors
@@ -78,18 +73,16 @@ public class MovingAverageStat implements DoubleGaugeDataPoint {
         } else {
             mean = values.getAsDouble() / times.getAsDouble();
         }
-    }
-
-    @Override
-    public double getAsDouble() {
-        values.update(StatUtils.ZERO);
-        times.update(StatUtils.ZERO);
         return mean;
     }
 
     @Override
+    public double getAsDouble() {
+        return update(StatUtils.ZERO);
+    }
+
     public double getAndReset() {
-        final double result = mean;
+        final double result = getAsDouble();
         reset();
         return result;
     }
@@ -99,7 +92,6 @@ public class MovingAverageStat implements DoubleGaugeDataPoint {
      * to cycle() per second, with the weighting having a half life of halfLife seconds. This is equivalent
      * to instantiating a new instance of the class. If halfLife &lt; 0.01 then 0.01 will be used.
      */
-    @Override
     public synchronized void reset() {
         firstRecord = true;
         values.reset();

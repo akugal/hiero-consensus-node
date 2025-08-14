@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.demo.crawler.threadpool.metrics;
 
-import static org.hiero.metrics.demo.crawler.threadpool.metrics.ExecutorServiceFactory.buildThreadFactory;
-
 import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -13,53 +13,45 @@ import org.apache.logging.log4j.ThreadContext;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricRegistryAware;
 import org.hiero.metrics.demo.crawler.api.util.Named;
-import org.hiero.metrics.demo.crawler.threadpool.config.ThreadPoolConfig;
 
-public class MeasurableThreadPoolExecutor extends ThreadPoolExecutor implements MetricRegistryAware, Named {
+public class MonitoredExecutorService extends AbstractExecutorService
+        implements ExecutorService, MetricRegistryAware, Named {
 
-    private final String poolName;
-    private final ThreadPoolConfig config;
+    private final String executorName;
+    private final ExecutorService delegate;
 
-    private ThreadPoolMetrics metrics;
+    private ExecutorServiceMetrics metrics;
 
-    public MeasurableThreadPoolExecutor(String poolName, ThreadPoolConfig config, RejectedExecutionHandler handler) {
-        super(
-                config.coreSize(),
-                config.maxSize(),
-                config.keepAliveSeconds(),
-                TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(config.queueSize()),
-                buildThreadFactory(config),
-                handler);
-        this.poolName = poolName;
-        this.config = config;
+    public MonitoredExecutorService(String executorName, ExecutorService delegate) {
+        this.executorName = executorName;
+        this.delegate = delegate;
     }
 
     @Override
     public String getName() {
-        return poolName;
-    }
-
-    public ThreadPoolConfig getConfig() {
-        return config;
+        return executorName;
     }
 
     @Override
     public synchronized void registerMetrics(MetricRegistry registry) {
         if (metrics == null) {
-            metrics = new ThreadPoolMetrics(this, registry);
+            if (delegate instanceof ThreadPoolExecutor threadPoolExecutor) {
+                metrics = new ThreadPoolMetrics(getName(), threadPoolExecutor, registry);
 
-            final RejectedExecutionHandler handler = getRejectedExecutionHandler();
-            setRejectedExecutionHandler((r, executor) -> {
-                metrics.taskRejected();
-                handler.rejectedExecution(r, executor);
-            });
+                final RejectedExecutionHandler rejectHandler = threadPoolExecutor.getRejectedExecutionHandler();
+                threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> {
+                    metrics.taskRejected();
+                    rejectHandler.rejectedExecution(r, executor);
+                });
+            } else {
+                metrics = new ExecutorServiceMetrics(getName(), registry);
+            }
         }
     }
 
     @Override
     public void execute(@NonNull Runnable command) {
-        super.execute(wrap(command));
+        delegate.execute(wrap(command));
     }
 
     private Runnable wrap(Runnable command) {
@@ -90,5 +82,30 @@ public class MeasurableThreadPoolExecutor extends ThreadPoolExecutor implements 
                 }
             };
         }
+    }
+
+    @Override
+    public void shutdown() {
+        delegate.shutdown();
+    }
+
+    @Override
+    public List<Runnable> shutdownNow() {
+        return delegate.shutdownNow();
+    }
+
+    @Override
+    public boolean isShutdown() {
+        return delegate.isShutdown();
+    }
+
+    @Override
+    public boolean isTerminated() {
+        return delegate.isTerminated();
+    }
+
+    @Override
+    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+        return delegate.awaitTermination(timeout, unit);
     }
 }

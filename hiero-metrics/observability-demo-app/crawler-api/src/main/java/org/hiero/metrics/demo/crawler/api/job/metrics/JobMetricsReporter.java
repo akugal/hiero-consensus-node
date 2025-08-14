@@ -17,6 +17,7 @@ import org.hiero.metrics.demo.crawler.api.job.JobResult;
 public class JobMetricsReporter {
 
     private final LongCounter countTotal;
+    private final LongCounter timeoutCountTotal;
     private final GaugeAdapter<DoubleSupplier, MovingAverageStat> durationAvgMoving;
     private final GaugeAdapter<Object, FrequencyCumulativeAvg> frequencyAvg;
     private final GaugeAdapter<DoubleSupplier, FrequencyMovingAvg> frequencyAvgMoving;
@@ -25,6 +26,7 @@ public class JobMetricsReporter {
 
     public JobMetricsReporter(MetricRegistry registry) {
         countTotal = registry.getMetric(JobMetricsRegistration.JOBS_COUNT_TOTAL);
+        timeoutCountTotal = registry.getMetric(JobMetricsRegistration.JOBS_TIMEOUT_TOTAL);
         durationAvgMoving = registry.getMetric(JobMetricsRegistration.JOB_DURATION_AVG_MOVING);
         frequencyAvg = registry.getMetric(JobMetricsRegistration.JOBS_FREQUENCY_AVG);
         frequencyAvgMoving = registry.getMetric(JobMetricsRegistration.JOBS_FREQUENCY_AVG_MOVING);
@@ -48,6 +50,11 @@ public class JobMetricsReporter {
         countTotal.getOrCreateLabeled(labels).increment();
         frequencyAvg.getOrCreateLabeled(labels).count();
         frequencyAvgMoving.getOrCreateLabeled(labels).update();
+    }
+
+    public void onJobTimeout(URI rootUri) {
+        Map<String, String> labels = Map.of(JobMetricsRegistration.SCHEME_LABEL, getScheme(rootUri));
+        timeoutCountTotal.getOrCreateLabeled(labels).increment();
     }
 
     public void onJobFinish(JobResult jobResult) {

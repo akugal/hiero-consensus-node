@@ -13,6 +13,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.hiero.metrics.api.core.IdempotentMetricRegistryAware;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricRegistryAware;
+import org.hiero.metrics.demo.crawler.api.exception.JobTimeoutException;
 import org.hiero.metrics.demo.crawler.api.job.JobConfig;
 import org.hiero.metrics.demo.crawler.api.job.JobExecutor;
 import org.hiero.metrics.demo.crawler.api.job.JobResult;
@@ -67,9 +68,14 @@ public class ExecutorServiceJobScheduler extends IdempotentMetricRegistryAware i
             if (metricsReporter != null) {
                 metricsReporter.onJobSubmit(uri);
                 return new FutureScheduledJob(jobId, executorService.submit(() -> {
-                    JobResult result = jobExecutor.execute(uri, config);
-                    metricsReporter.onJobFinish(result);
-                    return result;
+                    try {
+                        JobResult result = jobExecutor.execute(uri, config);
+                        metricsReporter.onJobFinish(result);
+                        return result;
+                    } catch (JobTimeoutException ex) {
+                        metricsReporter.onJobTimeout(uri);
+                        throw ex;
+                    }
                 }));
             } else {
                 logger.debug("Metrics are not available, executing job without metrics reporting. uri={}", uri);
