@@ -3,19 +3,32 @@ package org.hiero.metrics.demo.crawler.threadpool.metrics;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.hiero.metrics.demo.crawler.threadpool.config.ThreadPoolConfig;
 
 public final class ExecutorServiceFactory {
 
     private ExecutorServiceFactory() {}
 
-    public static <C extends ThreadPoolConfig> ExecutorService buildExecutorService(C config) {
+    public static <C extends ThreadPoolConfig> ExecutorService buildThreadPoolExecutor(C config) {
+        final ThreadFactory threadFactory = buildThreadFactory(config);
+
         if (config.useVirtualThreads()) {
-            return Executors.newThreadPerTaskExecutor(buildThreadFactory(config));
+            return new MonitoredExecutorService(config.getName(), Executors.newThreadPerTaskExecutor(threadFactory));
         } else {
-            return new MeasurableThreadPoolExecutor(config.getName(), config, new ThreadPoolExecutor.DiscardPolicy());
+            return new MonitoredExecutorService(
+                    config.getName(),
+                    new ThreadPoolExecutor(
+                            config.coreSize(),
+                            config.maxSize(),
+                            config.keepAliveSeconds(),
+                            TimeUnit.SECONDS,
+                            new LinkedBlockingQueue<>(config.queueSize() == 0 ? Integer.MAX_VALUE : config.queueSize()),
+                            threadFactory,
+                            new ThreadPoolExecutor.DiscardPolicy()));
         }
     }
 

@@ -88,11 +88,8 @@ public class TestUtils {
 
                 JobResult result = job.getResult(Duration.ofMillis(remainingTime));
                 printJobResults(job.getJobId(), result);
-
             } catch (JobTimeoutException te) {
-                System.out.println("⌛ Test timeout reached before all jobs completed");
-                jobManager.shutdown();
-                return;
+                System.out.println("⌛ Job timed out id=" + job.getJobId());
             } catch (JobException e) {
                 System.out.println("❌ Job Failed id=" + job.getJobId() + " : " + e.getMessage());
             }

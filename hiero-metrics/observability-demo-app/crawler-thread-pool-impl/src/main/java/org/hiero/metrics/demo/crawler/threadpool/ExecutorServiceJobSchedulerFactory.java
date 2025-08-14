@@ -23,7 +23,7 @@ public class ExecutorServiceJobSchedulerFactory implements JobSchedulerFactory {
     public JobScheduler createJobScheduler(Configuration configuration) {
         JobPoolConfig jobPoolConfig = configuration.getConfigData(JobPoolConfig.class);
         logger.info("Creating job tread pool executor with config: {}", jobPoolConfig);
-        ExecutorService jobExecutorService = ExecutorServiceFactory.buildExecutorService(jobPoolConfig);
+        ExecutorService jobExecutorService = ExecutorServiceFactory.buildThreadPoolExecutor(jobPoolConfig);
 
         return new ExecutorServiceJobScheduler(jobExecutorService, createJobExecutor(configuration));
     }
@@ -37,7 +37,7 @@ public class ExecutorServiceJobSchedulerFactory implements JobSchedulerFactory {
 
         JobTaskPoolConfig jobTaskPoolConfig = configuration.getConfigData(JobTaskPoolConfig.class);
         logger.info("Creating job task tread pool executor with config: {}", jobTaskPoolConfig);
-        ExecutorService jobTaskExecutorService = ExecutorServiceFactory.buildExecutorService(jobTaskPoolConfig);
+        ExecutorService jobTaskExecutorService = ExecutorServiceFactory.buildThreadPoolExecutor(jobTaskPoolConfig);
 
         return new ExecutorServiceJobExecutor(jobTaskExecutorService, documentCache);
     }

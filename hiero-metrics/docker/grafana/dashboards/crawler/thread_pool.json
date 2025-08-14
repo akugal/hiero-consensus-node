@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 4,
   "links": [],
   "panels": [
     {
@@ -78,7 +78,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:pool_config_core_size{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:pool_config_core_size{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -94,7 +94,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:pool_config_max_size{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:pool_config_max_size{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -102,23 +102,6 @@
           "legendFormat": "Pool Max Size",
           "range": true,
           "refId": "Pool Max Size",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:queue_config_capacity{pool_name=\"$pool_name\", test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Queue Capacity",
-          "range": true,
-          "refId": "Queue Capacity",
           "useBackend": false
         }
       ],
@@ -214,7 +197,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:pool_size{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:pool_size{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -316,7 +299,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:queue_size{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:queue_size{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -333,7 +316,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:queue_size_max_spike{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:queue_size_max_spike{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -350,7 +333,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:queue_size_avg{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:queue_size_avg{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -367,7 +350,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:queue_size_moving_avg{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:queue_size_moving_avg{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -470,8 +453,9 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:tasks_count_total{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:tasks_count_total{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
+          "hide": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "Total",
@@ -486,14 +470,14 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:tasks_count_callback{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:tasks_count_callback{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
-          "hide": true,
+          "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Total Callback",
+          "legendFormat": "Scheduled",
           "range": true,
-          "refId": "Total Callback",
+          "refId": "Scheduled",
           "useBackend": false
         },
         {
@@ -503,7 +487,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:tasks_completed_count_total{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:tasks_completed_count_total{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -520,14 +504,31 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:tasks_completed_count_callback{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:tasks_completed_count_callback{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
-          "hide": true,
+          "hide": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "Completed Callback",
           "range": true,
           "refId": "Completed Callback",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "thread_pool:tasks_rejected_count_total{executor_name=\"$executor_name\", test=\"$test_name\"}",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Rejected",
+          "range": true,
+          "refId": "Rejected",
           "useBackend": false
         }
       ],
@@ -623,12 +624,12 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:tasks_active_count{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:tasks_active_count_callback{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Active",
+          "legendFormat": "Active (Callback)",
           "range": true,
           "refId": "Active",
           "useBackend": false
@@ -639,36 +640,19 @@
             "uid": "PBFA97CFB590B2093"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "thread_pool:tasks_active_count_callback{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "editorMode": "code",
+          "expr": "avg(thread_pool:tasks_count_callback{executor_name=\"$executor_name\", test=\"$test_name\"}) - avg(thread_pool:tasks_completed_count_callback{executor_name=\"$executor_name\", test=\"$test_name\"})",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Active Callback",
+          "legendFormat": "Pending (scheduled - completed)",
           "range": true,
-          "refId": "Active Callback",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "avg(thread_pool:tasks_count_total{pool_name=\"$pool_name\", test=\"$test_name\"}) - avg(thread_pool:tasks_completed_count_total{pool_name=\"$pool_name\", test=\"$test_name\"})",
-          "fullMetaSearch": false,
-          "hide": true,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Active Computed",
-          "range": true,
-          "refId": "Active Computed",
+          "refId": "Pending",
           "useBackend": false
         }
       ],
-      "title": "Active Tasks",
+      "title": "Tasks Status",
       "type": "timeseries"
     },
     {
@@ -761,7 +745,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:task_queue_wait_duration_max_spike_ns{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:task_queue_wait_duration_max_spike_ns{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -778,7 +762,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:task_duration_max_spike_ns{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "thread_pool:task_duration_max_spike_ns{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -795,7 +779,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "thread_pool:task_duration_moving_avg_ns{pool_name=\"$pool_name\", test=\"$test_name\"}",
+          "expr": "task_duration_moving_avg_ns{executor_name=\"$executor_name\", test=\"$test_name\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -803,6 +787,40 @@
           "legendFormat": "Duration Moving Avg",
           "range": true,
           "refId": "Duration Moving Avg",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "task_duration_avg_smooth_ns{executor_name=\"$executor_name\", test=\"$test_name\"}",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Duration Avg Smooth",
+          "range": true,
+          "refId": "Duration Avg Smooth",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "task_duration_avg_volatile_ns{executor_name=\"$executor_name\", test=\"$test_name\"}",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Duration Avg Volatile",
+          "range": true,
+          "refId": "Duration Avg Volatile",
           "useBackend": false
         }
       ],
@@ -820,13 +838,13 @@
           "type": "prometheus",
           "uid": "PBFA97CFB590B2093"
         },
-        "definition": "label_values(pool_name)",
-        "label": "Pool Name",
-        "name": "pool_name",
+        "definition": "label_values(executor_name)",
+        "label": "Executor Name",
+        "name": "executor_name",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(pool_name)",
+          "query": "label_values(executor_name)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -834,10 +852,6 @@
         "type": "query"
       },
       {
-        "current": {
-          "text": "tasks-thread-pool",
-          "value": "tasks-thread-pool"
-        },
         "datasource": {
           "type": "prometheus",
           "uid": "PBFA97CFB590B2093"
@@ -878,5 +892,5 @@
   "timezone": "browser",
   "title": "Thread Pool Stats",
   "uid": "c01a9025-2fc0-43fa-92d9-c109ea4eff5b",
-  "version": 1
+  "version": 7
 }

@@ -24,6 +24,8 @@ public class JobMetricsRegistration implements MetricsRegistrationProvider {
 
     public static final MetricKey<LongCounter> JOBS_COUNT_TOTAL =
             LongCounter.key("count").withCategory(CATEGORY);
+    public static final MetricKey<LongCounter> JOBS_TIMEOUT_TOTAL =
+            LongCounter.key("timeout_count").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<DoubleSupplier, MovingAverageStat>> JOB_DURATION_AVG_MOVING =
             MovingAverageStat.key("duration_moving_avg").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<Object, FrequencyCumulativeAvg>> JOBS_FREQUENCY_AVG =
@@ -41,6 +43,9 @@ public class JobMetricsRegistration implements MetricsRegistrationProvider {
         return List.of(
                 LongCounter.builder(JOBS_COUNT_TOTAL)
                         .withDescription("Total number of jobs executed")
+                        .withDynamicLabelNames(SCHEME_LABEL),
+                LongCounter.builder(JOBS_TIMEOUT_TOTAL)
+                        .withDescription("Total number of jobs timed out")
                         .withDynamicLabelNames(SCHEME_LABEL),
                 MovingAverageStat.metricBuilder(1, JOB_DURATION_AVG_MOVING)
                         .withDescription("Job run time moving average with 1 second half-life")
