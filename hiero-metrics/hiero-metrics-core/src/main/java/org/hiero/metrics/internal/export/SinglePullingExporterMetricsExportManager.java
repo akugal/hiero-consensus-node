@@ -9,8 +9,8 @@ public class SinglePullingExporterMetricsExportManager extends AbstractMetricsEx
 
     private final PullingMetricsExporter exporter;
 
-    public SinglePullingExporterMetricsExportManager(@NonNull PullingMetricsExporter exporter) {
-        super();
+    public SinglePullingExporterMetricsExportManager(String name, @NonNull PullingMetricsExporter exporter) {
+        super(name);
         this.exporter = Objects.requireNonNull(exporter, "exporter must not be null");
     }
 

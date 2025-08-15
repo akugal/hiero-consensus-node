@@ -11,8 +11,6 @@ import java.util.concurrent.ExecutionException;
 import org.hiero.metrics.api.CallbackMetric;
 import org.hiero.metrics.api.core.IdempotentMetricRegistryAware;
 import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.stat.CumulativeAverageIntStat;
-import org.hiero.metrics.api.stat.MovingAverageStat;
 import org.hiero.metrics.api.utils.Unit;
 import org.hiero.metrics.demo.crawler.api.document.Document;
 import org.hiero.metrics.demo.crawler.api.document.DocumentFetcher;
@@ -24,9 +22,6 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
 
     private final String name;
     private final Cache<URI, Optional<Document>> cache;
-
-    private CumulativeAverageIntStat cacheSizeAvg;
-    private MovingAverageStat cacheSizeMovingAvg;
 
     public GuavaDocumentCache(CacheConfig cacheConfig) {
         this("document", cacheConfig);
@@ -51,20 +46,6 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
                 CallbackMetric.builder(CallbackMetric.key("size").withCategory(category))
                         .withDescription("Documents cache size")
                         .registerDataPoint(cache::size, Map.of()));
-        // accumulates cache size over time and rest betwee exports; starts with current cache size
-        cacheSizeAvg = metricRegistry
-                .register(CumulativeAverageIntStat.metricBuilder(
-                                CumulativeAverageIntStat.key("size_avg").withCategory(category))
-                        .withDefaultInitializer(() -> (int) cache.size())
-                        .withDescription("Documents cache size - avg cumulative"))
-                .getNotLabeled();
-        // moving average that also starts
-        cacheSizeMovingAvg = metricRegistry
-                .register(MovingAverageStat.metricBuilder(
-                                1, MovingAverageStat.key("size_moving_avg").withCategory(category))
-                        .withDefaultInitializer(() -> (int) cache.size())
-                        .withDescription("Documents cache size - avg moving (half-life 1 sec)"))
-                .getNotLabeled();
 
         // cache lookup count
         metricRegistry.register(
@@ -107,13 +88,6 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
                 throw (DocumentFetchException) e.getCause();
             }
             throw new DocumentFetchException(e);
-        } finally {
-            if (isMetricsRegistered()) {
-                long size = cache.size();
-                // we assume no config will have more than Integer.MAX_VALUE entries
-                cacheSizeAvg.update((int) size);
-                cacheSizeMovingAvg.update(size);
-            }
         }
     }
 }

@@ -3,6 +3,7 @@ package org.hiero.metrics.internal.export;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -11,21 +12,53 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hiero.metrics.api.LongGauge;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
+import org.hiero.metrics.api.core.MetricsFacade;
+import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
 import org.hiero.metrics.api.export.MetricSnapshot;
 import org.hiero.metrics.api.export.MetricsExportManager;
 import org.hiero.metrics.api.export.MetricsSnapshot;
+import org.hiero.metrics.api.utils.Unit;
 import org.hiero.metrics.internal.core.SnapshotableMetricsRegistry;
 
 public abstract class AbstractMetricsExportManager implements MetricsExportManager {
 
     protected static final Logger logger = LogManager.getLogger(MetricsExportManager.class);
 
+    private final String name;
     private final Set<Set<Label>> registriesGlobalLabels = new HashSet<>();
     private final List<MetricRegistry> metricRegistries = new CopyOnWriteArrayList<>();
 
+    private MetricRegistry exportMetricsRegistry;
+    private LongGaugeDataPoint snapshotDurationMetric;
+
+    protected AbstractMetricsExportManager(String name) {
+        this.name = name;
+    }
+
+    @NonNull
+    @Override
+    public final String getName() {
+        return name;
+    }
+
+    protected void registerExportMetrics(String category, MetricRegistry exportMetricsRegistry) {
+        snapshotDurationMetric = exportMetricsRegistry
+                .register(LongGauge.builder(LongGauge.key("snapshot_duration").withCategory(category))
+                        .withDescription("Snapshot duration time")
+                        .withUnit(Unit.MILLISECOND_UNIT))
+                .getNotLabeled();
+    }
+
     protected abstract void init();
+
+    private void initInternal() {
+        exportMetricsRegistry = MetricsFacade.createRegistry(new Label("export_manager", name));
+        registerExportMetrics("export", exportMetricsRegistry);
+        init();
+    }
 
     @Override
     public final void manageMetricRegistry(@NonNull MetricRegistry registry) {
@@ -47,14 +80,19 @@ public abstract class AbstractMetricsExportManager implements MetricsExportManag
         logger.info("Added metrics registry with global labels: {}", globalLabels);
 
         if (firstRegistry) {
-            init();
+            initInternal();
         }
     }
 
     // returns immutable list of snapshots
     @NonNull
     protected final Optional<MetricsSnapshot> takeSnapshot() {
+        if (metricRegistries.isEmpty()) {
+            return Optional.empty();
+        }
+
         final List<MetricSnapshot> snapshots;
+        final long startTime = System.currentTimeMillis();
 
         if (metricRegistries.size() == 1) {
             if (metricRegistries.getFirst() instanceof SnapshotableMetricsRegistry snapshotable) {
@@ -71,11 +109,15 @@ public abstract class AbstractMetricsExportManager implements MetricsExportManag
                     .toList(); // immutable list
         }
 
-        if (snapshots.isEmpty()) {
-            return Optional.empty();
+        long durationMs = System.currentTimeMillis() - startTime;
+        if (snapshotDurationMetric != null) {
+            snapshotDurationMetric.update(durationMs);
         }
 
-        return Optional.of(new MetricsSnapshot(snapshots, Instant.now()));
+        List<MetricSnapshot> finalSnapshots = new ArrayList<>(snapshots);
+        finalSnapshots.addAll(((SnapshotableMetricsRegistry) exportMetricsRegistry).snapshot());
+
+        return Optional.of(new MetricsSnapshot(finalSnapshots, Instant.now()));
     }
 
     @Override

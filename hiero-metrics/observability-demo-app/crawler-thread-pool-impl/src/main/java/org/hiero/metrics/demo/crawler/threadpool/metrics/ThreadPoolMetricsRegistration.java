@@ -4,7 +4,6 @@ package org.hiero.metrics.demo.crawler.threadpool.metrics;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 import org.hiero.metrics.api.CallbackMetric;

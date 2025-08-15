@@ -10,18 +10,32 @@ public class CrawlerTests {
 
     @Test
     public void testWithCacheAndWithout() throws InterruptedException {
-        IdempotentTimedProcessor fetcher = new IdempotentTimedProcessor(300, 300, 0.0);
-        IdempotentTimedProcessor processor = new IdempotentTimedProcessor(100, 100, 0.0);
-        SchemeCrawler crawler = new TestRandomSchemeCrawler(fetcher, 0.8, 10, 10, processor);
+        // adjust thread pool for jobs
+        System.setProperty("job.pool.useVirtualThreads", "false");
+        System.setProperty("job.pool.coreSize", "4");
+        System.setProperty("job.pool.maxSize", "32");
+        System.setProperty("job.pool.keepAliveSeconds", "60");
+        System.setProperty("job.pool.queueSize", "0"); // unbounded
 
-        TestConfig config = new TestConfig(TestUtils.createRandomTestJobsSpecs(50, 2, Duration.ofSeconds(30)))
+        // Adjust thread pool for job tasks
+        System.setProperty("job.task.pool.useVirtualThreads", "false");
+        System.setProperty("job.task.pool.coreSize", "8");
+        System.setProperty("job.task.pool.maxSize", "64");
+        System.setProperty("job.task.pool.keepAliveSeconds", "60");
+        System.setProperty("job.task.pool.queueSize", "0"); // unbounded
+
+        IdempotentTimedProcessor fetcher = new IdempotentTimedProcessor(200, 200, 0.0);
+        IdempotentTimedProcessor processor = new IdempotentTimedProcessor(50, 50, 0.0);
+        SchemeCrawler crawler = new TestRandomSchemeCrawler(fetcher, 0.8, 5, 5, processor);
+
+        TestConfig config = new TestConfig(TestUtils.createRandomTestJobsSpecs(150, 2, Duration.ofSeconds(30)))
                 .withTimeout(Duration.ofSeconds(300))
-                .withRampUpSeconds(5)
-                .withThroughputPerSecond(6);
+                .withRampUpSeconds(4)
+                .withThroughputPerSecond(2.3);
 
         // Provide spec for Guava cache
-        // This will enable the cache with a maximum size of 1000 and expire entries after 10 seconds of access
-        System.setProperty("cache.doc.guava.spec", "maximumSize=5000,expireAfterAccess=10s");
+        // This will enable the cache with a maximum size of 100000 and expire entries after 30 seconds of access
+        System.setProperty("cache.doc.guava.spec", "maximumSize=100000,expireAfterAccess=30s");
         TestUtils.run("cache-enabled", config, crawler);
 
         // Disable cache by setting an empty spec
@@ -41,8 +55,8 @@ public class CrawlerTests {
 
         TestConfig config = new TestConfig(TestUtils.createRandomTestJobsSpecs(150, 2, Duration.ofSeconds(30)))
                 .withTimeout(Duration.ofSeconds(300))
-                .withRampUpSeconds(0)
-                .withThroughputPerSecond(2.2);
+                .withRampUpSeconds(4)
+                .withThroughputPerSecond(2.3);
 
         // adjust thread pool for jobs
         System.setProperty("job.pool.useVirtualThreads", "false");
@@ -85,7 +99,7 @@ public class CrawlerTests {
         double tasksPerSec = jobPerSecond * jobTasksCount;
         System.out.println("Expected Tasks/second:  " + tasksPerSec);
 
-        int availableTasksPerSec = 1000* processors / taskTimeMs;
+        int availableTasksPerSec = 1000 * processors / taskTimeMs;
         System.out.println("Available Tasks/second:  " + availableTasksPerSec);
 
         System.out.println("--------------------------------");

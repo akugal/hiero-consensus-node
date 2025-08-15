@@ -26,7 +26,7 @@ public final class MetricsFacade {
 
     private static final class DefaultExportManagerHolder {
         private static final MetricsExportManager INSTANCE =
-                createExportManagerWithDiscoveredExporters(Executors::newSingleThreadScheduledExecutor, 1);
+                createExportManagerWithDiscoveredExporters("default", Executors::newSingleThreadScheduledExecutor, 1);
     }
 
     private MetricsFacade() {
@@ -59,7 +59,9 @@ public final class MetricsFacade {
     }
 
     public static MetricsExportManager createExportManagerWithDiscoveredExporters(
-            @NonNull Supplier<ScheduledExecutorService> executorServiceFactory, int exportIntervalSeconds) {
+            String name,
+            @NonNull Supplier<ScheduledExecutorService> executorServiceFactory,
+            int exportIntervalSeconds) {
         List<PullingMetricsExporter> pullingExporters = load(PullingMetricsExporter.class);
         List<PushingMetricsExporter> pushingExporters = load(PushingMetricsExporter.class);
 
@@ -70,21 +72,25 @@ public final class MetricsFacade {
 
         if (pushingExporters.isEmpty() && pullingExporters.size() == 1) {
             logger.info("Single pulling exporter found. No export thread will be running.");
-            return new SinglePullingExporterMetricsExportManager(pullingExporters.getFirst());
+            return new SinglePullingExporterMetricsExportManager(name, pullingExporters.getFirst());
         }
 
         return new DefaultMetricsExportManager(
-                executorServiceFactory, exportIntervalSeconds, pullingExporters, pushingExporters);
+                name, executorServiceFactory, exportIntervalSeconds, pullingExporters, pushingExporters);
     }
 
     public static MetricsExportManager createExportManager(
             @NonNull PushingMetricsExporter exporter, int exportIntervalSeconds) {
         Objects.requireNonNull(exporter, "exporter must not be null");
         return new DefaultMetricsExportManager(
-                Executors::newSingleThreadScheduledExecutor, exportIntervalSeconds, List.of(), List.of(exporter));
+                exporter.getName(),
+                Executors::newSingleThreadScheduledExecutor,
+                exportIntervalSeconds,
+                List.of(),
+                List.of(exporter));
     }
 
     public static MetricsExportManager createExportManager(@NonNull PullingMetricsExporter exporter) {
-        return new SinglePullingExporterMetricsExportManager(exporter);
+        return new SinglePullingExporterMetricsExportManager(exporter.getName(), exporter);
     }
 }

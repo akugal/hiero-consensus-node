@@ -18,7 +18,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
   "links": [],
   "panels": [
     {
@@ -76,191 +75,18 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 24,
         "x": 0,
         "y": 0
       },
       "id": 1,
-      "interval": "$interval",
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "cache_guava_document:size{test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Size",
-          "range": true,
-          "refId": "Size",
-          "useBackend": false
-        }
-      ],
-      "title": "Cache Size",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "id": 2,
-      "interval": "$interval",
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "mean"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum(cache_guava_document:lookups_count{test=\"$test_name\", type=\"hit\"}) / sum(cache_guava_document:lookups_count{test=\"$test_name\"})",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Hit Ratio %",
-          "range": true,
-          "refId": "Hit Ratio",
-          "useBackend": false
-        }
-      ],
-      "title": "Cache Efficiency",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "ns"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "id": 4,
       "interval": "$interval",
       "options": {
         "legend": {
@@ -284,17 +110,17 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "cache_guava_document:avg_load_time_ns{test=\"$test_name\"}",
+          "expr": "export:snapshot_duration_ms{export_manager=\"$export_manager\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Load Time",
+          "legendFormat": "Snapshot",
           "range": true,
-          "refId": "Load Time",
+          "refId": "Snapshot",
           "useBackend": false
         }
       ],
-      "title": "Miss Load Time",
+      "title": "Snapshot Duration",
       "type": "timeseries"
     },
     {
@@ -340,7 +166,6 @@
               "mode": "off"
             }
           },
-          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -353,17 +178,49 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ms"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Push Time"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Push demo-metrics"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
+        "w": 24,
+        "x": 0,
         "y": 8
       },
-      "id": 3,
+      "id": 2,
       "interval": "$interval",
       "options": {
         "legend": {
@@ -375,7 +232,7 @@
         "tooltip": {
           "hideZeros": false,
           "mode": "multi",
-          "sort": "none"
+          "sort": "desc"
         }
       },
       "pluginVersion": "12.0.2",
@@ -387,14 +244,13 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "cache_guava_document:lookups_count{test=\"$test_name\", type=\"hit\"}",
+          "expr": "export:push_export_duration_ms{export_manager=\"$export_manager\"}",
           "fullMetaSearch": false,
-          "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Hits",
+          "legendFormat": "Push {{name}}",
           "range": true,
-          "refId": "Hits",
+          "refId": "Push Duration",
           "useBackend": false
         },
         {
@@ -403,36 +259,19 @@
             "uid": "PBFA97CFB590B2093"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "cache_guava_document:lookups_count{test=\"$test_name\", type=\"miss\"}",
+          "editorMode": "code",
+          "expr": "avg(scrape_duration_seconds*1000)",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Misses",
+          "legendFormat": "Scrape",
           "range": true,
-          "refId": "Misses",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "cache_guava_document:eviction_count{test=\"$test_name\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Evictions",
-          "range": true,
-          "refId": "Evictions",
+          "refId": "Scrape Duration",
           "useBackend": false
         }
       ],
-      "title": "Cache Operations",
+      "title": "Export Duration",
       "type": "timeseries"
     }
   ],
@@ -446,13 +285,13 @@
           "type": "prometheus",
           "uid": "PBFA97CFB590B2093"
         },
-        "definition": "label_values(test)",
-        "label": "Test Name",
-        "name": "test_name",
+        "definition": "label_values(export_manager)",
+        "label": "Export Manager",
+        "name": "export_manager",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(test)",
+          "query": "label_values(export_manager)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -464,6 +303,7 @@
           "text": "3s",
           "value": "3s"
         },
+        "description": "",
         "hide": 2,
         "name": "interval",
         "query": "3s",
@@ -478,7 +318,6 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Cache Stats",
-  "uid": "85486bce-c3b5-4b6d-a1a4-726647ae2460",
-  "version": 1
+  "title": "Export Stats",
+  "version": 0
 }

@@ -23,6 +23,9 @@ public class CsvFileMetricsExporter implements PushingMetricsExporter {
         writer = CsvMetricsSnapshotsWriter.DEFAULT;
 
         if (!Files.exists(filePath)) {
+            if (filePath.getParent() != null) {
+                Files.createDirectories(filePath.getParent());
+            }
             Files.createFile(filePath);
             try (OutputStream outputStream = Files.newOutputStream(filePath, APPEND)) {
                 writer.writeHeaders(outputStream);
