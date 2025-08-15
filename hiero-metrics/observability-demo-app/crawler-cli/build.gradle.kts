@@ -19,20 +19,26 @@ application.mainClass = "org.hiero.metrics.demo.crawler.cli.CliMain"
 
 tasks.named<JavaExec>("run") { standardInput = System.`in` }
 
-tasks.register<Exec>("startDocker") {
-    description = "Starts docker with observability backends"
+val cleanAppData = tasks.register<Delete>("cleanData") {
+    description = "Clean up application output data directory"
+    group = "application"
+    delete(layout.projectDirectory.dir("out"))
+}
+
+tasks.clean { dependsOn(cleanAppData) }
+
+tasks.register<Exec>("startObserving") {
+    description = "Starts docker containers with Prometheus, Grafana, etc"
     group = "docker"
 
-    // dependsOn(updateDockerEnvTask)
     workingDir(layout.projectDirectory.dir("../../docker"))
     commandLine("/usr/local/bin/docker", "compose", "up")
 }
 
-tasks.register<Exec>("stopDocker") {
-    description = "Stops running docker of observability backends"
+tasks.register<Exec>("stopObserving") {
+    description = "Stops running docker containers with Prometheus, Grafana, etc"
     group = "docker"
 
-    // dependsOn(updateDockerEnvTask)
     workingDir(layout.projectDirectory.dir("../../docker"))
     commandLine("/usr/local/bin/docker", "compose", "stop")
 }
