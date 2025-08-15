@@ -5,6 +5,7 @@ services:
     image: nginx:alpine
     volumes:
       - ./tmp:/usr/share/nginx/html:ro
+      - ./../observability-demo-app/crawler-cli/out/metrics:/usr/share/nginx/html:ro
     networks:
       - observe-network
 

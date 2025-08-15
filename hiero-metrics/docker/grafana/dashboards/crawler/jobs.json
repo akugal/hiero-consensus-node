@@ -610,7 +610,7 @@
           "useBackend": false
         }
       ],
-      "title": "Concurrency Factor = SUM(task_duration) / job_duration",
+      "title": "Job Duration Improvement = SUM(task_duration) / job_duration",
       "type": "timeseries"
     }
   ],

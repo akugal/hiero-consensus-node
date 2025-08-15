@@ -6,6 +6,9 @@ import org.hiero.metrics.api.core.MetricRegistry;
 
 public interface MetricsExportManager {
 
+    @NonNull
+    String getName();
+
     void manageMetricRegistry(@NonNull MetricRegistry metricRegistry);
 
     void resetAll();

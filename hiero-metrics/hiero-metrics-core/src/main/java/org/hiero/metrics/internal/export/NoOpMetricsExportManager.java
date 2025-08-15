@@ -9,6 +9,12 @@ public class NoOpMetricsExportManager implements MetricsExportManager {
 
     public static final MetricsExportManager INSTANCE = new NoOpMetricsExportManager();
 
+    @NonNull
+    @Override
+    public String getName() {
+        return "no-op";
+    }
+
     @Override
     public void manageMetricRegistry(@NonNull MetricRegistry metricRegistry) {
         // no op

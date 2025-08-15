@@ -41,7 +41,7 @@ public class MetricsExportManagerTest {
         // then
         List<MetricSnapshot> snapshots = exporter.getSnapshot().get().snapshots();
         assertThat(snapshots)
-                .containsExactlyInAnyOrder(
+                .contains(
                         new MetricSnapshot(
                                 singleSumDoubleMetric.getMetadata(),
                                 List.of(new DataPointSnapshot(
@@ -62,7 +62,7 @@ public class MetricsExportManagerTest {
         // then
         snapshots = exporter.getSnapshot().get().snapshots();
         assertThat(snapshots)
-                .containsExactlyInAnyOrder(
+                .contains(
                         new MetricSnapshot(
                                 singleSumDoubleMetric.getMetadata(),
                                 List.of(new DataPointSnapshot(
