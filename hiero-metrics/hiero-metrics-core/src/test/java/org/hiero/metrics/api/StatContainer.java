@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
-import org.hiero.metrics.api.stat.StatUtils;
-
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntSupplier;
+import org.hiero.metrics.api.stat.StatUtils;
 
 public class StatContainer {
 

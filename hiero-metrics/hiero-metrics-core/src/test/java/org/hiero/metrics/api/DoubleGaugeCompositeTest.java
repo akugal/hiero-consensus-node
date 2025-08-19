@@ -11,7 +11,8 @@ public class DoubleGaugeCompositeTest {
 
     @Test
     public void testFailBuildWhenNoStatsDefined() {
-        assertThatThrownBy(() -> DoubleGaugeComposite.builder(DoubleGaugeComposite.key("noStats")).build())
+        assertThatThrownBy(() -> DoubleGaugeComposite.builder(DoubleGaugeComposite.key("noStats"))
+                        .build())
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("At least one stat must be defined");
     }

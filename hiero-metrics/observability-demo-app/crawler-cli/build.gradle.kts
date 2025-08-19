@@ -19,11 +19,12 @@ application.mainClass = "org.hiero.metrics.demo.crawler.cli.CliMain"
 
 tasks.named<JavaExec>("run") { standardInput = System.`in` }
 
-val cleanAppData = tasks.register<Delete>("cleanData") {
-    description = "Clean up application output data directory"
-    group = "application"
-    delete(layout.projectDirectory.dir("out"))
-}
+val cleanAppData =
+    tasks.register<Delete>("cleanData") {
+        description = "Clean up application output data directory"
+        group = "application"
+        delete(layout.projectDirectory.dir("out"))
+    }
 
 tasks.clean { dependsOn(cleanAppData) }
 

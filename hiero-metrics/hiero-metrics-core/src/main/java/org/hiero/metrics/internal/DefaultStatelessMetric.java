@@ -8,16 +8,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleSupplier;
-import org.hiero.metrics.api.CallbackMetric;
+import org.hiero.metrics.api.StatelessMetric;
 import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractMetric;
 import org.hiero.metrics.internal.core.SnapshotableMetric;
 
-public final class DefaultCallbackMetric extends AbstractMetric implements CallbackMetric, SnapshotableMetric {
+public final class DefaultStatelessMetric extends AbstractMetric implements StatelessMetric, SnapshotableMetric {
 
     private final Map<Map<String, String>, DoubleSupplier> labeledDataPoints = new ConcurrentHashMap<>();
 
-    public DefaultCallbackMetric(CallbackMetric.Builder builder) {
+    public DefaultStatelessMetric(StatelessMetric.Builder builder) {
         super(builder);
 
         for (Map.Entry<Map<String, String>, DoubleSupplier> entry :
@@ -38,7 +38,7 @@ public final class DefaultCallbackMetric extends AbstractMetric implements Callb
     }
 
     @Override
-    public CallbackMetric registerDataPoint(@NonNull DoubleSupplier valueSupplier, Map<String, String> labels) {
+    public StatelessMetric registerDataPoint(@NonNull DoubleSupplier valueSupplier, Map<String, String> labels) {
         Objects.requireNonNull(valueSupplier, "Value supplier must not be null");
 
         verifyLabels(labels);

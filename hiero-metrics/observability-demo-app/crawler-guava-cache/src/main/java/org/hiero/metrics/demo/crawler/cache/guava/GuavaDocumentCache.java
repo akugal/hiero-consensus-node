@@ -8,7 +8,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import org.hiero.metrics.api.CallbackMetric;
+import org.hiero.metrics.api.StatelessMetric;
 import org.hiero.metrics.api.core.IdempotentMetricRegistryAware;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.utils.Unit;
@@ -43,13 +43,13 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
 
         // cache size metrics
         metricRegistry.register(
-                CallbackMetric.builder(CallbackMetric.key("size").withCategory(category))
+                StatelessMetric.builder(StatelessMetric.key("size").withCategory(category))
                         .withDescription("Documents cache size")
                         .registerDataPoint(cache::size, Map.of()));
 
         // cache lookup count
         metricRegistry.register(
-                CallbackMetric.builder(CallbackMetric.key("lookups_count").withCategory(category))
+                StatelessMetric.builder(StatelessMetric.key("lookups_count").withCategory(category))
                         .withDynamicLabelNames("type")
                         .withDescription("Document cache lookups count (miss or hit)")
                         .registerDataPoint(() -> cache.stats().hitCount(), Map.of("type", "hit"))
@@ -57,7 +57,7 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
 
         // cache load count
         metricRegistry.register(
-                CallbackMetric.builder(CallbackMetric.key("loads_count").withCategory(category))
+                StatelessMetric.builder(StatelessMetric.key("loads_count").withCategory(category))
                         .withDynamicLabelNames("type")
                         .withDescription("Document cache loads count (success or exception)")
                         .registerDataPoint(() -> cache.stats().loadSuccessCount(), Map.of("type", "success"))
@@ -65,13 +65,13 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
 
         // eviction count
         metricRegistry.register(
-                CallbackMetric.builder(CallbackMetric.key("eviction_count").withCategory(category))
+                StatelessMetric.builder(StatelessMetric.key("eviction_count").withCategory(category))
                         .withDescription("Document cache eviction count")
                         .registerDataPoint(() -> cache.stats().evictionCount(), Map.of()));
 
         // avg load time
-        metricRegistry.register(CallbackMetric.builder(
-                        CallbackMetric.key("avg_load_time").withCategory(category))
+        metricRegistry.register(StatelessMetric.builder(
+                        StatelessMetric.key("avg_load_time").withCategory(category))
                 .withUnit(Unit.NANOSECOND_UNIT)
                 .withDescription("Document cache average load time in nanoseconds (successful and failed loads)")
                 .registerDataPoint(() -> cache.stats().averageLoadPenalty(), Map.of()));
