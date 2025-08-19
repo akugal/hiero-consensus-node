@@ -1,12 +1,25 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
+import org.hiero.metrics.api.stat.StatUtils;
+
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntSupplier;
 
 public class StatContainer {
 
-    private final AtomicInteger counter = new AtomicInteger(0);
-    private final AtomicInteger sum = new AtomicInteger(0);
+    private final AtomicInteger counter;
+    private final AtomicInteger sum;
+
+    public StatContainer(IntSupplier initializer) {
+        int initialValue = initializer.getAsInt();
+        counter = new AtomicInteger(initialValue);
+        sum = new AtomicInteger(initialValue);
+    }
+
+    public StatContainer() {
+        this(StatUtils.INT_INIT);
+    }
 
     public void update(int value) {
         counter.incrementAndGet();
