@@ -6,9 +6,9 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import org.hiero.metrics.demo.crawler.api.job.JobManager;
-import org.hiero.metrics.demo.crawler.api.job.JobProcessingMetrics;
 import org.hiero.metrics.demo.crawler.api.job.JobResult;
 import org.hiero.metrics.demo.crawler.api.job.ScheduledJob;
+import org.hiero.metrics.demo.crawler.api.job.metrics.JobProcessingMetrics;
 import org.hiero.metrics.demo.crawler.api.job.metrics.JobTaskMetrics;
 import org.hiero.metrics.demo.crawler.api.util.TypedMap;
 

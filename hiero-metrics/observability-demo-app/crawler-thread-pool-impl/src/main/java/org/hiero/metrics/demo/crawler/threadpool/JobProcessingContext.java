@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import org.hiero.metrics.demo.crawler.api.job.JobProcessingMetrics;
+import org.hiero.metrics.demo.crawler.api.job.metrics.JobProcessingMetrics;
 
 final class JobProcessingContext {
 
