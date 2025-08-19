@@ -6,11 +6,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
-import org.hiero.metrics.api.CallbackMetric;
 import org.hiero.metrics.api.DoubleGauge;
 import org.hiero.metrics.api.GaugeAdapter;
 import org.hiero.metrics.api.LongCounter;
 import org.hiero.metrics.api.LongGauge;
+import org.hiero.metrics.api.StatelessMetric;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricsRegistrationProvider;
@@ -27,14 +27,14 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
     public static final String NAME_LABEL = "executor_name";
 
     // config metrics
-    public static final MetricKey<CallbackMetric> POOL_CONFIG_CORE_SIZE =
-            CallbackMetric.key("pool_config_core_size").withCategory(CATEGORY);
-    public static final MetricKey<CallbackMetric> POOL_CONFIG_MAX_SIZE =
-            CallbackMetric.key("pool_config_max_size").withCategory(CATEGORY);
+    public static final MetricKey<StatelessMetric> POOL_CONFIG_CORE_SIZE =
+            StatelessMetric.key("pool_config_core_size").withCategory(CATEGORY);
+    public static final MetricKey<StatelessMetric> POOL_CONFIG_MAX_SIZE =
+            StatelessMetric.key("pool_config_max_size").withCategory(CATEGORY);
 
     // queue metrics
-    public static final MetricKey<CallbackMetric> QUEUE_SIZE =
-            CallbackMetric.key("queue_size").withCategory(CATEGORY);
+    public static final MetricKey<StatelessMetric> QUEUE_SIZE =
+            StatelessMetric.key("queue_size").withCategory(CATEGORY);
 
     public static final MetricKey<LongGauge> QUEUE_SIZE_MAX_SPIKE =
             LongGauge.key("queue_size_max_spike").withCategory(CATEGORY);
@@ -44,24 +44,24 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
             MovingAverageStat.key("queue_size_moving_avg").withCategory(CATEGORY);
 
     // pool metrics
-    public static final MetricKey<CallbackMetric> POOL_SIZE =
-            CallbackMetric.key("pool_size").withCategory(CATEGORY);
-    public static final MetricKey<CallbackMetric> POOL_MAX_SIZE =
-            CallbackMetric.key("pool_size_max").withCategory(CATEGORY);
+    public static final MetricKey<StatelessMetric> POOL_SIZE =
+            StatelessMetric.key("pool_size").withCategory(CATEGORY);
+    public static final MetricKey<StatelessMetric> POOL_MAX_SIZE =
+            StatelessMetric.key("pool_size_max").withCategory(CATEGORY);
 
     // tasks metrics
     public static final MetricKey<LongCounter> TASKS_COUNT_TOTAL =
             LongCounter.key("tasks_count").withCategory(CATEGORY);
-    public static final MetricKey<CallbackMetric> TASKS_COUNT_TOTAL_CALLBACK =
-            CallbackMetric.key("tasks_count_callback").withCategory(CATEGORY);
+    public static final MetricKey<StatelessMetric> TASKS_COUNT_TOTAL_CALLBACK =
+            StatelessMetric.key("tasks_count_callback").withCategory(CATEGORY);
     public static final MetricKey<LongCounter> TASKS_COMPLETED_COUNT_TOTAL =
             LongCounter.key("tasks_completed_count").withCategory(CATEGORY);
     public static final MetricKey<LongCounter> TASKS_REJECTED_COUNT_TOTAL =
             LongCounter.key("tasks_rejected_count").withCategory(CATEGORY);
-    public static final MetricKey<CallbackMetric> TASKS_COMPLETED_COUNT_TOTAL_CALLBACK =
-            CallbackMetric.key("tasks_completed_count_callback").withCategory(CATEGORY);
-    public static final MetricKey<CallbackMetric> TASKS_ACTIVE_COUNT_CALLBACK =
-            CallbackMetric.key("tasks_active_count_callback").withCategory(CATEGORY);
+    public static final MetricKey<StatelessMetric> TASKS_COMPLETED_COUNT_TOTAL_CALLBACK =
+            StatelessMetric.key("tasks_completed_count_callback").withCategory(CATEGORY);
+    public static final MetricKey<StatelessMetric> TASKS_ACTIVE_COUNT_CALLBACK =
+            StatelessMetric.key("tasks_active_count_callback").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<Object, FrequencyCumulativeAvg>> TASKS_FREQUENCY_AVG =
             FrequencyCumulativeAvg.key("tasks_frequency_avg").withCategory(CATEGORY);
     public static final MetricKey<GaugeAdapter<DoubleSupplier, FrequencyMovingAvg>> TASKS_FREQUENCY_MOVING_AVG =
@@ -83,14 +83,14 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
     public Collection<Metric.Builder<?, ?>> getMetricsToRegister() {
         return List.of(
                 // config metrics
-                CallbackMetric.builder(POOL_CONFIG_CORE_SIZE)
+                StatelessMetric.builder(POOL_CONFIG_CORE_SIZE)
                         .withDescription("Thread pool config - core size")
                         .withDynamicLabelNames(NAME_LABEL),
-                CallbackMetric.builder(POOL_CONFIG_MAX_SIZE)
+                StatelessMetric.builder(POOL_CONFIG_MAX_SIZE)
                         .withDescription("Thread pool config - max size")
                         .withDynamicLabelNames(NAME_LABEL),
                 // queue metrics
-                CallbackMetric.builder(QUEUE_SIZE)
+                StatelessMetric.builder(QUEUE_SIZE)
                         .withDescription("Thread pool queue size")
                         .withDynamicLabelNames(NAME_LABEL),
                 LongGauge.maxBuilder(QUEUE_SIZE_MAX_SPIKE, true)
@@ -103,29 +103,29 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
                         .withDescription("Thread pool queue running avg size (half-life of 1 sec)")
                         .withDynamicLabelNames(NAME_LABEL),
                 // pool metrics
-                CallbackMetric.builder(POOL_SIZE)
+                StatelessMetric.builder(POOL_SIZE)
                         .withDescription("Thread pool size")
                         .withDynamicLabelNames(NAME_LABEL),
-                CallbackMetric.builder(POOL_MAX_SIZE)
+                StatelessMetric.builder(POOL_MAX_SIZE)
                         .withDescription("Thread pool max size")
                         .withDynamicLabelNames(NAME_LABEL),
                 // tasks metrics
                 LongCounter.builder(TASKS_COUNT_TOTAL)
                         .withDescription("Thread pool tasks count total")
                         .withDynamicLabelNames(NAME_LABEL),
-                CallbackMetric.builder(TASKS_COUNT_TOTAL_CALLBACK)
+                StatelessMetric.builder(TASKS_COUNT_TOTAL_CALLBACK)
                         .withDescription("Thread pool tasks count total from callback")
                         .withDynamicLabelNames(NAME_LABEL),
                 LongCounter.builder(TASKS_COMPLETED_COUNT_TOTAL)
                         .withDescription("Thread pool completed tasks count")
                         .withDynamicLabelNames(NAME_LABEL),
-                CallbackMetric.builder(TASKS_COMPLETED_COUNT_TOTAL_CALLBACK)
+                StatelessMetric.builder(TASKS_COMPLETED_COUNT_TOTAL_CALLBACK)
                         .withDescription("Thread pool completed tasks count from callback")
                         .withDynamicLabelNames(NAME_LABEL),
                 LongCounter.builder(TASKS_REJECTED_COUNT_TOTAL)
                         .withDescription("Thread pool rejected tasks count")
                         .withDynamicLabelNames(NAME_LABEL),
-                CallbackMetric.builder(TASKS_ACTIVE_COUNT_CALLBACK)
+                StatelessMetric.builder(TASKS_ACTIVE_COUNT_CALLBACK)
                         .withDescription("Thread pool active tasks count from callback")
                         .withDynamicLabelNames(NAME_LABEL),
                 FrequencyCumulativeAvg.metricBuilder(TASKS_FREQUENCY_AVG)

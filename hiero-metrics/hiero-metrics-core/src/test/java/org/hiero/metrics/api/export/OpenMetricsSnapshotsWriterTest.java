@@ -3,12 +3,11 @@ package org.hiero.metrics.api.export;
 
 import java.util.Map;
 import java.util.function.IntSupplier;
-
 import org.hiero.metrics.api.BooleanGauge;
-import org.hiero.metrics.api.CallbackMetric;
 import org.hiero.metrics.api.DoubleGauge;
 import org.hiero.metrics.api.LongCounter;
 import org.hiero.metrics.api.StatContainer;
+import org.hiero.metrics.api.StatelessMetric;
 import org.hiero.metrics.api.StatsGaugeAdapter;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
@@ -33,7 +32,7 @@ public class OpenMetricsSnapshotsWriterTest {
                 .register(registry);
         booleanGauge.getNotLabeled().set(true);
 
-        CallbackMetric.builder(CallbackMetric.key("test_callback_metric"))
+        StatelessMetric.builder(StatelessMetric.key("test_stateless_metric"))
                 .withDynamicLabelNames("label1", "label2")
                 .register(registry)
                 .registerDataPoint(() -> 123.45, Map.of("label1", "val1", "label2", "val2"))

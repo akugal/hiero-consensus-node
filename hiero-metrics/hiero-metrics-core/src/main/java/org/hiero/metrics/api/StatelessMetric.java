@@ -8,30 +8,30 @@ import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
-import org.hiero.metrics.internal.DefaultCallbackMetric;
+import org.hiero.metrics.internal.DefaultStatelessMetric;
 
-public interface CallbackMetric extends Metric {
+public interface StatelessMetric extends Metric {
 
-    static MetricKey<CallbackMetric> key(String name) {
-        return MetricKey.of(name, CallbackMetric.class);
+    static MetricKey<StatelessMetric> key(String name) {
+        return MetricKey.of(name, StatelessMetric.class);
     }
 
-    static Builder builder(MetricKey<CallbackMetric> key) {
+    static Builder builder(MetricKey<StatelessMetric> key) {
         return new Builder(key);
     }
 
-    CallbackMetric registerDataPoint(DoubleSupplier valueSupplier, Map<String, String> labels);
+    StatelessMetric registerDataPoint(DoubleSupplier valueSupplier, Map<String, String> labels);
 
     @Override
     default void reset() {
         // no op
     }
 
-    final class Builder extends Metric.Builder<Builder, CallbackMetric> {
+    final class Builder extends Metric.Builder<Builder, StatelessMetric> {
 
         private final Map<Map<String, String>, DoubleSupplier> labeledDataPoints = new HashMap<>();
 
-        private Builder(MetricKey<CallbackMetric> key) {
+        private Builder(MetricKey<StatelessMetric> key) {
             super(MetricType.GAUGE, key);
         }
 
@@ -49,8 +49,8 @@ public interface CallbackMetric extends Metric {
 
         @NonNull
         @Override
-        protected CallbackMetric buildMetric() {
-            return new DefaultCallbackMetric(this);
+        protected StatelessMetric buildMetric() {
+            return new DefaultStatelessMetric(this);
         }
 
         @NonNull
