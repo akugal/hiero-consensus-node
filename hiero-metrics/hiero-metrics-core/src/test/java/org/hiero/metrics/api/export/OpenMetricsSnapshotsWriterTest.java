@@ -30,7 +30,7 @@ public class OpenMetricsSnapshotsWriterTest {
         BooleanGauge booleanGauge = BooleanGauge.builder(BooleanGauge.key("boolean_gauge"))
                 .withDescription("A test boolean gauge without labels")
                 .register(registry);
-        booleanGauge.getNotLabeled().set(true);
+        booleanGauge.getNotLabeled().setTrue();
 
         StatelessMetric.builder(StatelessMetric.key("test_stateless_metric"))
                 .withDynamicLabelNames("label1", "label2")
@@ -56,14 +56,21 @@ public class OpenMetricsSnapshotsWriterTest {
         StatsGaugeAdapter<IntSupplier, StatContainer> statGauge = StatsGaugeAdapter.builder(
                         StatsGaugeAdapter.key("test_stats_gauge"), StatUtils.INT_INIT, StatContainer::new)
                 .withConstantLabel(new Label("env", "test"))
+                .withDynamicLabelNames("name")
                 .withUnit("ms")
                 .withStat("counter", StatContainer::getCounter)
                 .withStat("sum", StatContainer::getSum)
                 .withStat("average", StatContainer::getAverage)
                 .withReset(StatContainer::reset)
                 .register(registry);
-        statGauge.getNotLabeled().update(3);
-        statGauge.getNotLabeled().update(5);
+
+        Map<String, String> labels1 = Map.of("name", "default");
+        statGauge.getOrCreateLabeled(labels1).update(3);
+        statGauge.getOrCreateLabeled(labels1).update(5);
+
+        Map<String, String> labels2 = Map.of("name", "custom");
+        statGauge.getOrCreateLabeled(labels2).update(10);
+        statGauge.getOrCreateLabeled(labels2).update(2);
 
         Thread.sleep(1000);
     }
