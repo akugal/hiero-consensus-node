@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.openmetrics;
 
-import com.google.auto.service.AutoService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.spi.HttpServerProvider;
@@ -15,8 +14,8 @@ import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.api.export.MetricsSnapshot;
 import org.hiero.metrics.api.export.extension.OpenMetricsSnapshotsWriter;
 import org.hiero.metrics.api.export.extension.PullingMetricsExporterAdapter;
+import org.hiero.metrics.openmetrics.config.OpenMetricsHttpEndpointConfig;
 
-@AutoService(PullingMetricsExporterAdapter.class)
 public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
 
     private static final Logger logger = LogManager.getLogger(OpenMetricsHttpEndpoint.class);
@@ -26,21 +25,16 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
     private final AtomicInteger lastResponseSize = new AtomicInteger(4096);
     private final OpenMetricsSnapshotsWriter exporter = new OpenMetricsSnapshotsWriter();
 
-    public OpenMetricsHttpEndpoint() throws IOException {
-        this(8888);
-    }
-
-    public OpenMetricsHttpEndpoint(int port) throws IOException {
+    public OpenMetricsHttpEndpoint(OpenMetricsHttpEndpointConfig config) throws IOException {
         super("open-metrics-http-endpoint");
 
-        final String path = "/metrics";
         final HttpServerProvider provider = HttpServerProvider.provider();
-        HttpServer server = provider.createHttpServer(new InetSocketAddress(port), 3);
-        server.createContext(path, this::handleSnapshots);
+        HttpServer server = provider.createHttpServer(new InetSocketAddress(config.port()), config.backlog());
+        server.createContext(config.path(), this::handleSnapshots);
         server.setExecutor(null);
         server.start();
 
-        logger.info("OpenMetrics HTTP endpoint started. port={}, path={}", port, path);
+        logger.info("OpenMetrics HTTP endpoint started. port={}, path={}", config.port(), config.path());
     }
 
     private void handleSnapshots(HttpExchange exchange) throws IOException {

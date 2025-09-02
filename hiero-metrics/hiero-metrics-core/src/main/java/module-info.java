@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 module org.hiero.metrics.core {
     uses org.hiero.metrics.api.core.MetricsRegistrationProvider;
-    uses org.hiero.metrics.api.export.PullingMetricsExporter;
-    uses org.hiero.metrics.api.export.PushingMetricsExporter;
+    uses org.hiero.metrics.api.export.MetricsExporterFactory;
 
     exports org.hiero.metrics.api;
     exports org.hiero.metrics.api.core;
@@ -14,7 +13,7 @@ module org.hiero.metrics.core {
     exports org.hiero.metrics.api.stat.container;
 
     requires transitive com.swirlds.base;
-    requires org.hiero.metrics.core;
+    requires transitive com.swirlds.config.api;
     requires java.management;
     requires jdk.management;
     requires org.apache.logging.log4j;

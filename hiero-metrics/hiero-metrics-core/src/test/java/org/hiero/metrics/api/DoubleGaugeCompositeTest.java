@@ -23,7 +23,7 @@ public class DoubleGaugeCompositeTest {
                         .withAccumulatorStat("stat1", Double::max, 0.0)
                         .withAccumulatorStat("stat1", Double::min, 0.0)
                         .build())
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Stat names must be unique");
     }
 

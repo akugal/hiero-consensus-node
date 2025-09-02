@@ -5,7 +5,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Collection;
 
 /**
- * An SPI for providing metrics to register in a {@link MetricRegistry}. <p>
+ * An SPI for providing metrics to register in a {@link MetricRegistry}.
  */
 public interface MetricsRegistrationProvider {
 

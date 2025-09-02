@@ -3,7 +3,9 @@ package org.hiero.metrics.api.core;
 
 import static org.hiero.metrics.api.utils.MetricUtils.load;
 
+import com.swirlds.config.api.Configuration;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -12,6 +14,8 @@ import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.api.export.MetricsExportManager;
+import org.hiero.metrics.api.export.MetricsExporter;
+import org.hiero.metrics.api.export.MetricsExporterFactory;
 import org.hiero.metrics.api.export.PullingMetricsExporter;
 import org.hiero.metrics.api.export.PushingMetricsExporter;
 import org.hiero.metrics.api.utils.MetricUtils;
@@ -26,11 +30,6 @@ import org.hiero.metrics.internal.export.SinglePullingExporterMetricsExportManag
 public final class MetricsFacade {
 
     private static final Logger logger = LogManager.getLogger(MetricsFacade.class);
-
-    private static final class DefaultExportManagerHolder {
-        private static final MetricsExportManager INSTANCE =
-                createExportManagerWithDiscoveredExporters("default", Executors::newSingleThreadScheduledExecutor, 1);
-    }
 
     private MetricsFacade() {
         // Prevent instantiation
@@ -71,19 +70,10 @@ public final class MetricsFacade {
     }
 
     /**
-     * Gets the default {@link MetricsExportManager} instance, which is created using discovered exporters:
-     * {@link #createExportManagerWithDiscoveredExporters(String, Supplier, int)} using {@code "default"} name,
-     * single thread scheduled executor factory, and {@code 1 second} export interval).
-     *
-     * @return the default {@link MetricsExportManager} instance
-     */
-    public static MetricsExportManager getDefaultExportManager() {
-        return DefaultExportManagerHolder.INSTANCE;
-    }
-
-    /**
-     * Creates a new {@link MetricsExportManager} using discovered {@link PullingMetricsExporter} collection
-     * and {@link PushingMetricsExporter} collection via the Java ServiceLoader mechanism. <p>
+     * Creates a new {@link MetricsExportManager} using discovered via the Java ServiceLoader mechanism
+     * implementations of {@link MetricsExporterFactory} to create either {@link PullingMetricsExporter}
+     * or {@link PushingMetricsExporter} exporters.
+     * Exporters that are failed to instantiate or not pulling or pushing will be ignored.<p>
      *
      * If no exporters are found, a no-op export manager is returned. <p>
      *
@@ -94,19 +84,44 @@ public final class MetricsFacade {
      * periodic snapshots on all managed {@link MetricRegistry} instances and propagating snapshots to all exporters.<p>
      *
      * Clients have to call {@link MetricsExportManager#manageMetricRegistry(MetricRegistry)}
-     * to manage registries for exporting. <p>
+     * to manage registries for exporting.
      *
      * @param name the name of the export manager
+     * @param configuration configuration to be passed to exporter factories, must not be {@code null}
      * @param executorServiceFactory factory to create the {@link ScheduledExecutorService} for scheduling export task
      * @param exportIntervalSeconds the interval in seconds between export operations
      * @return a new {@link MetricsExportManager} instance
      */
     public static MetricsExportManager createExportManagerWithDiscoveredExporters(
             String name,
+            Configuration configuration,
             @NonNull Supplier<ScheduledExecutorService> executorServiceFactory,
             int exportIntervalSeconds) {
-        List<PullingMetricsExporter> pullingExporters = load(PullingMetricsExporter.class);
-        List<PushingMetricsExporter> pushingExporters = load(PushingMetricsExporter.class);
+        List<MetricsExporterFactory> exporterFactories = load(MetricsExporterFactory.class);
+
+        List<PullingMetricsExporter> pullingExporters = new ArrayList<>();
+        List<PushingMetricsExporter> pushingExporters = new ArrayList<>();
+
+        for (MetricsExporterFactory exporterFactory : exporterFactories) {
+            MetricsExporter exporter;
+            try {
+                exporter = exporterFactory.createExporter(configuration);
+            } catch (Exception e) {
+                logger.error("Failed to create metrics exporter from factory: {}", exporterFactory.getClass(), e);
+                continue;
+            }
+
+            if (exporter instanceof PullingMetricsExporter pullingExporter) {
+                pullingExporters.add(pullingExporter);
+            } else if (exporter instanceof PushingMetricsExporter pushingExporter) {
+                pushingExporters.add(pushingExporter);
+            } else {
+                logger.warn(
+                        "Unsupported exporter type {} create by factory {}",
+                        exporter.getClass(),
+                        exporterFactory.getClass());
+            }
+        }
 
         if (pullingExporters.isEmpty() && pushingExporters.isEmpty()) {
             logger.info("No metrics exporters found. Using no-op export manager.");

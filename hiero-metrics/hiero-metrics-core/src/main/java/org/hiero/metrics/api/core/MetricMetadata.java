@@ -9,7 +9,7 @@ import java.util.Objects;
 /**
  * Immutable metadata of a {@link Metric}, including its type, name, description, and unit.
  * This class is immutable and provides methods to access the metric's properties.
- * </p>
+ * <p>
  * Description and unit can be null, in which case they default to an empty strings.
  */
 public record MetricMetadata(

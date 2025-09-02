@@ -120,7 +120,7 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
 
         /**
          * Set the aggregation operator to use when updating the gauge value.
-         * If not set, the gauge will simply hold the last value set. <p>
+         * If not set, the gauge will simply hold the last value set.
          *
          * @param operator the aggregation operator, must not be {@code null}
          * @param resetOnExport if true, the gauge will be reset to its initial value after each export
