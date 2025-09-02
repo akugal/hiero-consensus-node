@@ -43,12 +43,12 @@ public class MetricsExportManagerTest {
         assertThat(snapshots)
                 .contains(
                         new MetricSnapshot(
-                                singleSumDoubleMetric.getMetadata(),
+                                singleSumDoubleMetric.metadata(),
                                 List.of(new DataPointSnapshot(
                                         List.of(globalLabel),
                                         new DataPointSnapshot.ValueItem(1.3, new Label(DEFAULT_STAT_LABEL, "sum"))))),
                         new MetricSnapshot(
-                                multipleDoubleStats.getMetadata(),
+                                multipleDoubleStats.metadata(),
                                 List.of(new DataPointSnapshot(
                                         List.of(globalLabel),
                                         new DataPointSnapshot.ValueItem(1.3, new Label(DEFAULT_STAT_LABEL, "sum")),
@@ -64,12 +64,12 @@ public class MetricsExportManagerTest {
         assertThat(snapshots)
                 .contains(
                         new MetricSnapshot(
-                                singleSumDoubleMetric.getMetadata(),
+                                singleSumDoubleMetric.metadata(),
                                 List.of(new DataPointSnapshot(
                                         List.of(globalLabel),
                                         new DataPointSnapshot.ValueItem(3.0, new Label(DEFAULT_STAT_LABEL, "sum"))))),
                         new MetricSnapshot(
-                                multipleDoubleStats.getMetadata(),
+                                multipleDoubleStats.metadata(),
                                 List.of(new DataPointSnapshot(
                                         List.of(globalLabel),
                                         new DataPointSnapshot.ValueItem(3.0, new Label(DEFAULT_STAT_LABEL, "sum")),

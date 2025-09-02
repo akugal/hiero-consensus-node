@@ -12,39 +12,88 @@ import org.hiero.metrics.internal.DefaultLongCounter;
 import org.hiero.metrics.internal.datapoint.AtomicLongCounterDataPoint;
 import org.hiero.metrics.internal.datapoint.LongAdderCounterDataPoint;
 
+/**
+ * A stateful metric of type {@link MetricType#COUNTER} that holds {@link LongCounterDataPoint} per label set.
+ */
 public interface LongCounter extends StatefulMetric<LongSupplier, LongCounterDataPoint> {
 
+    /**
+     * Create a metric key for a {@link LongCounter} with the given name.
+     *
+     * @param name the name of the metric
+     * @return the metric key
+     */
     static MetricKey<LongCounter> key(String name) {
         return MetricKey.of(name, LongCounter.class);
     }
 
+    /**
+     * Create a builder for a {@link LongCounter} with the given metric key.
+     *
+     * @param key the metric key
+     * @return the builder
+     */
     static Builder builder(MetricKey<LongCounter> key) {
         return new Builder(key);
     }
 
+    /**
+     * Create a builder for a {@link LongCounter} with the given metric name.
+     *
+     * @param name the name of the metric
+     * @return the builder
+     */
+    static Builder builder(String name) {
+        return builder(key(name));
+    }
+
+    /**
+     * Builder for {@link LongCounter} metrics using {@link LongAdderCounterDataPoint}.
+     * By default, initial value is {@code 0L}.
+     */
     final class Builder extends StatefulMetric.Builder<LongSupplier, LongCounterDataPoint, Builder, LongCounter> {
 
         private Builder(MetricKey<LongCounter> key) {
             super(MetricType.COUNTER, key, StatUtils.LONG_INIT, LongAdderCounterDataPoint::new);
         }
 
+        /**
+         * Sets the default initial value for the counter data points created by this metric.
+         *
+         * @param initValue the initial value
+         * @return this builder
+         */
         @NonNull
         public Builder withInitValue(long initValue) {
             return withDefaultInitializer(StatUtils.asInitializer(initValue));
         }
 
+        /**
+         * Uses {@link AtomicLongCounterDataPoint} instead of default {@link LongAdderCounterDataPoint}
+         * as the data point implementation for this metric, if no high contention on update is expected.
+         *
+         * @return this builder
+         */
         @NonNull
         public Builder withLowThreadContention() {
             withContainerFactory(AtomicLongCounterDataPoint::new);
             return this;
         }
 
+        /**
+         * Build the {@link LongCounter} metric.
+         *
+         * @return this builder
+         */
         @NonNull
         @Override
         public LongCounter buildMetric() {
             return new DefaultLongCounter(this);
         }
 
+        /**
+         * @return this builder
+         */
         @NonNull
         @Override
         protected Builder self() {

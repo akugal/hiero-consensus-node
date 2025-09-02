@@ -63,7 +63,7 @@ public abstract class AbstractMetricsExportManager implements MetricsExportManag
     @Override
     public final void manageMetricRegistry(@NonNull MetricRegistry registry) {
         boolean firstRegistry = false;
-        HashSet<Label> globalLabels = new HashSet<>(registry.getGlobalLabels());
+        HashSet<Label> globalLabels = new HashSet<>(registry.globalLabels());
 
         synchronized (registriesGlobalLabels) {
             if (!registriesGlobalLabels.add(globalLabels)) {

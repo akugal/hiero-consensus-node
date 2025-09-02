@@ -10,9 +10,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hiero.metrics.api.core.IdempotentMetricRegistryAware;
+import org.hiero.metrics.api.core.IdempotentMetricsBinder;
 import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.core.MetricRegistryAware;
+import org.hiero.metrics.api.core.MetricsBinder;
 import org.hiero.metrics.demo.crawler.api.document.Document;
 import org.hiero.metrics.demo.crawler.api.document.DocumentFetcher;
 import org.hiero.metrics.demo.crawler.api.document.DocumentProcessor;
@@ -22,7 +22,7 @@ import org.hiero.metrics.demo.crawler.api.job.JobConfig;
 import org.hiero.metrics.demo.crawler.api.job.JobExecutor;
 import org.hiero.metrics.demo.crawler.api.job.JobResult;
 
-public class ExecutorServiceJobExecutor extends IdempotentMetricRegistryAware implements JobExecutor {
+public class ExecutorServiceJobExecutor extends IdempotentMetricsBinder implements JobExecutor {
 
     private static final Logger logger = LogManager.getLogger(ExecutorServiceJobExecutor.class);
 
@@ -35,10 +35,10 @@ public class ExecutorServiceJobExecutor extends IdempotentMetricRegistryAware im
     }
 
     @Override
-    protected void registerMetricsNonIdempotent(@NonNull MetricRegistry registry) {
-        cache.registerMetrics(registry);
-        if (executorService instanceof MetricRegistryAware registryAware) {
-            registryAware.registerMetrics(registry);
+    protected void bindMetricsNonIdempotent(@NonNull MetricRegistry registry) {
+        cache.bind(registry);
+        if (executorService instanceof MetricsBinder registryAware) {
+            registryAware.bind(registry);
         }
     }
 

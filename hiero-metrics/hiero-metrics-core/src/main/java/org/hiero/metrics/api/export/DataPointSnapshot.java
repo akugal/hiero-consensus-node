@@ -5,6 +5,12 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import org.hiero.metrics.api.core.Label;
 
+/**
+ * Immutable snapshot of a data point at a specific time.
+ *
+ * @param labels data point labels
+ * @param valueItems data point values
+ */
 public record DataPointSnapshot(@NonNull List<Label> labels, @NonNull List<ValueItem> valueItems) {
 
     public DataPointSnapshot(@NonNull List<Label> labels, @NonNull List<ValueItem> valueItems) {
@@ -27,6 +33,12 @@ public record DataPointSnapshot(@NonNull List<Label> labels, @NonNull List<Value
         this(labels, List.of(new ValueItem(value)));
     }
 
+    /**
+     * A single {@code double} value item with its additional associated labels (could be empty).
+     *
+     * @param value  double value
+     * @param labels labels
+     */
     public record ValueItem(double value, @NonNull List<Label> labels) {
 
         public ValueItem(double value, @NonNull List<Label> labels) {

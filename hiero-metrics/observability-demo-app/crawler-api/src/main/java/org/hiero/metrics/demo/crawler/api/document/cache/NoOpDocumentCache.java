@@ -3,6 +3,8 @@ package org.hiero.metrics.demo.crawler.api.document.cache;
 
 import java.net.URI;
 import java.util.Optional;
+
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.demo.crawler.api.document.Document;
 import org.hiero.metrics.demo.crawler.api.document.DocumentFetcher;
@@ -25,7 +27,7 @@ public final class NoOpDocumentCache implements DocumentCache {
     }
 
     @Override
-    public void registerMetrics(MetricRegistry registry) {
+    public void bind(@NonNull MetricRegistry registry) {
         // no cache to measure
     }
 }

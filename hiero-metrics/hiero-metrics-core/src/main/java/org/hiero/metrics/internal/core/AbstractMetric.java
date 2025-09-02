@@ -19,7 +19,7 @@ public abstract class AbstractMetric implements Metric {
 
     protected AbstractMetric(Builder<?, ?> builder) {
         metadata = new MetricMetadata(
-                builder.getType(), builder.getKey().getName(), builder.getDescription(), builder.getUnit());
+                builder.getType(), builder.getKey().name(), builder.getDescription(), builder.getUnit());
 
         constantLabels = List.copyOf(builder.getConstantLabels());
         dynamicLabelNames = List.copyOf(builder.getDynamicLabelNames());
@@ -27,19 +27,19 @@ public abstract class AbstractMetric implements Metric {
     }
 
     @NonNull
-    public final MetricMetadata getMetadata() {
+    public final MetricMetadata metadata() {
         return metadata;
     }
 
     @NonNull
     @Override
-    public List<Label> getConstantLabels() {
+    public List<Label> constantLabels() {
         return constantLabels;
     }
 
     @NonNull
     @Override
-    public List<String> getDynamicLabelNames() {
+    public List<String> dynamicLabelNames() {
         return dynamicLabelNames;
     }
 
@@ -48,12 +48,9 @@ public abstract class AbstractMetric implements Metric {
     }
 
     protected void verifyLabels(Map<String, String> labels) {
-        if (labels.size() != getDynamicLabelNames().size()) {
+        if (!labels.keySet().equals(getDynamicLabelNamesSet())) {
             throw new IllegalArgumentException(
-                    "Expected different size of labels. Expected: + " + getDynamicLabelNames() + ", got " + labels);
-        } else if (!labels.keySet().equals(getDynamicLabelNamesSet())) {
-            throw new IllegalArgumentException(
-                    "Expected different label names. Expected: + " + getDynamicLabelNames() + ", got " + labels);
+                    "Expected different label names. Expected: + " + dynamicLabelNames() + ", got " + labels);
         }
     }
 
@@ -70,25 +67,5 @@ public abstract class AbstractMetric implements Metric {
             labelsList.add(new Label(dynamicLabelName, labels.get(dynamicLabelName)));
         }
         return labelsList;
-    }
-
-    protected List<Label> createDataPointLabels(List<String> dynamicLabelValues) {
-        if (dynamicLabelValues.size() != dynamicLabelNames.size()) {
-            throw new IllegalStateException("Expected " + dynamicLabelNames.size() + " label values, but got "
-                    + dynamicLabelValues.size() + " for metric " + getMetadata().getName()
-                    + " with dynamic labels: "
-                    + dynamicLabelNames);
-        }
-
-        if (constantLabels.isEmpty() && dynamicLabelValues.isEmpty()) {
-            return List.of();
-        }
-
-        final List<Label> labels = new ArrayList<>(constantLabels.size() + dynamicLabelNames.size());
-        labels.addAll(constantLabels);
-        for (int i = 0; i < dynamicLabelValues.size(); i++) {
-            labels.add(new Label(dynamicLabelNames.get(i), dynamicLabelValues.get(i)));
-        }
-        return labels;
     }
 }

@@ -75,29 +75,29 @@ public class OpenMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
                 continue;
             }
 
-            String metricName = fix(metadata.getName());
-            String metricUnit = metadata.getUnit();
+            String metricName = fix(metadata.name());
+            String metricUnit = metadata.unit();
 
             if (!metricUnit.isEmpty()) {
                 metricUnit = fix(metricUnit);
                 metricName += '_' + metricUnit;
             }
 
-            writeMetadataLine(writer, "# TYPE ", metricName, getMetricTypeName(metadata.getMetricType()));
-            if (!metadata.getUnit().isEmpty()) {
+            writeMetadataLine(writer, "# TYPE ", metricName, getMetricTypeName(metadata.metricType()));
+            if (!metadata.unit().isEmpty()) {
                 writeMetadataLine(writer, "# UNIT ", metricName, metricUnit);
             }
-            if (!metadata.getDescription().isEmpty()) {
-                writeMetadataLine(writer, "# HELP ", metricName, metadata.getDescription());
+            if (!metadata.description().isEmpty()) {
+                writeMetadataLine(writer, "# HELP ", metricName, metadata.description());
             }
 
             for (DataPointSnapshot dataPoint : metricSnapshot.dataPoints()) {
                 for (DataPointSnapshot.ValueItem valueItem : dataPoint.valueItems()) {
                     writer.write(metricName);
-                    if (metadata.getMetricType() == MetricType.COUNTER) {
+                    if (metadata.metricType() == MetricType.COUNTER) {
                         writer.write(COUNTER_SUFFIX);
                     }
-                    if (metadata.getMetricType() == MetricType.INFO) {
+                    if (metadata.metricType() == MetricType.INFO) {
                         writer.write(INFO_SUFFIX);
                     }
 
@@ -151,10 +151,10 @@ public class OpenMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
 
             Label label = i < labels.size() ? labels.get(i) : itemLabels.get(i - labels.size());
 
-            writeEscaped(writer, fix(label.getName()));
+            writeEscaped(writer, fix(label.name()));
             writer.write('=');
             writer.write('\"');
-            writeEscaped(writer, label.getValue());
+            writeEscaped(writer, label.value());
             writer.write("\"");
         }
         writer.write('}');

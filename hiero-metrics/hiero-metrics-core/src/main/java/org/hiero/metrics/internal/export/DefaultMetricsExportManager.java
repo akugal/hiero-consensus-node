@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import org.hiero.metrics.api.LongGauge;
 import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.export.Exporter;
+import org.hiero.metrics.api.export.MetricsExporter;
 import org.hiero.metrics.api.export.MetricsSnapshot;
 import org.hiero.metrics.api.export.PullingMetricsExporter;
 import org.hiero.metrics.api.export.PushingMetricsExporter;
@@ -64,7 +64,7 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
         logExporters("pushing", pushingExporters);
     }
 
-    private void logExporters(String type, List<? extends Exporter> exporters) {
+    private void logExporters(String type, List<? extends MetricsExporter> exporters) {
         if (exporters.isEmpty()) {
             logger.info("No {} exporters provided", type);
         } else {
@@ -72,7 +72,7 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
                     "Provided {} {} exporters: {}",
                     exporters.size(),
                     type,
-                    exporters.stream().map(Exporter::getName).toList());
+                    exporters.stream().map(MetricsExporter::getName).toList());
         }
     }
 

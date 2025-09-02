@@ -11,11 +11,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.ThreadContext;
 import org.hiero.metrics.api.core.MetricRegistry;
-import org.hiero.metrics.api.core.MetricRegistryAware;
+import org.hiero.metrics.api.core.MetricsBinder;
 import org.hiero.metrics.demo.crawler.api.util.Named;
 
 public class MonitoredExecutorService extends AbstractExecutorService
-        implements ExecutorService, MetricRegistryAware, Named {
+        implements ExecutorService, MetricsBinder, Named {
 
     private final String executorName;
     private final ExecutorService delegate;
@@ -33,7 +33,7 @@ public class MonitoredExecutorService extends AbstractExecutorService
     }
 
     @Override
-    public synchronized void registerMetrics(MetricRegistry registry) {
+    public synchronized void bind(@NonNull MetricRegistry registry) {
         if (metrics == null) {
             if (delegate instanceof ThreadPoolExecutor threadPoolExecutor) {
                 metrics = new ThreadPoolMetrics(getName(), threadPoolExecutor, registry);

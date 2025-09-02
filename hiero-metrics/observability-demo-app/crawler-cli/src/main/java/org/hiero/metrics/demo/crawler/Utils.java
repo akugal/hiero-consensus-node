@@ -34,7 +34,7 @@ public final class Utils {
         }
 
         JobManager jobManager = JobManager.create(configuration);
-        jobManager.registerMetrics(registry);
+        jobManager.bind(registry);
 
         return jobManager;
     }

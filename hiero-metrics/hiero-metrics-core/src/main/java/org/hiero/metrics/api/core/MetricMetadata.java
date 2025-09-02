@@ -6,71 +6,30 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
 
-public final class MetricMetadata {
+/**
+ * Immutable metadata of a {@link Metric}, including its type, name, description, and unit.
+ * This class is immutable and provides methods to access the metric's properties.
+ * </p>
+ * Description and unit can be null, in which case they default to an empty strings.
+ */
+public record MetricMetadata(
+        @NonNull MetricType metricType, @NonNull String name, @Nullable String description, @Nullable String unit) {
 
     private static final String EMPTY = "";
 
-    private final MetricType metricType;
-    private final String name;
-    private final String description;
-    private final String unit;
-
-    private final int hashCode;
-
+    /**
+     * Constructs a new MetricMetadata instance with the specified properties.
+     *
+     * @param metricType  the type of the metric, must not be null
+     * @param name        the name of the metric, must not be blank
+     * @param description an optional description of the metric, can be null
+     * @param unit        an optional unit of measurement for the metric, can be null
+     */
     public MetricMetadata(
             @NonNull MetricType metricType, @NonNull String name, @Nullable String description, @Nullable String unit) {
         this.metricType = Objects.requireNonNull(metricType, "metricType must not be null");
         this.name = ArgumentUtils.throwArgBlank(name, "name");
         this.description = description == null ? EMPTY : description;
         this.unit = unit == null ? EMPTY : unit;
-
-        hashCode = Objects.hash(metricType, name, description, unit);
-    }
-
-    public MetricMetadata(MetricType metricType, String name) {
-        this(metricType, name, null, null);
-    }
-
-    public MetricType getMetricType() {
-        return metricType;
-    }
-
-    @NonNull
-    public String getName() {
-        return name;
-    }
-
-    @NonNull
-    public String getDescription() {
-        return description;
-    }
-
-    @NonNull
-    public String getUnit() {
-        return unit;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        MetricMetadata that = (MetricMetadata) o;
-        return metricType == that.metricType
-                && Objects.equals(name, that.name)
-                && Objects.equals(description, that.description)
-                && Objects.equals(unit, that.unit);
-    }
-
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-
-    @Override
-    public String toString() {
-        return "MetricMetadata{" + "metricType="
-                + metricType + ", name='"
-                + name + '\'' + ", description='"
-                + description + '\'' + ", unit='"
-                + unit + '\'' + '}';
     }
 }

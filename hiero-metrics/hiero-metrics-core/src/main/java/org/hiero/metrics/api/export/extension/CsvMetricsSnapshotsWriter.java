@@ -41,7 +41,7 @@ public class CsvMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
             }
 
             String timestamp = snapshot.createdTime().toString();
-            String metricName = metadata.getName();
+            String metricName = metadata.name();
 
             for (DataPointSnapshot dataPoint : metricSnapshot.dataPoints()) {
                 for (DataPointSnapshot.ValueItem valueItem : dataPoint.valueItems()) {
@@ -51,7 +51,7 @@ public class CsvMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
                     writer.write(metricName);
                     writer.write(',');
 
-                    writer.write(metadata.getUnit());
+                    writer.write(metadata.unit());
                     writer.write(',');
 
                     writer.write(formatter.format(valueItem.value()));
@@ -85,9 +85,9 @@ public class CsvMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
 
             Label label = i < labels.size() ? labels.get(i) : itemLabels.get(i - labels.size());
 
-            writer.write(label.getName());
+            writer.write(label.name());
             writer.write('=');
-            writer.write(label.getValue());
+            writer.write(label.value());
         }
 
         writer.write('"'); // End quote

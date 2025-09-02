@@ -20,6 +20,9 @@ import org.hiero.metrics.internal.export.DefaultMetricsExportManager;
 import org.hiero.metrics.internal.export.NoOpMetricsExportManager;
 import org.hiero.metrics.internal.export.SinglePullingExporterMetricsExportManager;
 
+/**
+ * Facade for creating and managing metrics registries and export managers.
+ */
 public final class MetricsFacade {
 
     private static final Logger logger = LogManager.getLogger(MetricsFacade.class);
@@ -33,10 +36,23 @@ public final class MetricsFacade {
         // Prevent instantiation
     }
 
+    /**
+     * Creates a new {@link MetricRegistry} with the specified global labels.
+     *
+     * @param globalLabels the global labels to apply to all metrics in the registry, may be empty but not {@code null}
+     * @return a new {@link MetricRegistry} instance
+     */
     public static MetricRegistry createRegistry(Label... globalLabels) {
         return new DefaultMetricRegistry(globalLabels);
     }
 
+    /**
+     * Creates a new {@link MetricRegistry} and automatically registers metrics from all discovered
+     * {@link MetricsRegistrationProvider} implementations using the Java ServiceLoader mechanism.
+     *
+     * @param globalLabels the global labels to apply to all metrics in the registry, may be empty but not {@code null}
+     * @return a new {@link MetricRegistry} instance with registered metrics
+     */
     public static MetricRegistry createRegistryWithDiscoveredProviders(Label... globalLabels) {
         List<MetricsRegistrationProvider> providers = MetricUtils.load(MetricsRegistrationProvider.class);
         MetricRegistry registry = createRegistry(globalLabels);
@@ -54,10 +70,37 @@ public final class MetricsFacade {
         return registry;
     }
 
+    /**
+     * Gets the default {@link MetricsExportManager} instance, which is created using discovered exporters:
+     * {@link #createExportManagerWithDiscoveredExporters(String, Supplier, int)} using {@code "default"} name,
+     * single thread scheduled executor factory, and {@code 1 second} export interval).
+     *
+     * @return the default {@link MetricsExportManager} instance
+     */
     public static MetricsExportManager getDefaultExportManager() {
         return DefaultExportManagerHolder.INSTANCE;
     }
 
+    /**
+     * Creates a new {@link MetricsExportManager} using discovered {@link PullingMetricsExporter} collection
+     * and {@link PushingMetricsExporter} collection via the Java ServiceLoader mechanism. <p>
+     *
+     * If no exporters are found, a no-op export manager is returned. <p>
+     *
+     * If a single pulling exporter is found, a manager without any threads will be created,
+     * allowing export metrics on demand. <p>
+     *
+     * Otherwise, a default export manager is created with scheduled task submitted to executor service to do
+     * periodic snapshots on all managed {@link MetricRegistry} instances and propagating snapshots to all exporters.<p>
+     *
+     * Clients have to call {@link MetricsExportManager#manageMetricRegistry(MetricRegistry)}
+     * to manage registries for exporting. <p>
+     *
+     * @param name the name of the export manager
+     * @param executorServiceFactory factory to create the {@link ScheduledExecutorService} for scheduling export task
+     * @param exportIntervalSeconds the interval in seconds between export operations
+     * @return a new {@link MetricsExportManager} instance
+     */
     public static MetricsExportManager createExportManagerWithDiscoveredExporters(
             String name,
             @NonNull Supplier<ScheduledExecutorService> executorServiceFactory,
@@ -79,6 +122,15 @@ public final class MetricsFacade {
                 name, executorServiceFactory, exportIntervalSeconds, pullingExporters, pushingExporters);
     }
 
+    /**
+     * Creates a simple {@link MetricsExportManager} that periodically exports metrics from managed
+     * {@link MetricRegistry} instances using the specified {@link PushingMetricsExporter}
+     * and single threaded scheduled executor.
+     *
+     * @param exporter the pushing metrics exporter to use for exporting metrics, must not be {@code null}
+     * @param exportIntervalSeconds the interval in seconds between export operations
+     * @return a new {@link MetricsExportManager} instance
+     */
     public static MetricsExportManager createExportManager(
             @NonNull PushingMetricsExporter exporter, int exportIntervalSeconds) {
         Objects.requireNonNull(exporter, "exporter must not be null");
@@ -90,6 +142,14 @@ public final class MetricsFacade {
                 List.of(exporter));
     }
 
+    /**
+     * Creates a simple {@link MetricsExportManager} that allows on-demand exporting of metrics from managed
+     * {@link MetricRegistry} instances using the specified {@link PullingMetricsExporter}. <p>
+     * No export thread will be created.
+     *
+     * @param exporter the pulling metrics exporter to use for exporting metrics, must not be {@code null}
+     * @return a new {@link MetricsExportManager} instance
+     */
     public static MetricsExportManager createExportManager(@NonNull PullingMetricsExporter exporter) {
         return new SinglePullingExporterMetricsExportManager(exporter.getName(), exporter);
     }

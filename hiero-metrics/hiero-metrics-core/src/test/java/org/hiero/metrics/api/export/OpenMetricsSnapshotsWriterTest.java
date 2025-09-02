@@ -21,7 +21,7 @@ public class OpenMetricsSnapshotsWriterTest {
 
     @Test
     public void export() throws InterruptedException {
-        MetricRegistry registry = MetricsFacade.createRegistry();
+        MetricRegistry registry = MetricsFacade.createRegistry(new Label("global", "label"));
         MetricsExportManager snapshotManager = MetricsFacade.createExportManager(
                 new PushingMetricsExporterWriterAdapter("console", new OpenMetricsSnapshotsWriter(), () -> System.out),
                 1);
@@ -47,7 +47,7 @@ public class OpenMetricsSnapshotsWriterTest {
         longCounter.getOrCreateLabeled(Map.of("method", "GET")).increment(17);
 
         DoubleGauge doubleGauge = DoubleGauge.builder(DoubleGauge.key("test_double_gauge"))
-                .withOperator(StatUtils.DOUBLE_SUM)
+                .withOperator(StatUtils.DOUBLE_SUM, false)
                 .withDynamicLabelNames("init")
                 .register(registry);
         doubleGauge.getOrCreateLabeled(Map.of("init", "one"), () -> 1.0).update(10.0);

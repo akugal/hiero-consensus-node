@@ -25,7 +25,7 @@ public class DefaultStateSet<T> extends AbstractStatefulMetric<Map<T, Boolean>, 
 
     public DefaultStateSet(StateSet.Builder<T> builder) {
         super(builder);
-        stateLabelFactory = state -> new Label(getMetadata().getName(), state.toString());
+        stateLabelFactory = state -> new Label(metadata().name(), state.toString());
     }
 
     @Override

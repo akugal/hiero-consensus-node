@@ -25,18 +25,19 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
     private final Collection<Metric> metricsView = Collections.unmodifiableCollection(metrics.values());
 
     public DefaultMetricRegistry(Label... globalLabels) {
+        Objects.requireNonNull(globalLabels);
         this.globalLabels = MetricUtils.asList(globalLabels);
     }
 
     @NonNull
     @Override
-    public List<Label> getGlobalLabels() {
+    public List<Label> globalLabels() {
         return globalLabels;
     }
 
     @NonNull
     @Override
-    public Collection<Metric> getAll() {
+    public Collection<Metric> metrics() {
         return metricsView;
     }
 
@@ -57,14 +58,14 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
 
         final MetricKey<M> metricKey = builder.getKey();
 
-        return (M) metrics.compute(metricKey.getName(), (name, existingMetric) -> {
+        return (M) metrics.compute(metricKey.name(), (name, existingMetric) -> {
             if (existingMetric != null) {
                 throw new IllegalArgumentException(
-                        "Duplicate metric name: " + metricKey + ". Existing metric: " + existingMetric.getMetadata());
+                        "Duplicate metric name: " + metricKey + ". Existing metric: " + existingMetric.metadata());
             }
 
             M metric = builder.withConstantLabels(globalLabels).build();
-            logger.info("Registered metric: {} with global labels: {}", metric.getMetadata(), globalLabels);
+            logger.info("Registered metric: {} with global labels: {}", metric.metadata(), globalLabels);
             return metric;
         });
     }
@@ -74,8 +75,8 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
     @SuppressWarnings("unchecked")
     public <M extends Metric> Optional<M> findMetric(@NonNull MetricKey<M> key) {
         Objects.requireNonNull(key, "metric key must not be null");
-        Metric metric = metrics.get(key.getName());
-        if (key.getMetricClass().isInstance(metric)) {
+        Metric metric = metrics.get(key.name());
+        if (key.type().isInstance(metric)) {
             return Optional.of((M) metric);
         }
         return Optional.empty();

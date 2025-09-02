@@ -24,16 +24,51 @@ import org.hiero.metrics.internal.datapoint.AtomicDoubleGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.DoubleGaugeCompositeArrayDataPoint;
 
+/**
+ * A stateful metric of type {@link MetricType#GAUGE} that holds {@link DoubleGaugeCompositeDataPoint} per label set.
+ * General use case is to track multiple related statistics (e.g. min, max, sum, count, latest) for the same metric
+ * without creating multiple individual metrics.
+ * <p>
+ * On export each {@link DoubleGaugeDataPoint} within {@link DoubleGaugeCompositeDataPoint} has additional label
+ * to be identified - see {@link Builder} for details
+ */
 public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGaugeCompositeDataPoint> {
 
+    /**
+     * Create a metric key for a {@link DoubleGaugeComposite} with the given name.
+     *
+     * @param name the name of the metric
+     * @return the metric key
+     */
     static MetricKey<DoubleGaugeComposite> key(String name) {
         return MetricKey.of(name, DoubleGaugeComposite.class);
     }
 
+    /**
+     * Create a builder for a {@link DoubleGaugeComposite} with the given metric key.
+     *
+     * @param key the metric key
+     * @return the builder
+     */
     static Builder builder(MetricKey<DoubleGaugeComposite> key) {
         return new Builder(key);
     }
 
+    /**
+     * Create a builder for a {@link DoubleGaugeComposite} with the given metric name.
+     *
+     * @param name the metric name
+     * @return the builder
+     */
+    static Builder builder(String name) {
+        return builder(key(name));
+    }
+
+    /**
+     * A builder for a {@link DoubleGaugeComposite}.
+     * Default additional label for export is {@value StatUtils#DEFAULT_STAT_LABEL}, and can be changed via
+     * {@link #withStatLabel(String)}.
+     */
     final class Builder
             extends StatefulMetric.Builder<Object, DoubleGaugeCompositeDataPoint, Builder, DoubleGaugeComposite> {
 
@@ -42,6 +77,11 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
         private final List<Supplier<DoubleGaugeDataPoint>> dataPointFactories = new ArrayList<>();
         private boolean resetOnExport = false;
 
+        /**
+         * Create a builder for a {@link DoubleGaugeComposite} with the given metric key.
+         *
+         * @param key the metric key
+         */
         private Builder(MetricKey<DoubleGaugeComposite> key) {
             super(
                     MetricType.GAUGE,
@@ -50,67 +90,140 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
                     init -> new DoubleGaugeCompositeArrayDataPoint(() -> new DoubleGaugeDataPoint[0]));
         }
 
+        /**
+         * @return {@code true} if the stats will be reset on export, {@code false} otherwise
+         */
         public boolean isResetOnExport() {
             return resetOnExport;
         }
 
+        /**
+         * @return the label name used to identify the stat type in the exported metric
+         */
         @NonNull
         public String getStatLabel() {
             return statLabel;
         }
 
+        /**
+         * @return the list of stat names defined for this composite gauge
+         */
         @NonNull
         public List<String> getStatNames() {
             return statNames;
         }
 
+        /**
+         * Set the label name used to identify the stat type in the exported snapshots.
+         * Default is {@value StatUtils#DEFAULT_STAT_LABEL}.
+         *
+         * @param statLabel the label name
+         * @return this builder
+         * @throws IllegalArgumentException if the stat label is blank
+         */
         public Builder withStatLabel(String statLabel) {
             this.statLabel = ArgumentUtils.throwArgBlank(statLabel, "stat label");
             return this;
         }
 
+        /**
+         * Add a new stat to be tracked by this composite gauge using the given accumulation operator.
+         * The initial value is {@code 0.0}.
+         *
+         * @param name     the name of the stat
+         * @param operator the accumulation operator
+         * @return this builder
+         * @throws NullPointerException if the operator is null
+         * @throws IllegalArgumentException if the stat name is blank
+         */
         public Builder withAccumulatorStat(String name, DoubleBinaryOperator operator) {
             return withAccumulatorStat(name, operator, ZERO);
         }
 
+        /**
+         * Add a new stat to be tracked by this composite gauge using the given accumulation operator
+         * and initial value.
+         *
+         * @param name      the name of the stat
+         * @param operator  the accumulation operator
+         * @param initValue the initial value
+         * @return this builder
+         * @throws NullPointerException if the operator is null
+         * @throws IllegalArgumentException if the stat name is blank
+         */
         public Builder withAccumulatorStat(String name, DoubleBinaryOperator operator, double initValue) {
             Objects.requireNonNull(operator, "operator must not be null");
             return withStatContainerFactory(name, () -> new DoubleAccumulatorGaugeDataPoint(operator, initValue));
         }
 
+        /**
+         * Add a new stat to be tracked by this composite gauge that simply holds the sum of all values set.
+         * The initial value is {@code 0.0}.
+         *
+         * @return this builder
+         */
         public Builder withSumStat() {
             return withAccumulatorStat("sum", StatUtils.DOUBLE_SUM, ZERO);
         }
 
+        /**
+         * Add a new stat to be tracked by this composite gauge that simply holds the maximum of all values set.
+         * The initial value is {@link Double#MIN_VALUE}.
+         *
+         * @return this builder
+         */
         public Builder withMaxStat() {
             return withAccumulatorStat("max", StatUtils.DOUBLE_MAX, Double.MIN_VALUE);
         }
 
+        /**
+         * Add a new stat to be tracked by this composite gauge that simply holds the minimum of all values set.
+         * The initial value is {@link Double#MAX_VALUE}.
+         *
+         * @return this builder
+         */
         public Builder withMinStat() {
             return withAccumulatorStat("min", StatUtils.DOUBLE_MIN, Double.MAX_VALUE);
         }
 
+        /**
+         * Add a new stat to be tracked by this composite gauge that simply holds the latest value set.
+         * The initial value is {@code 0.0}.
+         *
+         * @return this builder
+         */
         public Builder withLatestValueStat() {
             return withLatestValueStat(ZERO);
         }
 
+        /**
+         * Add a new stat to be tracked by this composite gauge that simply holds the latest value set.
+         *
+         * @param initValue the initial value
+         * @return this builder
+         */
         public Builder withLatestValueStat(double initValue) {
             return withStatContainerFactory("latest", () -> new AtomicDoubleGaugeDataPoint(initValue));
         }
 
-        public Builder withStatContainerFactory(String statName, Supplier<DoubleGaugeDataPoint> statContainerFactory) {
-            ArgumentUtils.throwArgBlank(statName, "stat name");
-
-            statNames.add(statName);
-            dataPointFactories.add(statContainerFactory);
-            return this;
-        }
-
-        public Builder withResetOnSnapshot() {
+        /**
+         * Configure this composite gauge to reset all stats to their initial values after each export.
+         * Default is {@code false}.
+         *
+         * @return this builder
+         */
+        public Builder withResetOnExport() {
             this.resetOnExport = true;
             return this;
         }
 
+        /**
+         * Build the {@link DoubleGaugeComposite} instance.
+         *
+         * @return the built metric
+         * @throws IllegalStateException if no stats have been defined, or if the stat names are not unique
+         *                               or stat label conflicts with a constant or dynamic label
+         */
         @NonNull
         @Override
         public DoubleGaugeComposite buildMetric() {
@@ -119,7 +232,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
             }
 
             if (new HashSet<>(statNames).size() != dataPointFactories.size()) {
-                throw new IllegalArgumentException("Stat names must be unique");
+                throw new IllegalStateException("Stat names must be unique");
             }
 
             if (constantLabels.containsKey(statLabel)) {
@@ -140,9 +253,28 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
             return new DefaultDoubleGaugeComposite(this);
         }
 
+        /**
+         * @return this builder
+         */
         @NonNull
         @Override
         protected Builder self() {
+            return this;
+        }
+
+        /**
+         * Add a new stat container factory to this composite gauge.
+         *
+         * @param statName             the name of the stat
+         * @param statContainerFactory the factory to create the stat container
+         * @return this builder
+         * @throws IllegalArgumentException if the stat name is blank
+         */
+        private Builder withStatContainerFactory(String statName, Supplier<DoubleGaugeDataPoint> statContainerFactory) {
+            ArgumentUtils.throwArgBlank(statName, "stat name");
+
+            statNames.add(statName);
+            dataPointFactories.add(statContainerFactory);
             return this;
         }
     }

@@ -11,9 +11,9 @@ public interface SnapshotableMetricsRegistry extends MetricRegistry {
 
     @NonNull
     default List<MetricSnapshot> snapshot() {
-        return getAll().stream()
+        return metrics().stream()
                 .filter(metric -> metric instanceof SnapshotableMetric)
-                .map(metric -> new MetricSnapshot(metric.getMetadata(), ((SnapshotableMetric) metric).snapshot()))
+                .map(metric -> new MetricSnapshot(metric.metadata(), ((SnapshotableMetric) metric).snapshot()))
                 .sorted(MetricSnapshot.COMPARATOR)
                 .collect(Collectors.toList());
     }

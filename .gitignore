@@ -1081,6 +1081,9 @@ hedera-state-validator/report.json
 hedera-state-validator/slack_report.json
 hedera-state-validator/validator.log
 
+### Ignore tmp files for docker containers
+**/docker/tmp
+
 ### Snyk Files
 .dccache
 snyk-code.html

@@ -11,33 +11,79 @@ import org.hiero.metrics.api.stat.StatUtils;
 import org.hiero.metrics.internal.DefaultBooleanGauge;
 import org.hiero.metrics.internal.datapoint.AtomicBooleanGaugeDataPoint;
 
+/**
+ * A stateful metric of type {@link MetricType#GAUGE} that holds {@link BooleanGaugeDataPoint} per label set.
+ */
 public interface BooleanGauge extends StatefulMetric<BooleanSupplier, BooleanGaugeDataPoint> {
 
+    /**
+     * Create a metric key for a {@link BooleanGauge} with the given name.
+     *
+     * @param name the name of the metric
+     * @return the metric key
+     */
+    @NonNull
     static MetricKey<BooleanGauge> key(String name) {
         return MetricKey.of(name, BooleanGauge.class);
     }
 
+    /**
+     * Create a builder for a {@link BooleanGauge} with the given metric key.
+     *
+     * @param key the metric key
+     * @return the builder
+     */
+    @NonNull
     static Builder builder(MetricKey<BooleanGauge> key) {
         return new Builder(key);
     }
 
+    /**
+     * Create a builder for a {@link BooleanGauge} with the given metric name.
+     *
+     * @param name the name of the metric
+     * @return the builder
+     */
+    @NonNull
+    static Builder builder(String name) {
+        return builder(key(name));
+    }
+
+    /**
+     * Builder for {@link BooleanGauge} metrics using {@link AtomicBooleanGaugeDataPoint} implementation.
+     * By default, initial value is {@code false}.
+     */
     final class Builder extends StatefulMetric.Builder<BooleanSupplier, BooleanGaugeDataPoint, Builder, BooleanGauge> {
 
         private Builder(MetricKey<BooleanGauge> key) {
             super(MetricType.GAUGE, key, StatUtils.BOOL_INIT_FALSE, AtomicBooleanGaugeDataPoint::new);
         }
 
+        /**
+         * Set the default value for the gauge and any data point within this metric.
+         *
+         * @param initValue the default value for any data point within this metric
+         * @return this builder
+         */
         @NonNull
         public Builder withInitValue(boolean initValue) {
             return withDefaultInitializer(StatUtils.asInitializer(initValue));
         }
 
+        /**
+         * Build the {@link BooleanGauge} metric.
+         *
+         * @return this builder
+         */
         @NonNull
         @Override
         public BooleanGauge buildMetric() {
             return new DefaultBooleanGauge(this);
         }
 
+        /**
+         * @return this builder
+         */
         @NonNull
         @Override
         protected Builder self() {

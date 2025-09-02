@@ -2,6 +2,7 @@
 package org.hiero.metrics.api.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,19 +12,57 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 
+/**
+ * Base interface for all metric types. A metric is defined by its {@link MetricMetadata}, a set of
+ * constant {@link Label}s and a set of dynamic label names.
+ * <p>
+ * Metrics are immutable and thread-safe, but they can hold mutable {@link org.hiero.metrics.api.datapoint.DataPoint}s
+ * that can be updated with new measurements. Metrics can also be reset to their initial state, which resets
+ * all associated datapoints.
+ * <p>
+ * Since metric can support aggregations (like sum, min, max, avg, etc.), this interface doesn't expose
+ * export or snapshot functionality, but usually each metric implementation will extend
+ * {@link org.hiero.metrics.internal.core.SnapshotableMetric} that is internal and used by
+ * {@link org.hiero.metrics.api.export.MetricsExportManager} to export metrics.
+ */
 public interface Metric {
 
+    /**
+     * @return the immutable metadata associated with this metric.
+     */
     @NonNull
-    MetricMetadata getMetadata();
+    MetricMetadata metadata();
 
+    /**
+     * @return the immutable list of constant labels associated with this metric.
+     */
     @NonNull
-    List<Label> getConstantLabels();
+    List<Label> constantLabels();
 
+    /**
+     * @return the immutable list of dynamic label names associated with this metric.
+     */
     @NonNull
-    List<String> getDynamicLabelNames();
+    List<String> dynamicLabelNames();
 
+    /**
+     * Allows to reset the metric and all it's datapoints to its initial state.
+     */
     void reset();
 
+    /**
+     * Base abstract builder for all metric types.
+     * <p>
+     * Requires {@link MetricType} and {@link MetricKey} to be specified at construction time, and provides
+     * methods to set optional fields: description, unit, constant labels and dynamic label names.
+     * Dynamic label names must be unique and must not conflict with constant label names. Exception will be thrown at
+     * metric build time if there are conflicts.
+     * <p>
+     * Builder is mutable so must not be reused for building multiple metric instances.
+     *
+     * @param <B> the concrete builder type
+     * @param <M> the concrete metric type
+     */
     abstract class Builder<B extends Builder<B, M>, M extends Metric> {
 
         private final MetricType type;
@@ -35,58 +74,108 @@ public interface Metric {
         private final List<String> dynamicLabelNames = new ArrayList<>();
         private final Set<String> dynamicLabelNamesSet = new HashSet<>();
 
+        /**
+         * Constructor for a metric builder.
+         *
+         * @param type the metric type, must not be {@code null}
+         * @param key  the metric key, must not be {@code null}
+         */
         protected Builder(@NonNull MetricType type, @NonNull MetricKey<M> key) {
             this.type = Objects.requireNonNull(type, "type must not be null");
             this.key = Objects.requireNonNull(key, "key must not be null");
         }
 
+        /**
+         * @return the metric type, never {@code null}
+         */
         @NonNull
         public final MetricType getType() {
             return type;
         }
 
+        /**
+         * @return the metric key, never {@code null}
+         */
         @NonNull
         public MetricKey<M> getKey() {
             return key;
         }
 
+        /**
+         * @return the metric description, {@code null} if not set
+         */
+        @Nullable
         public String getDescription() {
             return description;
         }
 
+        /**
+         * @return the metric unit, {@code null} if not set
+         */
+        @Nullable
         public String getUnit() {
             return unit;
         }
 
+        /**
+         * @return collection of constant labels, never {@code null}, possibly empty
+         */
         @NonNull
         public Collection<Label> getConstantLabels() {
             return constantLabels.values();
         }
 
+        /**
+         * @return list of dynamic label names as list, never {@code null}, possibly empty
+         */
         @NonNull
         public List<String> getDynamicLabelNames() {
             return dynamicLabelNames;
         }
 
+        /**
+         * @return dynamic label names as set, never {@code null}, possibly empty
+         */
         @NonNull
         public Set<String> getDynamicLabelNamesSet() {
             return dynamicLabelNamesSet;
         }
 
+        /**
+         * Sets the metric description.
+         *
+         * @param description the metric description, may be {@code null}
+         * @return the builder instance
+         */
         @NonNull
         public final B withDescription(String description) {
             this.description = description;
             return self();
         }
 
+        /**
+         * Sets the metric unit.
+         *
+         * @param unit the metric unit, may be {@code null}
+         * @return the builder instance
+         */
         @NonNull
         public final B withUnit(String unit) {
             this.unit = unit;
             return self();
         }
 
+        /**
+         * Adds dynamic label names to the metric. Dynamic label names must be unique and must not conflict with
+         * constant label names. Exception will be thrown at metric build time if there are conflicts.
+         *
+         * @param labelNames the dynamic label names to add, must not be {@code null}
+         * @return the builder instance
+         */
         @NonNull
         public final B withDynamicLabelNames(String... labelNames) {
+            Objects.requireNonNull(labelNames, "label names must not be null");
+
             for (String labelName : labelNames) {
                 if (dynamicLabelNamesSet.add(labelName)) {
                     dynamicLabelNames.add(labelName);
@@ -96,16 +185,31 @@ public interface Metric {
             return self();
         }
 
+        /**
+         * Adds a constant label to the metric. Constant label names must be unique and must not conflict with
+         * dynamic label names. Exception will be thrown at metric build time if there are conflicts.
+         *
+         * @param label the constant label to add, must not be {@code null}
+         * @return the builder instance
+         */
         @NonNull
         public final B withConstantLabel(Label label) {
             Objects.requireNonNull(label, "label must not be null");
-            Label existingLabel = constantLabels.put(label.getName(), label);
+
+            Label existingLabel = constantLabels.put(label.name(), label);
             if (existingLabel != null && !existingLabel.equals(label)) {
                 throw new IllegalArgumentException(label + " conflicts with existing: " + existingLabel);
             }
             return self();
         }
 
+        /**
+         * Adds constant labels to the metric. Constant label names must be unique and must not conflict with
+         * dynamic label names. Exception will be thrown at metric build time if there are conflicts.
+         *
+         * @param labels the constant labels to add, must not be {@code null}
+         * @return the builder instance
+         */
         @NonNull
         public final B withConstantLabels(Collection<Label> labels) {
             for (Label label : labels) {
@@ -114,11 +218,24 @@ public interface Metric {
             return self();
         }
 
+        /**
+         * Adds constant labels to the metric. Constant label names must be unique and must not conflict with
+         * dynamic label names. Exception will be thrown at metric build time if there are conflicts.
+         *
+         * @param labels the constant labels to add, must not be {@code null}
+         * @return the builder instance
+         */
         @NonNull
         public final B withConstantLabels(Label... labels) {
             return withConstantLabels(Arrays.asList(labels));
         }
 
+        /**
+         * Builds the metric instance. Validates that dynamic label names do not conflict with constant label names.
+         *
+         * @return the built metric instance, never {@code null}
+         * @throws IllegalStateException if there are conflicts between dynamic and constant label names
+         */
         @NonNull
         public final M build() {
             for (String dynamicLabelName : dynamicLabelNames) {
@@ -131,14 +248,30 @@ public interface Metric {
             return buildMetric();
         }
 
+        /**
+         * Registers the built metric instance with the provided metric registry.
+         * {@link MetricRegistry} may perform additional changes to the builder before registering the metric.
+         *
+         * @param registry the metric registry to register with, must not be {@code null}
+         * @return the registered metric instance, never {@code null}
+         */
         @NonNull
-        public final M register(MetricRegistry registry) {
+        public final M register(@NonNull MetricRegistry registry) {
+            Objects.requireNonNull(registry, "registry must not be null");
             return registry.register(this);
         }
 
+        /**
+         * Builds the metric instance. Subclasses must implement this method to create the specific metric type.
+         *
+         * @return the built metric instance, never {@code null}
+         */
         @NonNull
         protected abstract M buildMetric();
 
+        /**
+         * @return the builder instance concrete type to support fluent API
+         */
         @NonNull
         protected abstract B self();
     }

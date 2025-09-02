@@ -93,7 +93,7 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
                 StatelessMetric.builder(QUEUE_SIZE)
                         .withDescription("Thread pool queue size")
                         .withDynamicLabelNames(NAME_LABEL),
-                LongGauge.maxBuilder(QUEUE_SIZE_MAX_SPIKE, true)
+                LongGauge.maxBuilder(QUEUE_SIZE_MAX_SPIKE.name(), true)
                         .withDescription("Thread pool queue max size spike")
                         .withDynamicLabelNames(NAME_LABEL),
                 CumulativeAverageIntStat.metricBuilder(QUEUE_SIZE_AVG)
@@ -135,12 +135,12 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
                         .withDescription("Thread pool tasks frequency weighted moving average (half-life of 1 sec)")
                         .withDynamicLabelNames(NAME_LABEL),
                 // task timing metrics
-                LongGauge.maxBuilder(TASK_WAIT_DURATION_MAX_SPIKE, true)
+                LongGauge.maxBuilder(TASK_WAIT_DURATION_MAX_SPIKE.name(), true)
                         .withInitValue(0L)
                         .withDescription("Thread pool queue task wait duration max spike")
                         .withUnit(Unit.NANOSECOND_UNIT)
                         .withDynamicLabelNames(NAME_LABEL),
-                LongGauge.maxBuilder(TASK_DURATION_MAX_SPIKE, true)
+                LongGauge.maxBuilder(TASK_DURATION_MAX_SPIKE.name(), true)
                         .withInitValue(0L)
                         .withDescription("Thread pool task duration time max spike")
                         .withUnit(Unit.NANOSECOND_UNIT)
@@ -151,12 +151,12 @@ public class ThreadPoolMetricsRegistration implements MetricsRegistrationProvide
                         .withDynamicLabelNames(NAME_LABEL),
                 DoubleGauge.builder(TASK_DURATION_AVG_SMOOTH)
                         .withDescription("Thread pool task duration avg smooth")
-                        .withOperator(StatUtils.DOUBLE_AVG_SMOOTH)
+                        .withOperator(StatUtils.DOUBLE_AVG_SMOOTH, false)
                         .withUnit(Unit.NANOSECOND_UNIT)
                         .withDynamicLabelNames(NAME_LABEL),
                 DoubleGauge.builder(TASK_DURATION_AVG_VOLATILE)
                         .withDescription("Thread pool task duration avg volatile")
-                        .withOperator(StatUtils.DOUBLE_AVG_VOLATILE)
+                        .withOperator(StatUtils.DOUBLE_AVG_VOLATILE, false)
                         .withUnit(Unit.NANOSECOND_UNIT)
                         .withDynamicLabelNames(NAME_LABEL));
     }

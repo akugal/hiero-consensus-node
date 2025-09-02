@@ -10,6 +10,9 @@ import java.util.function.LongBinaryOperator;
 import java.util.function.LongSupplier;
 import java.util.function.ToDoubleBiFunction;
 
+/**
+ * Common utilities for statistics.
+ */
 public final class StatUtils {
 
     public static final String DEFAULT_STAT_LABEL = "stat";

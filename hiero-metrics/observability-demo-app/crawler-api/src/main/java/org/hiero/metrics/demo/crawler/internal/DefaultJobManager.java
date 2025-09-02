@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hiero.metrics.api.core.IdempotentMetricRegistryAware;
+import org.hiero.metrics.api.core.IdempotentMetricsBinder;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.demo.crawler.api.document.DocumentProcessor;
 import org.hiero.metrics.demo.crawler.api.document.SchemeCrawler;
@@ -25,7 +25,7 @@ import org.hiero.metrics.demo.crawler.api.job.JobManager;
 import org.hiero.metrics.demo.crawler.api.job.JobScheduler;
 import org.hiero.metrics.demo.crawler.api.job.ScheduledJob;
 
-public class DefaultJobManager extends IdempotentMetricRegistryAware implements JobManager {
+public class DefaultJobManager extends IdempotentMetricsBinder implements JobManager {
 
     private static final Logger logger = LogManager.getLogger(DefaultJobManager.class);
 
@@ -38,8 +38,8 @@ public class DefaultJobManager extends IdempotentMetricRegistryAware implements 
     }
 
     @Override
-    protected void registerMetricsNonIdempotent(@NonNull MetricRegistry registry) {
-        jobScheduler.registerMetrics(registry);
+    protected void bindMetricsNonIdempotent(@NonNull MetricRegistry registry) {
+        jobScheduler.bind(registry);
     }
 
     @Override

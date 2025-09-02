@@ -6,12 +6,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
-import org.hiero.metrics.api.core.MetricRegistryAware;
+import org.hiero.metrics.api.core.MetricsBinder;
 import org.hiero.metrics.demo.crawler.api.document.SchemeCrawler;
 import org.hiero.metrics.demo.crawler.api.exception.JobException;
 import org.hiero.metrics.demo.crawler.internal.DefaultJobManager;
 
-public interface JobManager extends MetricRegistryAware {
+public interface JobManager extends MetricsBinder {
 
     static JobManager create(Configuration configuration) {
         JobSchedulerFactory jobSchedulerFactory =

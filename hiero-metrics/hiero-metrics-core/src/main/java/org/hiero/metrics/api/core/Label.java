@@ -2,55 +2,30 @@
 package org.hiero.metrics.api.core;
 
 import com.swirlds.base.ArgumentUtils;
-import java.util.Objects;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
-public final class Label implements Comparable<Label> {
+/**
+ * A label is an immutable key-value pair that can be associated with a metric to provide additional context or
+ * metadata. Labels are often used to differentiate between different instances of the same metric,
+ * such as tracking the number of requests to a web server by different HTTP methods (e.g., GET,
+ * POST, etc.) or by different response status codes (e.g., 200, 404, 500, etc.).
+ */
+public record Label(@NonNull String name, @NonNull String value) implements Comparable<Label> {
 
-    private final String name;
-    private final String value;
-
-    private final int hashCode;
-
-    public Label(String name, String value) {
+    /**
+     * Constructs a new label with the specified name and value.
+     *
+     * @param name  the name of the label, must not be blank
+     * @param value the value of the label, must not be blank
+     */
+    public Label(@NonNull String name, @NonNull String value) {
         this.name = ArgumentUtils.throwArgBlank(name, "labelName");
         this.value = ArgumentUtils.throwArgBlank(value, "labelValue");
-
-        hashCode = Objects.hash(name, value);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     @Override
     public int compareTo(Label other) {
         int nameCompare = name.compareTo(other.name);
         return nameCompare != 0 ? nameCompare : value.compareTo(other.value);
-    }
-
-    @Override
-    public String toString() {
-        return "Label{" + "name='" + name + '\'' + ", value='" + value + '\'' + '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Label label = (Label) o;
-        return Objects.equals(name, label.name) && Objects.equals(value, label.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return hashCode;
     }
 }

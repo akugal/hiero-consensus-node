@@ -3,13 +3,13 @@ package org.hiero.metrics.demo.crawler.api.document.cache;
 
 import java.net.URI;
 import java.util.Optional;
-import org.hiero.metrics.api.core.MetricRegistryAware;
+import org.hiero.metrics.api.core.MetricsBinder;
 import org.hiero.metrics.demo.crawler.api.document.Document;
 import org.hiero.metrics.demo.crawler.api.document.DocumentFetcher;
 import org.hiero.metrics.demo.crawler.api.exception.DocumentFetchException;
 import org.hiero.metrics.demo.crawler.api.util.Named;
 
-public interface DocumentCache extends MetricRegistryAware, Named {
+public interface DocumentCache extends MetricsBinder, Named {
 
     Optional<Document> fetchIfAbsent(URI uri, DocumentFetcher fetcher) throws DocumentFetchException;
 }

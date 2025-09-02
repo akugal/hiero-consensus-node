@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import org.hiero.metrics.api.StatelessMetric;
-import org.hiero.metrics.api.core.IdempotentMetricRegistryAware;
+import org.hiero.metrics.api.core.IdempotentMetricsBinder;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.utils.Unit;
 import org.hiero.metrics.demo.crawler.api.document.Document;
@@ -18,7 +18,7 @@ import org.hiero.metrics.demo.crawler.api.document.cache.DocumentCache;
 import org.hiero.metrics.demo.crawler.api.exception.DocumentFetchException;
 import org.hiero.metrics.demo.crawler.cache.guava.config.CacheConfig;
 
-public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements DocumentCache {
+public class GuavaDocumentCache extends IdempotentMetricsBinder implements DocumentCache {
 
     private final String name;
     private final Cache<URI, Optional<Document>> cache;
@@ -38,7 +38,7 @@ public class GuavaDocumentCache extends IdempotentMetricRegistryAware implements
     }
 
     @Override
-    protected void registerMetricsNonIdempotent(@NonNull MetricRegistry metricRegistry) {
+    protected void bindMetricsNonIdempotent(@NonNull MetricRegistry metricRegistry) {
         final String category = "cache_guava_" + name;
 
         // cache size metrics

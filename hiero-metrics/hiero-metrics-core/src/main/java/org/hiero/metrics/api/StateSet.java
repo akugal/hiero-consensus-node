@@ -12,26 +12,64 @@ import org.hiero.metrics.internal.DefaultStateSet;
 import org.hiero.metrics.internal.datapoint.EnumStateSetDataPoint;
 import org.hiero.metrics.internal.datapoint.GenerictStateSetDataPoint;
 
+/**
+ * A stateful metric of type {@link MetricType#STATE_SET} that holds a set of states identified
+ * by values of specified type.
+ * @param <T> the type of the states in the set
+ */
 public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDataPoint<T>> {
 
+    /**
+     * Create a metric key for a {@link StateSet} with the given name.
+     *
+     * @param name the name of the metric
+     * @param <T>  the type of the states in the set
+     * @return the metric key
+     */
     static <T> MetricKey<StateSet<T>> key(String name) {
         return MetricKey.of(name, StateSet.class);
     }
 
+    /**
+     * Create a builder for a {@link StateSet} with the given metric key.
+     *
+     * @param key the metric key
+     * @param <T> the type of the states in the set
+     * @return the builder
+     */
     static <T> Builder<T> builder(MetricKey<StateSet<T>> key) {
         return new Builder<>(key);
     }
 
-    static <E extends Enum<E>> Builder<E> enumBuilder(MetricKey<StateSet<E>> key, Class<E> enumClass) {
-        return new Builder<>(key, init -> new EnumStateSetDataPoint<>(init, enumClass));
+    /**
+     * Create a builder for a {@link StateSet} with the given metric name.
+     *
+     * @param name the metric name
+     * @param <T>  the type of the states in the set
+     * @return the builder
+     */
+    static <T> Builder<T> builder(String name) {
+        return builder(key(name));
     }
 
-    @Override
-    default void reset() {
-        // No reset operation defined for StateSet, as it is not meaningful to reset the entire set.
-        // Individual states can be set to true or false, but the set itself does not have a reset state.
+    /**
+     * Create a builder for a {@link StateSet} with the given metric name and enum class.
+     * The states in the set will be of the specified enum type.
+     *
+     * @param name      the metric name
+     * @param enumClass the enum class representing the states in the set
+     * @param <E>       the type of the enum
+     * @return the builder
+     */
+    static <E extends Enum<E>> Builder<E> enumBuilder(String name, Class<E> enumClass) {
+        return new Builder<>(key(name), init -> new EnumStateSetDataPoint<>(init, enumClass));
     }
 
+    /**
+     * Builder for {@link StateSet} metrics using {@link GenerictStateSetDataPoint}.
+     * By default, the initial state is empty and false for each state.
+     * @param <T> the type of the states in the set
+     */
     final class Builder<T>
             extends StatefulMetric.Builder<Map<T, Boolean>, StateSetDataPoint<T>, Builder<T>, StateSet<T>> {
 
@@ -44,6 +82,11 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
             super(MetricType.STATE_SET, key, Map.of(), dataPointFactory);
         }
 
+        /**
+         * Build the {@link StateSet} metric.
+         *
+         * @return the built metric
+         */
         @NonNull
         @Override
         protected StateSet<T> buildMetric() {
@@ -51,7 +94,7 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
 
             // state set must not have a label as metric name
             for (String dynamicLabelName : getDynamicLabelNames()) {
-                if (dynamicLabelName.equals(getKey().getName())) {
+                if (dynamicLabelName.equals(getKey().name())) {
                     throw new IllegalStateException(
                             "StateSet metric cannot have a dynamic label with the same name as the metric");
                 }
@@ -60,6 +103,9 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
             return new DefaultStateSet<>(this);
         }
 
+        /**
+         * @return this builder
+         */
         @NonNull
         @Override
         protected Builder<T> self() {
