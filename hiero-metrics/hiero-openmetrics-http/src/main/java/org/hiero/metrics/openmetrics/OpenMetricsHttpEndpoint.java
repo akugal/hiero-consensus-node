@@ -22,6 +22,7 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
 
     public static final String CONTENT_TYPE = "application/openmetrics-text; version=1.0.0; charset=utf-8";
 
+    private final HttpServer server;
     private final AtomicInteger lastResponseSize = new AtomicInteger(4096);
     private final OpenMetricsSnapshotsWriter writer = new OpenMetricsSnapshotsWriter();
 
@@ -29,7 +30,7 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
         super("open-metrics-http-endpoint");
 
         final HttpServerProvider provider = HttpServerProvider.provider();
-        HttpServer server = provider.createHttpServer(new InetSocketAddress(config.port()), config.backlog());
+        server = provider.createHttpServer(new InetSocketAddress(config.port()), config.backlog());
         server.createContext(config.path(), this::handleSnapshots);
         server.setExecutor(null);
         server.start();
@@ -67,5 +68,11 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
         } finally {
             exchange.close();
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+        server.stop(1);
     }
 }

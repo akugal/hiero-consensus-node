@@ -150,7 +150,7 @@ public final class MetricsFacade {
             @NonNull PushingMetricsExporter exporter, int exportIntervalSeconds) {
         Objects.requireNonNull(exporter, "exporter must not be null");
         return new DefaultMetricsExportManager(
-                exporter.getName(),
+                exporter.name(),
                 Executors::newSingleThreadScheduledExecutor,
                 exportIntervalSeconds,
                 List.of(),
@@ -166,6 +166,6 @@ public final class MetricsFacade {
      * @return a new {@link MetricsExportManager} instance
      */
     public static MetricsExportManager createExportManager(@NonNull PullingMetricsExporter exporter) {
-        return new SinglePullingExporterMetricsExportManager(exporter.getName(), exporter);
+        return new SinglePullingExporterMetricsExportManager(exporter.name(), exporter);
     }
 }

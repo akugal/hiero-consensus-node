@@ -27,9 +27,10 @@ public class TestUtils {
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 
     public static void run(String testName, TestConfig config, SchemeCrawler crawler) throws InterruptedException {
-        JobManager jobManager = Utils.initializeJobManager(testName);
-        jobManager.registerCrawler(crawler);
-        run(testName, jobManager, config);
+        RunContext context = new RunContext(testName);
+        context.getJobManager().registerCrawler(crawler);
+        run(testName, context.getJobManager(), config);
+        context.getExportManager().shutdown();
     }
 
     public static void run(String testName, JobManager jobManager, TestConfig config) throws InterruptedException {

@@ -35,7 +35,12 @@ public final class PushingMetricsExporterWriterAdapter implements PushingMetrics
 
     @NonNull
     @Override
-    public String getName() {
+    public String name() {
         return name;
+    }
+
+    @Override
+    public void close() throws IOException {
+        // No resources to close
     }
 }

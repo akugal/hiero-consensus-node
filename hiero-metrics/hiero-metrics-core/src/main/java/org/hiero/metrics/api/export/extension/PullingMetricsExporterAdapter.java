@@ -3,6 +3,7 @@ package org.hiero.metrics.api.export.extension;
 
 import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -25,7 +26,7 @@ public class PullingMetricsExporterAdapter implements PullingMetricsExporter {
 
     @NonNull
     @Override
-    public final String getName() {
+    public final String name() {
         return name;
     }
 
@@ -37,5 +38,10 @@ public class PullingMetricsExporterAdapter implements PullingMetricsExporter {
     @NonNull
     public final Optional<MetricsSnapshot> getSnapshot() {
         return snapshotSupplier.get();
+    }
+
+    @Override
+    public void close() throws IOException {
+        snapshotSupplier = Optional::empty;
     }
 }

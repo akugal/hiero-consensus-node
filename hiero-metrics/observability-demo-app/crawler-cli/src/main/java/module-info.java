@@ -13,6 +13,6 @@ module org.hiero.metrics.demo.crawler.cli {
 
     provides org.hiero.metrics.demo.crawler.api.document.SchemeCrawler with
             org.hiero.metrics.demo.crawler.file.FileSchemeCrawler;
-    provides org.hiero.metrics.api.export.PushingMetricsExporter with
-            org.hiero.metrics.demo.crawler.DemoCsvMetricsFileExporter;
+    provides org.hiero.metrics.api.export.MetricsExporterFactory with
+            org.hiero.metrics.demo.crawler.DemoCsvMetricsFileExporterFactory;
 }

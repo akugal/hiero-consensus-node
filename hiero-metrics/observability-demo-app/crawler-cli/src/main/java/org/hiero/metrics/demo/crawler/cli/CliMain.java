@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.demo.crawler.cli;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hiero.metrics.demo.crawler.Utils;
+import org.hiero.metrics.demo.crawler.RunContext;
 import org.hiero.metrics.demo.crawler.api.job.JobManager;
 import org.hiero.metrics.demo.crawler.cli.internal.Command;
 import org.hiero.metrics.demo.crawler.cli.internal.CommandManager;
@@ -18,8 +19,9 @@ public class CliMain {
 
     private static final Logger logger = LogManager.getLogger(CliMain.class);
 
-    public static void main(String[] args) {
-        JobManager jobManager = Utils.initializeJobManager("cli");
+    public static void main(String[] args) throws InterruptedException {
+        RunContext context = new RunContext("cli");
+        JobManager jobManager = context.getJobManager();
         CommandManager commandManager =
                 new CommandManager(List.of(new CrawlCommand(jobManager), new JobCommand(jobManager)));
 
@@ -28,7 +30,9 @@ public class CliMain {
 
         startInteractiveLoop(commandManager);
 
-        jobManager.shutdown();
+        context.getJobManager().shutdown();
+        context.getJobManager().awaitTermination(Duration.ofSeconds(1));
+        context.getExportManager().shutdown();
     }
 
     private static void startInteractiveLoop(CommandManager commandManager) {

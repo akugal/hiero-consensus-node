@@ -38,7 +38,7 @@ public class CsvFileMetricsExporter implements PushingMetricsExporter {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return name;
     }
 
@@ -47,5 +47,10 @@ public class CsvFileMetricsExporter implements PushingMetricsExporter {
         try (OutputStream outputStream = Files.newOutputStream(filePath, APPEND)) {
             writer.write(snapshot, outputStream);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        // No resources to close
     }
 }

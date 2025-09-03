@@ -33,7 +33,12 @@ tasks.register<Exec>("startObserving") {
     group = "docker"
 
     workingDir(layout.projectDirectory.dir("../../docker"))
-    commandLine("/usr/local/bin/docker", "compose", "up")
+    commandLine("/usr/local/bin/docker", "compose", "up", "-d")
+
+    doLast {
+        println("Started docker containers, waiting a bit to allow them to fully start...")
+        Thread.sleep(2000) // 2 second pause
+    }
 }
 
 tasks.register<Exec>("stopObserving") {

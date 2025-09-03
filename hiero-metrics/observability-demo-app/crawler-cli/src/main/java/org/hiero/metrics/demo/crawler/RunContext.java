@@ -14,11 +14,12 @@ import org.hiero.metrics.api.core.MetricsFacade;
 import org.hiero.metrics.api.export.MetricsExportManager;
 import org.hiero.metrics.demo.crawler.api.job.JobManager;
 
-public final class Utils {
+public class RunContext {
 
-    private Utils() {}
+    private final MetricsExportManager exportManager;
+    private final JobManager jobManager;
 
-    public static JobManager initializeJobManager(String testName) {
+    public RunContext(String testName) {
         Configuration configuration;
         try {
             configuration = ConfigurationBuilder.create()
@@ -31,13 +32,19 @@ public final class Utils {
         }
 
         MetricRegistry registry = MetricsFacade.createRegistryWithDiscoveredProviders(new Label("test", testName));
-        MetricsExportManager exportManager = MetricsFacade.createExportManagerWithDiscoveredExporters(
+        exportManager = MetricsFacade.createExportManagerWithDiscoveredExporters(
                 "crawler", configuration, Executors::newSingleThreadScheduledExecutor, 1);
         exportManager.manageMetricRegistry(registry);
 
-        JobManager jobManager = JobManager.create(configuration);
+        jobManager = JobManager.create(configuration);
         jobManager.bind(registry);
+    }
 
+    public JobManager getJobManager() {
         return jobManager;
+    }
+
+    public MetricsExportManager getExportManager() {
+        return exportManager;
     }
 }

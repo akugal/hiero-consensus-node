@@ -72,7 +72,7 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
                     "Provided {} {} exporters: {}",
                     exporters.size(),
                     type,
-                    exporters.stream().map(MetricsExporter::getName).toList());
+                    exporters.stream().map(MetricsExporter::name).toList());
         }
     }
 
@@ -93,13 +93,11 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
     protected void init() {
         for (PullingMetricsExporter pullingExporter : pullingExporters) {
             try {
-                logger.info("Initializing pulling exporter: {}", pullingExporter.getName());
+                logger.info("Initializing pulling exporter: {}", pullingExporter.name());
                 pullingExporter.init(snapshotHolder::get);
             } catch (RuntimeException e) {
                 logger.error(
-                        "Error while initializing pulling metrics exporter {}. Ignoring it",
-                        pullingExporter.getName(),
-                        e);
+                        "Error while initializing pulling metrics exporter {}. Ignoring it", pullingExporter.name(), e);
             }
         }
 
@@ -123,10 +121,9 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
             // just in case - re-init pulling exporters to get empty snapshots
             for (PullingMetricsExporter pullingExporter : pullingExporters) {
                 try {
-                    pullingExporter.init(Optional::empty);
-                } catch (RuntimeException ex) {
-                    logger.error(
-                            "Error while de-initializing pulling metrics exporter {}", pullingExporter.getName(), ex);
+                    pullingExporter.close();
+                } catch (Exception ex) {
+                    logger.error("Error while shutting down pulling metrics exporter {}", pullingExporter.name(), ex);
                     // ignore, we are stopping anyway
                 }
             }
@@ -153,16 +150,16 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
                     // TODO disable and enable back after some time, completely remove after some time in disabled state
                     logger.error(
                             "Error while exporting metrics snapshot by pushing metrics exporter {}",
-                            pushingExporter.getName(),
+                            pushingExporter.name(),
                             ex);
                 } catch (RuntimeException ex) {
                     // TODO remove from pushing exporters list
                     logger.error(
                             "Error while exporting metrics snapshot by pushing metrics exporter {}",
-                            pushingExporter.getName(),
+                            pushingExporter.name(),
                             ex);
                 } finally {
-                    final Map<String, String> labels = Map.of(PUSHING_EXPORTER_NAME, pushingExporter.getName());
+                    final Map<String, String> labels = Map.of(PUSHING_EXPORTER_NAME, pushingExporter.name());
                     final long duration = System.currentTimeMillis() - startTime;
                     pushingExportDurationMetric.getOrCreateLabeled(labels).update(duration);
                 }
