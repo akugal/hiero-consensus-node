@@ -33,7 +33,7 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
     private final int exportIntervalSeconds;
     private volatile ScheduledFuture<?> scheduledExportFuture;
 
-    // this metric will report previous push export duration for each exporter
+    // this metric will report previous export duration for each pushing exporter
     private LongGauge pushingExportDurationMetric;
 
     public DefaultMetricsExportManager(

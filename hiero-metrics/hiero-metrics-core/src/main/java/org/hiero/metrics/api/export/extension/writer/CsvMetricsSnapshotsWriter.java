@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.api.export.extension;
+package org.hiero.metrics.api.export.extension.writer;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.BufferedWriter;
@@ -16,6 +16,19 @@ import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.api.export.MetricSnapshot;
 import org.hiero.metrics.api.export.MetricsSnapshot;
 
+/**
+ * A {@link MetricsSnapshotsWriter} implementation that writes metrics in CSV format.
+ *
+ * <p>CSV Format:
+ *
+ * <pre>
+ * timestamp,metric,unit,value,labels
+ * 2024-10-01T12:00:00Z,cpu_usage,percentage,75.5,"host=server1;region=us-west"
+ * 2024-10-01T12:00:00Z,memory_usage,MB,2048,"host=server1;region=us-west"
+ * </pre>
+ *
+ * <p>Labels are enclosed in quotes and separated by semicolons to handle commas in label values.
+ */
 public class CsvMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
 
     public static final CsvMetricsSnapshotsWriter DEFAULT =
@@ -30,7 +43,7 @@ public class CsvMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
     }
 
     @Override
-    public void export(@NonNull MetricsSnapshot snapshot, OutputStream outputStream) throws IOException {
+    public void write(@NonNull MetricsSnapshot snapshot, OutputStream outputStream) throws IOException {
         Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
 
         for (MetricSnapshot metricSnapshot : snapshot.snapshots()) {

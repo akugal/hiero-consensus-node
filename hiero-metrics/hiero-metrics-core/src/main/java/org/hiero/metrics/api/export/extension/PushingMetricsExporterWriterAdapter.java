@@ -7,8 +7,13 @@ import java.io.OutputStream;
 import java.util.function.Supplier;
 import org.hiero.metrics.api.export.MetricsSnapshot;
 import org.hiero.metrics.api.export.PushingMetricsExporter;
+import org.hiero.metrics.api.export.extension.writer.MetricsSnapshotsWriter;
 
-public class PushingMetricsExporterWriterAdapter implements PushingMetricsExporter {
+/**
+ * An adapter that allows using a {@link MetricsSnapshotsWriter} as a {@link PushingMetricsExporter}.
+ * It uses a {@link Supplier} to provide the output stream for writing metrics snapshots.
+ */
+public final class PushingMetricsExporterWriterAdapter implements PushingMetricsExporter {
 
     private final String name;
     private final MetricsSnapshotsWriter writer;
@@ -24,7 +29,7 @@ public class PushingMetricsExporterWriterAdapter implements PushingMetricsExport
     @Override
     public void export(@NonNull MetricsSnapshot snapshot) throws IOException {
         try (OutputStream stream = streamSupplier.get()) {
-            writer.export(snapshot, stream);
+            writer.write(snapshot, stream);
         }
     }
 

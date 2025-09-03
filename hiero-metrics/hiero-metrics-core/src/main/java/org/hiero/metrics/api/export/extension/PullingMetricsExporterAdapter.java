@@ -9,6 +9,10 @@ import java.util.function.Supplier;
 import org.hiero.metrics.api.export.MetricsSnapshot;
 import org.hiero.metrics.api.export.PullingMetricsExporter;
 
+/**
+ * An abstract base class for {@link PullingMetricsExporter} implementations.
+ * It provides a mechanism to supply metrics snapshots via a {@link Supplier}.
+ */
 public class PullingMetricsExporterAdapter implements PullingMetricsExporter {
 
     private final String name;
@@ -31,7 +35,7 @@ public class PullingMetricsExporterAdapter implements PullingMetricsExporter {
     }
 
     @NonNull
-    public Optional<MetricsSnapshot> getSnapshot() {
+    public final Optional<MetricsSnapshot> getSnapshot() {
         return snapshotSupplier.get();
     }
 }

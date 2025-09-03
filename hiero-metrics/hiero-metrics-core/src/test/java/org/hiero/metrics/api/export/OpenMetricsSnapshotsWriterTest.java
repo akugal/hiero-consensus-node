@@ -12,15 +12,15 @@ import org.hiero.metrics.api.StatsGaugeAdapter;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricsFacade;
-import org.hiero.metrics.api.export.extension.OpenMetricsSnapshotsWriter;
 import org.hiero.metrics.api.export.extension.PushingMetricsExporterWriterAdapter;
+import org.hiero.metrics.api.export.extension.writer.OpenMetricsSnapshotsWriter;
 import org.hiero.metrics.api.stat.StatUtils;
 import org.junit.jupiter.api.Test;
 
 public class OpenMetricsSnapshotsWriterTest {
 
     @Test
-    public void export() throws InterruptedException {
+    public void write() throws InterruptedException {
         MetricRegistry registry = MetricsFacade.createRegistry(new Label("global", "label"));
         MetricsExportManager snapshotManager = MetricsFacade.createExportManager(
                 new PushingMetricsExporterWriterAdapter("console", new OpenMetricsSnapshotsWriter(), () -> System.out),

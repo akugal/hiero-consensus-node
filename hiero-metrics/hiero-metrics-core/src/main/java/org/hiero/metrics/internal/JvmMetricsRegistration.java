@@ -15,6 +15,10 @@ import org.hiero.metrics.api.StatelessMetric;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricsRegistrationProvider;
 
+/**
+ * A {@link MetricsRegistrationProvider} that registers standard JVM metrics such as memory usage,
+ * CPU load, and open file descriptors.
+ */
 public class JvmMetricsRegistration implements MetricsRegistrationProvider {
 
     @NonNull

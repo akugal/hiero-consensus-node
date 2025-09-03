@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.api.export.extension;
+package org.hiero.metrics.api.export.extension.writer;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.BufferedWriter;
@@ -18,6 +18,11 @@ import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.api.export.MetricSnapshot;
 import org.hiero.metrics.api.export.MetricsSnapshot;
 
+/**
+ * A {@link MetricsSnapshotsWriter} implementation that writes metrics in the OpenMetrics text format.
+ *
+ * <p>See <a href="https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md">OpenMetrics</a> for details.
+ */
 public class OpenMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
 
     private static final EnumMap<MetricType, String> METRIC_TYPES = new EnumMap<>(MetricType.class);
@@ -64,7 +69,7 @@ public class OpenMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
     }
 
     @Override
-    public void export(@NonNull MetricsSnapshot snapshot, OutputStream outputStream) throws IOException {
+    public void write(@NonNull MetricsSnapshot snapshot, OutputStream outputStream) throws IOException {
         Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
         long snapshotTimestamp = snapshot.createdTime().toEpochMilli();
 

@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.demo.crawler.api.document.cache;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URI;
 import java.util.Optional;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.demo.crawler.api.document.Document;
 import org.hiero.metrics.demo.crawler.api.document.DocumentFetcher;

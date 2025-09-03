@@ -27,7 +27,7 @@ public record MetricMetadata(
      */
     public MetricMetadata(
             @NonNull MetricType metricType, @NonNull String name, @Nullable String description, @Nullable String unit) {
-        this.metricType = Objects.requireNonNull(metricType, "metricType must not be null");
+        this.metricType = Objects.requireNonNull(metricType, "metric type must not be null");
         this.name = ArgumentUtils.throwArgBlank(name, "name");
         this.description = description == null ? EMPTY : description;
         this.unit = unit == null ? EMPTY : unit;

@@ -31,7 +31,7 @@ public abstract class AbstractMetricsExportManager implements MetricsExportManag
     private final Set<Set<Label>> registriesGlobalLabels = new HashSet<>();
     private final List<MetricRegistry> metricRegistries = new CopyOnWriteArrayList<>();
 
-    private MetricRegistry exportMetricsRegistry;
+    private SnapshotableMetricsRegistry exportMetricsRegistry;
     private LongGaugeDataPoint snapshotDurationMetric;
 
     protected AbstractMetricsExportManager(String name) {
@@ -44,20 +44,21 @@ public abstract class AbstractMetricsExportManager implements MetricsExportManag
         return name;
     }
 
-    protected void registerExportMetrics(String category, MetricRegistry exportMetricsRegistry) {
-        snapshotDurationMetric = exportMetricsRegistry
-                .register(LongGauge.builder(LongGauge.key("snapshot_duration").withCategory(category))
-                        .withDescription("Snapshot duration time")
-                        .withUnit(Unit.MILLISECOND_UNIT))
-                .getNotLabeled();
-    }
-
     protected abstract void init();
 
     private void initInternal() {
-        exportMetricsRegistry = MetricsFacade.createRegistry(new Label("export_manager", name));
+        exportMetricsRegistry =
+                (SnapshotableMetricsRegistry) MetricsFacade.createRegistry(new Label("export_manager", name));
         registerExportMetrics("export", exportMetricsRegistry);
         init();
+    }
+
+    protected void registerExportMetrics(String category, MetricRegistry exportMetricsRegistry) {
+        snapshotDurationMetric = exportMetricsRegistry
+                .register(LongGauge.builder(LongGauge.key("snapshot_duration").withCategory(category))
+                        .withDescription("Snapshot duration time in milliseconds")
+                        .withUnit(Unit.MILLISECOND_UNIT))
+                .getNotLabeled();
     }
 
     @Override
@@ -91,33 +92,31 @@ public abstract class AbstractMetricsExportManager implements MetricsExportManag
             return Optional.empty();
         }
 
-        final List<MetricSnapshot> snapshots;
+        final List<MetricSnapshot> snapshots = new ArrayList<>();
         final long startTime = System.currentTimeMillis();
 
         if (metricRegistries.size() == 1) {
             if (metricRegistries.getFirst() instanceof SnapshotableMetricsRegistry snapshotable) {
-                snapshots = Collections.unmodifiableList(snapshotable.snapshot());
+                snapshots.addAll(snapshotable.snapshot());
             } else {
                 return Optional.empty();
             }
         } else {
-            snapshots = metricRegistries.stream()
-                    .filter(SnapshotableMetricsRegistry.class::isInstance)
-                    .map(SnapshotableMetricsRegistry.class::cast)
-                    .flatMap(registry -> registry.snapshot().stream())
-                    .sorted(MetricSnapshot.COMPARATOR)
-                    .toList(); // immutable list
+            for (MetricRegistry registry : metricRegistries) {
+                if (registry instanceof SnapshotableMetricsRegistry snapshotable) {
+                    snapshots.addAll(snapshotable.snapshot());
+                }
+            }
         }
 
-        long durationMs = System.currentTimeMillis() - startTime;
         if (snapshotDurationMetric != null) {
+            long durationMs = System.currentTimeMillis() - startTime;
             snapshotDurationMetric.update(durationMs);
+
+            snapshots.addAll(exportMetricsRegistry.snapshot());
         }
 
-        List<MetricSnapshot> finalSnapshots = new ArrayList<>(snapshots);
-        finalSnapshots.addAll(((SnapshotableMetricsRegistry) exportMetricsRegistry).snapshot());
-
-        return Optional.of(new MetricsSnapshot(finalSnapshots, Instant.now()));
+        return Optional.of(new MetricsSnapshot(Collections.unmodifiableList(snapshots), Instant.now()));
     }
 
     @Override

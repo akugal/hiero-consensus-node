@@ -14,8 +14,7 @@ import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricsBinder;
 import org.hiero.metrics.demo.crawler.api.util.Named;
 
-public class MonitoredExecutorService extends AbstractExecutorService
-        implements ExecutorService, MetricsBinder, Named {
+public class MonitoredExecutorService extends AbstractExecutorService implements ExecutorService, MetricsBinder, Named {
 
     private final String executorName;
     private final ExecutorService delegate;

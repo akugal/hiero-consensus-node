@@ -7,6 +7,7 @@ import com.swirlds.config.extensions.sources.ClasspathFileConfigSource;
 import com.swirlds.config.extensions.sources.SystemPropertiesConfigSource;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.concurrent.Executors;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricsFacade;
@@ -18,10 +19,6 @@ public final class Utils {
     private Utils() {}
 
     public static JobManager initializeJobManager(String testName) {
-        MetricRegistry registry = MetricsFacade.createRegistryWithDiscoveredProviders(new Label("test", testName));
-        MetricsExportManager exportManager = MetricsFacade.getDefaultExportManager();
-        exportManager.manageMetricRegistry(registry);
-
         Configuration configuration;
         try {
             configuration = ConfigurationBuilder.create()
@@ -32,6 +29,11 @@ public final class Utils {
         } catch (IOException e) {
             throw new RuntimeException("Failed to load configuration", e);
         }
+
+        MetricRegistry registry = MetricsFacade.createRegistryWithDiscoveredProviders(new Label("test", testName));
+        MetricsExportManager exportManager = MetricsFacade.createExportManagerWithDiscoveredExporters(
+                "crawler", configuration, Executors::newSingleThreadScheduledExecutor, 1);
+        exportManager.manageMetricRegistry(registry);
 
         JobManager jobManager = JobManager.create(configuration);
         jobManager.bind(registry);

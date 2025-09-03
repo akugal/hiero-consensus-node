@@ -10,7 +10,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.hiero.metrics.api.export.MetricsSnapshot;
 import org.hiero.metrics.api.export.PushingMetricsExporter;
+import org.hiero.metrics.api.export.extension.writer.CsvMetricsSnapshotsWriter;
 
+/**
+ * A {@link PushingMetricsExporter} that writes metrics snapshots to a CSV file.
+ */
 public class CsvFileMetricsExporter implements PushingMetricsExporter {
 
     private final String name;
@@ -41,7 +45,7 @@ public class CsvFileMetricsExporter implements PushingMetricsExporter {
     @Override
     public void export(@NonNull MetricsSnapshot snapshot) throws IOException {
         try (OutputStream outputStream = Files.newOutputStream(filePath, APPEND)) {
-            writer.export(snapshot, outputStream);
+            writer.write(snapshot, outputStream);
         }
     }
 }

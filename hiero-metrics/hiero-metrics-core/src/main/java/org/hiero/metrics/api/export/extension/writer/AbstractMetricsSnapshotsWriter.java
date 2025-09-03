@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.api.export.extension;
+package org.hiero.metrics.api.export.extension.writer;
 
 import java.text.DecimalFormat;
 import java.util.function.Predicate;
 import org.hiero.metrics.api.core.MetricMetadata;
 
+/**
+ * Abstract base class for {@link MetricsSnapshotsWriter} implementations.
+ * Provides common functionality such as metric filtering and number formatting.
+ */
 public abstract class AbstractMetricsSnapshotsWriter implements MetricsSnapshotsWriter {
 
     public static final String DEFAULT_DECIMAL_FORMAT = "#.####";

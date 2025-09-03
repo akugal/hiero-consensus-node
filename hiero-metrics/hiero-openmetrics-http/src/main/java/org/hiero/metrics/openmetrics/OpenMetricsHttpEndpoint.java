@@ -12,8 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hiero.metrics.api.export.MetricsSnapshot;
-import org.hiero.metrics.api.export.extension.OpenMetricsSnapshotsWriter;
 import org.hiero.metrics.api.export.extension.PullingMetricsExporterAdapter;
+import org.hiero.metrics.api.export.extension.writer.OpenMetricsSnapshotsWriter;
 import org.hiero.metrics.openmetrics.config.OpenMetricsHttpEndpointConfig;
 
 public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
@@ -23,7 +23,7 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
     public static final String CONTENT_TYPE = "application/openmetrics-text; version=1.0.0; charset=utf-8";
 
     private final AtomicInteger lastResponseSize = new AtomicInteger(4096);
-    private final OpenMetricsSnapshotsWriter exporter = new OpenMetricsSnapshotsWriter();
+    private final OpenMetricsSnapshotsWriter writer = new OpenMetricsSnapshotsWriter();
 
     public OpenMetricsHttpEndpoint(OpenMetricsHttpEndpointConfig config) throws IOException {
         super("open-metrics-http-endpoint");
@@ -46,7 +46,7 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
             }
 
             ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream(lastResponseSize.get() + 1024);
-            exporter.export(optionalSnapshot.get(), responseBuffer);
+            writer.write(optionalSnapshot.get(), responseBuffer);
             lastResponseSize.set(responseBuffer.size());
             logger.debug("Exporting metrics snapshot, sizeBytes={}", lastResponseSize.get());
 
