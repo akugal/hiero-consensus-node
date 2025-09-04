@@ -36,7 +36,7 @@ public abstract class AbstractMetricsExportManager implements MetricsExportManag
     private LongGaugeDataPoint snapshotDurationMetric;
 
     protected AbstractMetricsExportManager(@NonNull String name) {
-        this.name = ArgumentUtils.throwArgBlank("name", name);
+        this.name = ArgumentUtils.throwArgBlank(name, "name");
     }
 
     @NonNull

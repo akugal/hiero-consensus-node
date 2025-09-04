@@ -12,7 +12,7 @@ public abstract class AbstractMetricsExporter implements MetricsExporter {
     private final String name;
 
     protected AbstractMetricsExporter(@NonNull String name) {
-        this.name = ArgumentUtils.throwArgBlank("name", name);
+        this.name = ArgumentUtils.throwArgBlank(name, "name");
     }
 
     @NonNull

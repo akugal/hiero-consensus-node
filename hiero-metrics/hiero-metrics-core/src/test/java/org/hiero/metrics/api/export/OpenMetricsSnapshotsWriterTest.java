@@ -21,32 +21,35 @@ public class OpenMetricsSnapshotsWriterTest {
 
     @Test
     public void write() throws InterruptedException {
-        MetricRegistry registry = MetricsFacade.createRegistry(new Label("global", "label"));
+        MetricRegistry registry = MetricsFacade.createRegistry(new Label("env", "test"));
         MetricsExportManager snapshotManager = MetricsFacade.createExportManager(
                 new PushingMetricsExporterWriterAdapter("console", new OpenMetricsSnapshotsWriter(), () -> System.out),
                 1);
         snapshotManager.manageMetricRegistry(registry);
 
-        BooleanGauge booleanGauge = BooleanGauge.builder(BooleanGauge.key("boolean_gauge"))
+        BooleanGauge booleanGauge = BooleanGauge.builder("boolean_gauge")
                 .withDescription("A test boolean gauge without labels")
                 .register(registry);
         booleanGauge.getNotLabeled().setTrue();
 
-        StatelessMetric.builder(StatelessMetric.key("test_stateless_metric"))
-                .withDynamicLabelNames("label1", "label2")
-                .register(registry)
-                .registerDataPoint(() -> 123.45, Map.of("label1", "val1", "label2", "val2"))
-                .registerDataPoint(() -> 1.0, Map.of("label1", "1", "label2", "2"));
+        StatelessMetric.builder(StatelessMetric.key("memory").withCategory("jvm"))
+                .withDynamicLabelNames("type")
+                .withDescription("JVM memory usage")
+                .withUnit("bytes")
+                .registerDataPoint(() -> Runtime.getRuntime().maxMemory(), Map.of("type", "max"))
+                .registerDataPoint(() -> Runtime.getRuntime().totalMemory(), Map.of("type", "total"))
+                .registerDataPoint(() -> Runtime.getRuntime().freeMemory(), Map.of("type", "free"))
+                .register(registry);
 
-        LongCounter longCounter = LongCounter.builder(LongCounter.key("test_long_counter"))
+        LongCounter longCounter = LongCounter.builder("test_long_counter")
                 .withUnit("requests")
-                .withConstantLabel(new Label("env", "test"))
+                .withConstantLabel(new Label("constant-label", "constant-value"))
                 .withDynamicLabelNames("method")
                 .register(registry);
         longCounter.getOrCreateLabeled(Map.of("method", "POST")).increment(42);
         longCounter.getOrCreateLabeled(Map.of("method", "GET")).increment(17);
 
-        DoubleGauge doubleGauge = DoubleGauge.builder(DoubleGauge.key("test_double_gauge"))
+        DoubleGauge doubleGauge = DoubleGauge.builder("test_double_gauge")
                 .withOperator(StatUtils.DOUBLE_SUM, false)
                 .withDynamicLabelNames("init")
                 .register(registry);
@@ -55,7 +58,7 @@ public class OpenMetricsSnapshotsWriterTest {
 
         StatsGaugeAdapter<IntSupplier, StatContainer> statGauge = StatsGaugeAdapter.builder(
                         StatsGaugeAdapter.key("test_stats_gauge"), StatUtils.INT_INIT, StatContainer::new)
-                .withConstantLabel(new Label("env", "test"))
+                .withConstantLabel(new Label("constant-label", "constant-value"))
                 .withDynamicLabelNames("name")
                 .withUnit("ms")
                 .withStat("counter", StatContainer::getCounter)
