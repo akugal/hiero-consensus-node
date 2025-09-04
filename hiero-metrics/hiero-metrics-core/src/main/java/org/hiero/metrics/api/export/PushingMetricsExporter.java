@@ -5,8 +5,10 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 /**
- * Type of metrics exporter that receives metrics data pushed to it by the metrics system on regular intervals.
- * Example of such exporter: CSV file.
+ * Type of {@link MetricsExporter} that receives metrics snapshots pushed to it
+ * by the {@link MetricsExportManager} on regular intervals.
+ * <p>
+ * Example: CSV file exporter.
  *
  * @see PullingMetricsExporter
  */

@@ -37,7 +37,8 @@ public interface StatsGaugeAdapter<I, D> extends StatefulMetric<I, D> {
      * @param <D>  the type of the data point
      * @return the metric key
      */
-    static <I, D> MetricKey<StatsGaugeAdapter<I, D>> key(String name) {
+    @NonNull
+    static <I, D> MetricKey<StatsGaugeAdapter<I, D>> key(@NonNull String name) {
         return MetricKey.of(name, StatsGaugeAdapter.class);
     }
 
@@ -51,8 +52,9 @@ public interface StatsGaugeAdapter<I, D> extends StatefulMetric<I, D> {
      * @param <D>                the type of the data point
      * @return the builder
      */
+    @NonNull
     static <I, D> Builder<I, D> builder(
-            MetricKey<StatsGaugeAdapter<I, D>> key,
+            @NonNull MetricKey<StatsGaugeAdapter<I, D>> key,
             @NonNull I defaultInitializer,
             @NonNull Function<I, D> dataPointFactory) {
         return new Builder<>(key, defaultInitializer, dataPointFactory);
@@ -67,8 +69,9 @@ public interface StatsGaugeAdapter<I, D> extends StatefulMetric<I, D> {
      * @param <D>              the type of the data point
      * @return the builder
      */
+    @NonNull
     static <D> Builder<Object, D> builder(
-            MetricKey<StatsGaugeAdapter<Object, D>> key, @NonNull Supplier<D> dataPointFactory) {
+            @NonNull MetricKey<StatsGaugeAdapter<Object, D>> key, @NonNull Supplier<D> dataPointFactory) {
         return new Builder<>(key, NO_DEFAULT_INITIALIZER, init -> dataPointFactory.get());
     }
 
@@ -88,7 +91,7 @@ public interface StatsGaugeAdapter<I, D> extends StatefulMetric<I, D> {
         private Consumer<D> reset;
 
         private Builder(
-                MetricKey<StatsGaugeAdapter<I, D>> key,
+                @NonNull MetricKey<StatsGaugeAdapter<I, D>> key,
                 @NonNull I defaultInitializer,
                 @NonNull Function<I, D> dataPointFactory) {
             super(MetricType.GAUGE, key, defaultInitializer, dataPointFactory);
@@ -136,7 +139,7 @@ public interface StatsGaugeAdapter<I, D> extends StatefulMetric<I, D> {
          * @return this builder
          */
         @NonNull
-        public Builder<I, D> withReset(Consumer<D> reset) {
+        public Builder<I, D> withReset(@NonNull Consumer<D> reset) {
             this.reset = Objects.requireNonNull(reset, "Container stats reset must not be null");
             return this;
         }
@@ -150,7 +153,7 @@ public interface StatsGaugeAdapter<I, D> extends StatefulMetric<I, D> {
          * @throws IllegalArgumentException if the stat label is blank
          */
         @NonNull
-        public Builder<I, D> withStatLabel(String statLabel) {
+        public Builder<I, D> withStatLabel(@NonNull String statLabel) {
             this.statLabel = ArgumentUtils.throwArgBlank(statLabel, "stat label");
             return this;
         }
@@ -165,7 +168,7 @@ public interface StatsGaugeAdapter<I, D> extends StatefulMetric<I, D> {
          * @throws IllegalArgumentException if the stat name is blank or if the export getter is {@code null}
          */
         @NonNull
-        public Builder<I, D> withStat(String statName, Function<D, Number> exportGetter) {
+        public Builder<I, D> withStat(@NonNull String statName, @NonNull Function<D, Number> exportGetter) {
             statNames.add(ArgumentUtils.throwArgBlank(statName, "stat name"));
             statExportGetters.add(Objects.requireNonNull(exportGetter, "Export getter must not be null"));
             return this;

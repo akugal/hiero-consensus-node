@@ -34,7 +34,8 @@ public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
      * @param <D>  the type of the data point
      * @return the metric key
      */
-    static <I, D> MetricKey<GaugeAdapter<I, D>> key(String name) {
+    @NonNull
+    static <I, D> MetricKey<GaugeAdapter<I, D>> key(@NonNull String name) {
         return MetricKey.of(name, GaugeAdapter.class);
     }
 
@@ -49,8 +50,9 @@ public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
      * @param <D>                the type of the data point
      * @return the builder
      */
+    @NonNull
     static <I, D> Builder<I, D> builder(
-            MetricKey<GaugeAdapter<I, D>> key,
+            @NonNull MetricKey<GaugeAdapter<I, D>> key,
             @NonNull I defaultInitializer,
             @NonNull Function<I, D> dataPointFactory,
             @NonNull Function<D, Number> exportGetter) {
@@ -68,8 +70,9 @@ public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
      * @param <D>                the type of the data point
      * @return the builder
      */
+    @NonNull
     static <I, D> Builder<I, D> builder(
-            String name,
+            @NonNull String name,
             @NonNull I defaultInitializer,
             @NonNull Function<I, D> dataPointFactory,
             @NonNull Function<D, Number> exportGetter) {
@@ -86,8 +89,9 @@ public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
      * @param <D>              the type of the data point
      * @return the builder
      */
+    @NonNull
     static <D> Builder<Object, D> builder(
-            MetricKey<GaugeAdapter<Object, D>> key,
+            @NonNull MetricKey<GaugeAdapter<Object, D>> key,
             @NonNull Supplier<D> dataPointFactory,
             @NonNull Function<D, Number> exportGetter) {
         return new Builder<>(key, NO_DEFAULT_INITIALIZER, init -> dataPointFactory.get(), exportGetter);
@@ -104,7 +108,7 @@ public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
      * @return the builder
      */
     static <D> Builder<Object, D> builder(
-            String name, @NonNull Supplier<D> dataPointFactory, @NonNull Function<D, Number> exportGetter) {
+            @NonNull String name, @NonNull Supplier<D> dataPointFactory, @NonNull Function<D, Number> exportGetter) {
         return builder(key(name), dataPointFactory, exportGetter);
     }
 
@@ -161,7 +165,7 @@ public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
          * @return this builder
          */
         @NonNull
-        public Builder<I, D> withReset(Consumer<D> reset) {
+        public Builder<I, D> withReset(@NonNull Consumer<D> reset) {
             this.reset = Objects.requireNonNull(reset, "Value reset must not be null");
             return this;
         }

@@ -37,12 +37,13 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
     private LongGauge pushingExportDurationMetric;
 
     public DefaultMetricsExportManager(
-            String name,
+            @NonNull String name,
             @NonNull Supplier<ScheduledExecutorService> executorServiceFactory,
             int exportIntervalSeconds,
             @NonNull List<PullingMetricsExporter> pullingExporters,
             @NonNull List<PushingMetricsExporter> pushingExporters) {
         super(name);
+
         if (exportIntervalSeconds <= 0) {
             throw new IllegalArgumentException("Export interval must be greater than 0 seconds");
         }

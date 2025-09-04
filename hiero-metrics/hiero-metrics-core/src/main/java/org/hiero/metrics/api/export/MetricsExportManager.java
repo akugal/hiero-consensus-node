@@ -15,7 +15,7 @@ public interface MetricsExportManager {
      * @return the name of the export manager, never {@code null}
      */
     @NonNull
-    String getName();
+    String name();
 
     /**
      * Add metrics registry to be exported.

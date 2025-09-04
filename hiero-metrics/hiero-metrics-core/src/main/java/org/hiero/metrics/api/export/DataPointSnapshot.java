@@ -6,7 +6,7 @@ import java.util.List;
 import org.hiero.metrics.api.core.Label;
 
 /**
- * Immutable snapshot of a data point at a specific time.
+ * Immutable snapshot of a metric {@link  org.hiero.metrics.api.datapoint.DataPoint} at a specific time.
  *
  * @param labels data point labels
  * @param valueItems data point values

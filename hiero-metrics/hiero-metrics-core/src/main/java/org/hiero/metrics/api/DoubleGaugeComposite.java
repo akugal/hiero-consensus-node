@@ -40,7 +40,8 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
      * @param name the name of the metric
      * @return the metric key
      */
-    static MetricKey<DoubleGaugeComposite> key(String name) {
+    @NonNull
+    static MetricKey<DoubleGaugeComposite> key(@NonNull String name) {
         return MetricKey.of(name, DoubleGaugeComposite.class);
     }
 
@@ -50,7 +51,8 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
      * @param key the metric key
      * @return the builder
      */
-    static Builder builder(MetricKey<DoubleGaugeComposite> key) {
+    @NonNull
+    static Builder builder(@NonNull MetricKey<DoubleGaugeComposite> key) {
         return new Builder(key);
     }
 
@@ -60,7 +62,8 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
      * @param name the metric name
      * @return the builder
      */
-    static Builder builder(String name) {
+    @NonNull
+    static Builder builder(@NonNull String name) {
         return builder(key(name));
     }
 
@@ -82,7 +85,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          *
          * @param key the metric key
          */
-        private Builder(MetricKey<DoubleGaugeComposite> key) {
+        private Builder(@NonNull MetricKey<DoubleGaugeComposite> key) {
             super(
                     MetricType.GAUGE,
                     key,
@@ -121,7 +124,8 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          * @return this builder
          * @throws IllegalArgumentException if the stat label is blank
          */
-        public Builder withStatLabel(String statLabel) {
+        @NonNull
+        public Builder withStatLabel(@NonNull String statLabel) {
             this.statLabel = ArgumentUtils.throwArgBlank(statLabel, "stat label");
             return this;
         }
@@ -136,7 +140,8 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          * @throws NullPointerException if the operator is null
          * @throws IllegalArgumentException if the stat name is blank
          */
-        public Builder withAccumulatorStat(String name, DoubleBinaryOperator operator) {
+        @NonNull
+        public Builder withAccumulatorStat(@NonNull String name, @NonNull DoubleBinaryOperator operator) {
             return withAccumulatorStat(name, operator, ZERO);
         }
 
@@ -151,7 +156,9 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          * @throws NullPointerException if the operator is null
          * @throws IllegalArgumentException if the stat name is blank
          */
-        public Builder withAccumulatorStat(String name, DoubleBinaryOperator operator, double initValue) {
+        @NonNull
+        public Builder withAccumulatorStat(
+                @NonNull String name, @NonNull DoubleBinaryOperator operator, double initValue) {
             Objects.requireNonNull(operator, "operator must not be null");
             return withStatContainerFactory(name, () -> new DoubleAccumulatorGaugeDataPoint(operator, initValue));
         }
@@ -162,6 +169,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          *
          * @return this builder
          */
+        @NonNull
         public Builder withSumStat() {
             return withAccumulatorStat("sum", StatUtils.DOUBLE_SUM, ZERO);
         }
@@ -172,6 +180,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          *
          * @return this builder
          */
+        @NonNull
         public Builder withMaxStat() {
             return withAccumulatorStat("max", StatUtils.DOUBLE_MAX, Double.MIN_VALUE);
         }
@@ -182,6 +191,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          *
          * @return this builder
          */
+        @NonNull
         public Builder withMinStat() {
             return withAccumulatorStat("min", StatUtils.DOUBLE_MIN, Double.MAX_VALUE);
         }
@@ -192,6 +202,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          *
          * @return this builder
          */
+        @NonNull
         public Builder withLatestValueStat() {
             return withLatestValueStat(ZERO);
         }
@@ -202,6 +213,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          * @param initValue the initial value
          * @return this builder
          */
+        @NonNull
         public Builder withLatestValueStat(double initValue) {
             return withStatContainerFactory("latest", () -> new AtomicDoubleGaugeDataPoint(initValue));
         }
@@ -212,6 +224,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          *
          * @return this builder
          */
+        @NonNull
         public Builder withResetOnExport() {
             this.resetOnExport = true;
             return this;
@@ -270,6 +283,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          * @return this builder
          * @throws IllegalArgumentException if the stat name is blank
          */
+        @NonNull
         private Builder withStatContainerFactory(String statName, Supplier<DoubleGaugeDataPoint> statContainerFactory) {
             ArgumentUtils.throwArgBlank(statName, "stat name");
 

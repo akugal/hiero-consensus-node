@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.logging.log4j.LogManager;
 
 /**
- * Abstract base class for {@link MetricsBinder} implementations that ensures idempotent binding of metrics.
+ * Abstract base class for {@link MetricsBinder} implementations that ensures
+ * thread-safe and idempotent binding of metrics.
  * <p>
  * This class uses an {@link AtomicBoolean} to track whether the metrics have already been bound, preventing
  * multiple bindings. Subclasses must implement the {@link #bindMetricsNonIdempotent(MetricRegistry)} method
@@ -26,7 +27,7 @@ public abstract class IdempotentMetricsBinder implements MetricsBinder {
         } else {
             LogManager.getLogger(IdempotentMetricsBinder.class)
                     .warn(
-                            "Metrics registry already bound for instance of {}.",
+                            "Metrics registry already bound. instance={}",
                             getClass().getName());
         }
     }

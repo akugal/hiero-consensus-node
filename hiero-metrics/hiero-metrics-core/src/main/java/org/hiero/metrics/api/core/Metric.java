@@ -13,12 +13,14 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * Base interface for all metric types. A metric is defined by its {@link MetricMetadata}, a set of
+ * Base interface for all metrics.
+ * <p>
+ * A metric is defined by its {@link MetricMetadata}, a set of
  * constant {@link Label}s and a set of dynamic label names.
  * <p>
- * Metrics are immutable and thread-safe, but they can hold mutable {@link org.hiero.metrics.api.datapoint.DataPoint}s
- * that can be updated with new measurements. Metrics can also be reset to their initial state, which resets
- * all associated datapoints.
+ * Metrics are immutable and thread-safe, but they may hold mutable {@link org.hiero.metrics.api.datapoint.DataPoint}s
+ * per dynamic labels set, that can be updated with new measurements.
+ * Metrics can also be reset to their initial state, which resets all associated datapoints.
  * <p>
  * Since metric can support aggregations (like sum, min, max, avg, etc.), this interface doesn't expose
  * export or snapshot functionality, but usually each metric implementation will extend

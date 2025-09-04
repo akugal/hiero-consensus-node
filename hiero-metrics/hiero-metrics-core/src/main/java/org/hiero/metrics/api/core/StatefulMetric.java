@@ -8,7 +8,9 @@ import java.util.function.Function;
 
 /**
  * Base interface for a metric that can have multiple data points holding values,
- * each associated with a unique set of label values.
+ * each associated with a unique set of dynamic label values.
+ * <p>
+ * Implementation is responsible for creating a new data point for each unique set of label values.
  *
  * @param <I> the type of the initializer used to create new data points per label set
  * @param <D> the type of the data point
@@ -36,7 +38,7 @@ public interface StatefulMetric<I, D> extends Metric {
      * @throws NullPointerException if labels is null or contains null keys or values
      */
     @NonNull
-    D getOrCreateLabeled(Map<String, String> labels);
+    D getOrCreateLabeled(@NonNull Map<String, String> labels);
 
     /**
      * Get or create a data point with the given label values.
@@ -49,7 +51,7 @@ public interface StatefulMetric<I, D> extends Metric {
      * @throws IllegalArgumentException if the number of labels does not match the number of dynamic labels
      * @throws NullPointerException if labels or initializer is null or contains null keys or values
      */
-    D getOrCreateLabeled(Map<String, String> labels, I initializer);
+    D getOrCreateLabeled(@NonNull Map<String, String> labels, @NonNull I initializer);
 
     /**
      * Base abstract builder for {@link StatefulMetric}.

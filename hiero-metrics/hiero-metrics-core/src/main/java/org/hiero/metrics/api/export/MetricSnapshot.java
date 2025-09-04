@@ -8,7 +8,7 @@ import java.util.Objects;
 import org.hiero.metrics.api.core.MetricMetadata;
 
 /**
- * Immutable snapshot of the metric and its datapa points at some point in time.
+ * Immutable snapshot of the {@link org.hiero.metrics.api.core.Metric} and its data points at some point in time.
  *
  * @param metadata   metric metadata
  * @param dataPoints metric data point snapshots

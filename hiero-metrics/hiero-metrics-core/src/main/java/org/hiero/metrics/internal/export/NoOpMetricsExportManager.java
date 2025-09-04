@@ -14,7 +14,7 @@ public class NoOpMetricsExportManager implements MetricsExportManager {
 
     @NonNull
     @Override
-    public String getName() {
+    public String name() {
         return "no-op";
     }
 

@@ -37,13 +37,15 @@ public final class DefaultStatelessMetric extends AbstractMetric implements Stat
         return snapshots;
     }
 
+    @NonNull
     @Override
-    public StatelessMetric registerDataPoint(@NonNull DoubleSupplier valueSupplier, Map<String, String> labels) {
+    public StatelessMetric registerDataPoint(
+            @NonNull DoubleSupplier valueSupplier, @NonNull Map<String, String> labels) {
         Objects.requireNonNull(valueSupplier, "Value supplier must not be null");
 
         verifyLabels(labels);
 
-        if (labeledDataPoints.putIfAbsent(labels, valueSupplier) != null) {
+        if (labeledDataPoints.putIfAbsent(Map.copyOf(labels), valueSupplier) != null) {
             throw new IllegalArgumentException("A data point with the same label values already exists: " + labels);
         }
 

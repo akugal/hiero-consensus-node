@@ -26,7 +26,8 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
      * @param <T>  the type of the states in the set
      * @return the metric key
      */
-    static <T> MetricKey<StateSet<T>> key(String name) {
+    @NonNull
+    static <T> MetricKey<StateSet<T>> key(@NonNull String name) {
         return MetricKey.of(name, StateSet.class);
     }
 
@@ -37,7 +38,8 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
      * @param <T> the type of the states in the set
      * @return the builder
      */
-    static <T> Builder<T> builder(MetricKey<StateSet<T>> key) {
+    @NonNull
+    static <T> Builder<T> builder(@NonNull MetricKey<StateSet<T>> key) {
         return new Builder<>(key);
     }
 
@@ -48,7 +50,8 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
      * @param <T>  the type of the states in the set
      * @return the builder
      */
-    static <T> Builder<T> builder(String name) {
+    @NonNull
+    static <T> Builder<T> builder(@NonNull String name) {
         return builder(key(name));
     }
 
@@ -61,7 +64,8 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
      * @param <E>       the type of the enum
      * @return the builder
      */
-    static <E extends Enum<E>> Builder<E> enumBuilder(String name, Class<E> enumClass) {
+    @NonNull
+    static <E extends Enum<E>> Builder<E> enumBuilder(@NonNull String name, @NonNull Class<E> enumClass) {
         return new Builder<>(key(name), init -> new EnumStateSetDataPoint<>(init, enumClass));
     }
 
@@ -78,7 +82,8 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
         }
 
         private Builder(
-                @NonNull MetricKey<StateSet<T>> key, Function<Map<T, Boolean>, StateSetDataPoint<T>> dataPointFactory) {
+                @NonNull MetricKey<StateSet<T>> key,
+                @NonNull Function<Map<T, Boolean>, StateSetDataPoint<T>> dataPointFactory) {
             super(MetricType.STATE_SET, key, Map.of(), dataPointFactory);
         }
 

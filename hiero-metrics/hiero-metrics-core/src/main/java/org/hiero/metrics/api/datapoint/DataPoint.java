@@ -2,10 +2,12 @@
 package org.hiero.metrics.api.datapoint;
 
 /**
- * Base interface for a metric data point that holds a measurement values(s). It can be associated with
- * a set of dynamic labels (key-value pairs) that provide additional context for the measurement.
+ * Base interface for a metric data point that holds a measurement values(s).
+ * A metric data point is associated with set of labels and there can not be same metric two data points
+ * with the same set of labels (or without any labels at all).
  * <p>
- * Data points are mutable and can be updated with new measurements. They can also be reset to their initial state.
+ * Data points are mutable and extensions must provide methods to update data point and get its value(s).
+ * Data point can also be reset to it's initial state.
  * Implementations are expected to be thread-safe and handle concurrent updates atomically.
  */
 public interface DataPoint {

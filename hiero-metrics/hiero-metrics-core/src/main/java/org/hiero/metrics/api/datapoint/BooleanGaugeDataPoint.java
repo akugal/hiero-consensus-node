@@ -4,10 +4,10 @@ package org.hiero.metrics.api.datapoint;
 import java.util.function.BooleanSupplier;
 
 /**
- * A {@link DataPoint} that represents a boolean gauge value.
+ * A {@link DataPoint} that represents a {@code boolean} gauge value.
  * <p>
- * The value can be set to true or false using {@link #setTrue()} and {@link #setFalse()} methods,
- * or to an arbitrary boolean value using {@link #set(boolean)} method.
+ * The value can be set to {@code true} or {@code false} using {@link #setTrue()} and {@link #setFalse()} methods,
+ * or to an arbitrary {@code boolean} value using {@link #set(boolean)} method.
  * <p>
  * The current value can be retrieved using the {@link #getAsBoolean()} method inherited from
  * {@link BooleanSupplier}.

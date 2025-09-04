@@ -25,7 +25,8 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
      * @param name the name of the metric
      * @return the metric key
      */
-    static MetricKey<LongGauge> key(String name) {
+    @NonNull
+    static MetricKey<LongGauge> key(@NonNull String name) {
         return MetricKey.of(name, LongGauge.class);
     }
 
@@ -35,7 +36,8 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
      * @param key the metric key
      * @return the builder
      */
-    static Builder builder(MetricKey<LongGauge> key) {
+    @NonNull
+    static Builder builder(@NonNull MetricKey<LongGauge> key) {
         return new Builder(key);
     }
 
@@ -45,7 +47,8 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
      * @param name the metric name
      * @return the builder
      */
-    static Builder builder(String name) {
+    @NonNull
+    static Builder builder(@NonNull String name) {
         return builder(key(name));
     }
 
@@ -57,7 +60,8 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
      * @param resetOnExport if true, the gauge is reset to its initial value on export
      * @return the builder
      */
-    static Builder sumBuilder(String name, boolean resetOnExport) {
+    @NonNull
+    static Builder sumBuilder(@NonNull String name, boolean resetOnExport) {
         return builder(name).withOperator(StatUtils.LONG_SUM, resetOnExport);
     }
 
@@ -70,7 +74,8 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
      * @param resetOnExport   if true, the gauge is reset to its initial value on export
      * @return the builder
      */
-    static Builder maxBuilder(String name, boolean resetOnExport) {
+    @NonNull
+    static Builder maxBuilder(@NonNull String name, boolean resetOnExport) {
         return builder(name).withOperator(StatUtils.LONG_MAX, resetOnExport).withInitValue(Long.MIN_VALUE);
     }
 
@@ -83,7 +88,8 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
      * @param resetOnExport   if true, the gauge is reset to its initial value on export
      * @return the builder
      */
-    static Builder minBuilder(String name, boolean resetOnExport) {
+    @NonNull
+    static Builder minBuilder(@NonNull String name, boolean resetOnExport) {
         return builder(name).withOperator(StatUtils.LONG_MIN, resetOnExport).withInitValue(Long.MAX_VALUE);
     }
 
@@ -97,7 +103,7 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
         private LongBinaryOperator operator;
         private boolean resetOnExport = false;
 
-        private Builder(MetricKey<LongGauge> key) {
+        private Builder(@NonNull MetricKey<LongGauge> key) {
             super(MetricType.GAUGE, key, StatUtils.LONG_INIT, AtomicLongGaugeDataPoint::new);
         }
 
@@ -114,6 +120,7 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
          * @param initValue the initial value for any data point within this metric
          * @return this builder
          */
+        @NonNull
         public Builder withInitValue(long initValue) {
             return withDefaultInitializer(StatUtils.asInitializer(initValue));
         }
@@ -126,7 +133,8 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
          * @param resetOnExport if true, the gauge will be reset to its initial value after each export
          * @return this builder
          */
-        public Builder withOperator(LongBinaryOperator operator, boolean resetOnExport) {
+        @NonNull
+        public Builder withOperator(@NonNull LongBinaryOperator operator, boolean resetOnExport) {
             this.operator = Objects.requireNonNull(operator, "Operator must not be null");
             this.resetOnExport = resetOnExport;
             return this;

@@ -26,6 +26,32 @@ import org.hiero.metrics.internal.export.SinglePullingExporterMetricsExportManag
 
 /**
  * Facade for creating and managing metrics registries and export managers.
+ * <p>
+ * Here is production ready example of using the facade:
+ * <pre>
+ * {@code
+ * Configuration configuration = ConfigurationBuilder.create()
+ * 	    // init configuration
+ *      .build();
+ *
+ * 	// create export manager named "my-app", that will discover all implementations
+ * 	// of MetricsExporterFactory SPI and create exporters using the provided configuration.
+ * 	// Scheduled thread executor would only be used if there is more than just
+ * 	// a single pulling exporter to sync exports every 3 seconds.
+ * 	MetricsExportManager exportManager = MetricsFacade.createExportManagerWithDiscoveredExporters(
+ * 		"my-app", configuration, Executors::newSingleThreadScheduledExecutor, 3);
+ *
+ * 	// create metrics registry without global labels and register all metrics found
+ * 	// by any implementation of MetricsRegistrationProvider SPI
+ *  MetricRegistry metricRegistry = MetricsFacade.createRegistryWithDiscoveredProviders();
+ *
+ *  // allow export manager to manage registry and perform exports
+ *  exportManager.manageMetricRegistry(metricRegistry);
+ *
+ *  // pass metrics registry to required classes to retrieve or register metrics
+ *  // Use IdempotentMetricsBinder to bind metrics registry in a thread-safe and idempotent way
+ *  }
+ * </pre>
  */
 public final class MetricsFacade {
 
@@ -47,7 +73,7 @@ public final class MetricsFacade {
 
     /**
      * Creates a new {@link MetricRegistry} and automatically registers metrics from all discovered
-     * {@link MetricsRegistrationProvider} implementations using the Java ServiceLoader mechanism.
+     * {@link MetricsRegistrationProvider} implementations using the Java {@link java.util.ServiceLoader} mechanism.
      *
      * @param globalLabels the global labels to apply to all metrics in the registry, may be empty but not {@code null}
      * @return a new {@link MetricRegistry} instance with registered metrics
@@ -70,31 +96,31 @@ public final class MetricsFacade {
     }
 
     /**
-     * Creates a new {@link MetricsExportManager} using discovered via the Java ServiceLoader mechanism
-     * implementations of {@link MetricsExporterFactory} to create either {@link PullingMetricsExporter}
+     * Creates a new {@link MetricsExportManager} using discovered via the Java {@link java.util.ServiceLoader}
+     * mechanism implementations of {@link MetricsExporterFactory} to create either {@link PullingMetricsExporter}
      * or {@link PushingMetricsExporter} exporters.
-     * Exporters that are failed to instantiate or not pulling or pushing will be ignored.<p>
-     *
-     * If no exporters are found, a no-op export manager is returned. <p>
-     *
+     * Exporters that are failed to instantiate or not pulling or pushing will be ignored.
+     * <p>
+     * If no exporters are found, a no-op export manager is returned.
+     * <p>
      * If a single pulling exporter is found, a manager without any threads will be created,
-     * allowing export metrics on demand. <p>
-     *
+     * allowing export metrics on demand.
+     * <p>
      * Otherwise, a default export manager is created with scheduled task submitted to executor service to do
-     * periodic snapshots on all managed {@link MetricRegistry} instances and propagating snapshots to all exporters.<p>
-     *
+     * periodic snapshots on all managed {@link MetricRegistry} instances and propagating snapshots to all exporters.
+     * <p>
      * Clients have to call {@link MetricsExportManager#manageMetricRegistry(MetricRegistry)}
      * to manage registries for exporting.
      *
-     * @param name the name of the export manager
+     * @param name the name of the export manager (could be an application name), must not be blank
      * @param configuration configuration to be passed to exporter factories, must not be {@code null}
      * @param executorServiceFactory factory to create the {@link ScheduledExecutorService} for scheduling export task
      * @param exportIntervalSeconds the interval in seconds between export operations
      * @return a new {@link MetricsExportManager} instance
      */
     public static MetricsExportManager createExportManagerWithDiscoveredExporters(
-            String name,
-            Configuration configuration,
+            @NonNull String name,
+            @NonNull Configuration configuration,
             @NonNull Supplier<ScheduledExecutorService> executorServiceFactory,
             int exportIntervalSeconds) {
         List<MetricsExporterFactory> exporterFactories = load(MetricsExporterFactory.class);
@@ -166,6 +192,7 @@ public final class MetricsFacade {
      * @return a new {@link MetricsExportManager} instance
      */
     public static MetricsExportManager createExportManager(@NonNull PullingMetricsExporter exporter) {
+        Objects.requireNonNull(exporter, "exporter must not be null");
         return new SinglePullingExporterMetricsExportManager(exporter.name(), exporter);
     }
 }

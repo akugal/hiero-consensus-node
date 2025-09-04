@@ -6,8 +6,10 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * Type of metrics exporter that pulls metrics data from the metrics system on its own schedule.
- * Example of such exporter: Prometheus scrapper.
+ * Type of {@link MetricsExporter} that pulls metrics snapshots from
+ * the {@link MetricsExportManager} on its own schedule.
+ * <p>
+ * Example: Prometheus scrapper.
  *
  * @see PushingMetricsExporter
  */

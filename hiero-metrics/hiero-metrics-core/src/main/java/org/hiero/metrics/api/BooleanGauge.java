@@ -23,7 +23,7 @@ public interface BooleanGauge extends StatefulMetric<BooleanSupplier, BooleanGau
      * @return the metric key
      */
     @NonNull
-    static MetricKey<BooleanGauge> key(String name) {
+    static MetricKey<BooleanGauge> key(@NonNull String name) {
         return MetricKey.of(name, BooleanGauge.class);
     }
 
@@ -34,7 +34,7 @@ public interface BooleanGauge extends StatefulMetric<BooleanSupplier, BooleanGau
      * @return the builder
      */
     @NonNull
-    static Builder builder(MetricKey<BooleanGauge> key) {
+    static Builder builder(@NonNull MetricKey<BooleanGauge> key) {
         return new Builder(key);
     }
 
@@ -45,7 +45,7 @@ public interface BooleanGauge extends StatefulMetric<BooleanSupplier, BooleanGau
      * @return the builder
      */
     @NonNull
-    static Builder builder(String name) {
+    static Builder builder(@NonNull String name) {
         return builder(key(name));
     }
 
@@ -55,7 +55,7 @@ public interface BooleanGauge extends StatefulMetric<BooleanSupplier, BooleanGau
      */
     final class Builder extends StatefulMetric.Builder<BooleanSupplier, BooleanGaugeDataPoint, Builder, BooleanGauge> {
 
-        private Builder(MetricKey<BooleanGauge> key) {
+        private Builder(@NonNull MetricKey<BooleanGauge> key) {
             super(MetricType.GAUGE, key, StatUtils.BOOL_INIT_FALSE, AtomicBooleanGaugeDataPoint::new);
         }
 

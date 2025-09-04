@@ -5,6 +5,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.Metric;
@@ -47,16 +48,37 @@ public abstract class AbstractMetric implements Metric {
         return dynamicLabelNamesSet;
     }
 
+    /**
+     * Verify that the provided labels map has the correct label names and non-null keys and values.
+     *
+     * @param labels labels for the dynamic label names as map
+     * @throws IllegalArgumentException if the label names do not match the expected dynamic label names
+     * @throws NullPointerException if any label key or value is null
+     */
     protected void verifyLabels(Map<String, String> labels) {
+        Objects.requireNonNull(labels);
         if (!labels.keySet().equals(getDynamicLabelNamesSet())) {
             throw new IllegalArgumentException(
                     "Expected different label names. Expected: + " + dynamicLabelNames() + ", got " + labels);
         }
+
+        for (Map.Entry<String, String> entry : labels.entrySet()) {
+            if (entry.getKey() == null) {
+                throw new NullPointerException("Label key cannot be null");
+            }
+            if (entry.getValue() == null) {
+                throw new NullPointerException("Label value cannot be null: " + entry.getKey());
+            }
+        }
     }
 
+    /**
+     * Create the full list of labels for a data point, combining constant and dynamic labels.
+     *
+     * @param labels labels for the dynamic label names as map
+     * @return the full mutable list of labels for the data point
+     */
     protected List<Label> createDataPointLabels(Map<String, String> labels) {
-        verifyLabels(labels);
-
         if (constantLabels.isEmpty() && labels.isEmpty()) {
             return List.of();
         }

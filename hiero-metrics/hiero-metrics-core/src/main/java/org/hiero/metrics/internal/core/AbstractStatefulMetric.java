@@ -6,6 +6,7 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import org.hiero.metrics.api.core.StatefulMetric;
@@ -59,24 +60,24 @@ public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric
 
     @NonNull
     @Override
-    public D getOrCreateLabeled(Map<String, String> labels) {
+    public D getOrCreateLabeled(@NonNull Map<String, String> labels) {
         return getOrCreateLabeled(labels, defaultInitializer);
     }
 
     @Override
-    public D getOrCreateLabeled(Map<String, String> labels, I initializer) {
+    public D getOrCreateLabeled(@NonNull Map<String, String> labels, @NonNull I initializer) {
         if (noLabelsDataPoint != null) {
-            if (!labels.isEmpty()) {
+            if (labels != null && !labels.isEmpty()) {
                 throw new IllegalArgumentException(getClass().getSimpleName()
                         + " "
                         + metadata().name()
                         + " was created without label names, so you must not provide label values.");
             }
             return noLabelsDataPoint;
-        } else {
-            verifyLabels(labels);
         }
 
+        Objects.requireNonNull(initializer);
+        verifyLabels(labels);
         return labeledDataPoints.computeIfAbsent(Map.copyOf(labels), l -> dataPointFactory.apply(initializer));
     }
 
@@ -106,15 +107,4 @@ public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric
 
     @NonNull
     protected abstract List<DataPointSnapshot.ValueItem> exportDataPoint(D datapoint);
-
-    private void checkNoNullLabels(String[] labelValues) {
-        for (int i = 0; i < labelValues.length; i++) {
-            if (labelValues[i] == null) {
-                throw new IllegalArgumentException("null label value for metric "
-                        + metadata().name()
-                        + " and label "
-                        + dynamicLabelNames().get(i));
-            }
-        }
-    }
 }

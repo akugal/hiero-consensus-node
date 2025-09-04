@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal.export;
 
+import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -34,13 +35,13 @@ public abstract class AbstractMetricsExportManager implements MetricsExportManag
     private SnapshotableMetricsRegistry exportMetricsRegistry;
     private LongGaugeDataPoint snapshotDurationMetric;
 
-    protected AbstractMetricsExportManager(String name) {
-        this.name = name;
+    protected AbstractMetricsExportManager(@NonNull String name) {
+        this.name = ArgumentUtils.throwArgBlank("name", name);
     }
 
     @NonNull
     @Override
-    public final String getName() {
+    public final String name() {
         return name;
     }
 

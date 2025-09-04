@@ -8,22 +8,21 @@ import java.util.Objects;
 
 /**
  * Immutable metadata of a {@link Metric}, including its type, name, description, and unit.
- * This class is immutable and provides methods to access the metric's properties.
  * <p>
- * Description and unit can be null, in which case they default to an empty strings.
+ * Description and unit can be {@code null}, in which case they default to an empty strings.
  */
 public record MetricMetadata(
-        @NonNull MetricType metricType, @NonNull String name, @Nullable String description, @Nullable String unit) {
+        @NonNull MetricType metricType, @NonNull String name, @NonNull String description, @NonNull String unit) {
 
     private static final String EMPTY = "";
 
     /**
      * Constructs a new MetricMetadata instance with the specified properties.
      *
-     * @param metricType  the type of the metric, must not be null
+     * @param metricType  the type of the metric, must not be {@code null}
      * @param name        the name of the metric, must not be blank
-     * @param description an optional description of the metric, can be null
-     * @param unit        an optional unit of measurement for the metric, can be null
+     * @param description an optional description of the metric, can be {@code null}
+     * @param unit        an optional unit of measurement for the metric, can be {@code null}
      */
     public MetricMetadata(
             @NonNull MetricType metricType, @NonNull String name, @Nullable String description, @Nullable String unit) {

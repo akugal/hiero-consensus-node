@@ -23,7 +23,7 @@ public interface DoubleCounter extends StatefulMetric<DoubleSupplier, DoubleCoun
      * @return the metric key
      */
     @NonNull
-    static MetricKey<DoubleCounter> key(String name) {
+    static MetricKey<DoubleCounter> key(@NonNull String name) {
         return MetricKey.of(name, DoubleCounter.class);
     }
 
@@ -34,7 +34,7 @@ public interface DoubleCounter extends StatefulMetric<DoubleSupplier, DoubleCoun
      * @return the builder
      */
     @NonNull
-    static Builder builder(MetricKey<DoubleCounter> key) {
+    static Builder builder(@NonNull MetricKey<DoubleCounter> key) {
         return new Builder(key);
     }
 
@@ -45,7 +45,7 @@ public interface DoubleCounter extends StatefulMetric<DoubleSupplier, DoubleCoun
      * @return the builder
      */
     @NonNull
-    static Builder builder(String name) {
+    static Builder builder(@NonNull String name) {
         return builder(key(name));
     }
 
@@ -55,7 +55,7 @@ public interface DoubleCounter extends StatefulMetric<DoubleSupplier, DoubleCoun
      */
     final class Builder extends StatefulMetric.Builder<DoubleSupplier, DoubleCounterDataPoint, Builder, DoubleCounter> {
 
-        private Builder(MetricKey<DoubleCounter> key) {
+        private Builder(@NonNull MetricKey<DoubleCounter> key) {
             super(MetricType.COUNTER, key, StatUtils.DOUBLE_INIT, DoubleAdderCounterDataPoint::new);
         }
 

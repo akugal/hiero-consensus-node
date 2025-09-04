@@ -28,7 +28,7 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
      * @return the metric key
      */
     @NonNull
-    static MetricKey<DoubleGauge> key(String name) {
+    static MetricKey<DoubleGauge> key(@NonNull String name) {
         return MetricKey.of(name, DoubleGauge.class);
     }
 
@@ -39,7 +39,7 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
      * @return the builder
      */
     @NonNull
-    static Builder builder(MetricKey<DoubleGauge> key) {
+    static Builder builder(@NonNull MetricKey<DoubleGauge> key) {
         return new Builder(key);
     }
 
@@ -50,7 +50,7 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
      * @return the builder
      */
     @NonNull
-    static Builder builder(String name) {
+    static Builder builder(@NonNull String name) {
         return builder(key(name));
     }
 
@@ -62,7 +62,8 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
      * @param resetOnExport if true, the gauge will be reset to its initial value after each export
      * @return the builder
      */
-    static Builder sumBuilder(String name, boolean resetOnExport) {
+    @NonNull
+    static Builder sumBuilder(@NonNull String name, boolean resetOnExport) {
         return builder(key(name)).withOperator(StatUtils.DOUBLE_SUM, resetOnExport);
     }
 
@@ -75,7 +76,8 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
      * @param resetOnExport if true, the gauge will be reset to its initial value after each export
      * @return the builder
      */
-    static Builder maxBuilder(String name, boolean resetOnExport) {
+    @NonNull
+    static Builder maxBuilder(@NonNull String name, boolean resetOnExport) {
         return builder(key(name))
                 .withOperator(StatUtils.DOUBLE_MAX, resetOnExport)
                 .withInitValue(Double.MIN_VALUE);
@@ -90,7 +92,8 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
      * @param resetOnExport if true, the gauge will be reset to its initial value after each export
      * @return the builder
      */
-    static Builder minBuilder(String name, boolean resetOnExport) {
+    @NonNull
+    static Builder minBuilder(@NonNull String name, boolean resetOnExport) {
         return builder(key(name))
                 .withOperator(StatUtils.DOUBLE_MIN, resetOnExport)
                 .withInitValue(Double.MAX_VALUE);
@@ -107,7 +110,7 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
         private DoubleBinaryOperator operator;
         private boolean resetOnExport = false;
 
-        private Builder(MetricKey<DoubleGauge> key) {
+        private Builder(@NonNull MetricKey<DoubleGauge> key) {
             super(MetricType.GAUGE, key, DOUBLE_INIT, AtomicDoubleGaugeDataPoint::new);
         }
 
@@ -138,6 +141,7 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
          * @param resetOnExport if true, the gauge will be reset to its initial value after each export
          * @return this builder
          */
+        @NonNull
         public Builder withOperator(DoubleBinaryOperator operator, boolean resetOnExport) {
             this.operator = Objects.requireNonNull(operator, "Operator must not be null");
             this.resetOnExport = resetOnExport;

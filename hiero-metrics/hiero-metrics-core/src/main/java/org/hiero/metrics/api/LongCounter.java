@@ -23,7 +23,8 @@ public interface LongCounter extends StatefulMetric<LongSupplier, LongCounterDat
      * @param name the name of the metric
      * @return the metric key
      */
-    static MetricKey<LongCounter> key(String name) {
+    @NonNull
+    static MetricKey<LongCounter> key(@NonNull String name) {
         return MetricKey.of(name, LongCounter.class);
     }
 
@@ -33,7 +34,8 @@ public interface LongCounter extends StatefulMetric<LongSupplier, LongCounterDat
      * @param key the metric key
      * @return the builder
      */
-    static Builder builder(MetricKey<LongCounter> key) {
+    @NonNull
+    static Builder builder(@NonNull MetricKey<LongCounter> key) {
         return new Builder(key);
     }
 
@@ -43,7 +45,8 @@ public interface LongCounter extends StatefulMetric<LongSupplier, LongCounterDat
      * @param name the name of the metric
      * @return the builder
      */
-    static Builder builder(String name) {
+    @NonNull
+    static Builder builder(@NonNull String name) {
         return builder(key(name));
     }
 
@@ -53,7 +56,7 @@ public interface LongCounter extends StatefulMetric<LongSupplier, LongCounterDat
      */
     final class Builder extends StatefulMetric.Builder<LongSupplier, LongCounterDataPoint, Builder, LongCounter> {
 
-        private Builder(MetricKey<LongCounter> key) {
+        private Builder(@NonNull MetricKey<LongCounter> key) {
             super(MetricType.COUNTER, key, StatUtils.LONG_INIT, LongAdderCounterDataPoint::new);
         }
 

@@ -10,9 +10,7 @@ import java.util.Collection;
 public interface MetricsRegistrationProvider {
 
     /**
-     * Returns a collection of metric builders to register.
-     *
-     * @return the metric builders, never {@code null}
+     * @return a collection of metric builders to register, never {@code null}
      */
     @NonNull
     Collection<Metric.Builder<?, ?>> getMetricsToRegister();

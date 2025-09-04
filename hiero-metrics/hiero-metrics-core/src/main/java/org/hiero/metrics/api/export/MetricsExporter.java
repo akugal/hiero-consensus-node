@@ -6,7 +6,11 @@ import java.io.Closeable;
 
 /**
  * Base interface for metrics exporters.
+ * <p>
  * Metrics exporter able to handle {@link MetricsSnapshot} into specific destination.
+ *
+ * @see PullingMetricsExporter
+ * @see PushingMetricsExporter
  */
 public interface MetricsExporter extends Closeable {
 

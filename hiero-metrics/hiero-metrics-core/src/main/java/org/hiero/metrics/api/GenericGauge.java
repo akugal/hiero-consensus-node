@@ -2,8 +2,10 @@
 package org.hiero.metrics.api;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import org.hiero.metrics.api.core.MetricKey;
@@ -29,7 +31,8 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
      * @param <T>  the type of value used to observe/update the gauge
      * @return the metric key
      */
-    static <T> MetricKey<GenericGauge<T>> key(String name) {
+    @NonNull
+    static <T> MetricKey<GenericGauge<T>> key(@NonNull String name) {
         return MetricKey.of(name, GenericGauge.class);
     }
 
@@ -41,7 +44,9 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
      * @param <T>            the type of value used to observe/update the gauge
      * @return the builder
      */
-    static <T> Builder<T> builder(MetricKey<GenericGauge<T>> key, ToDoubleFunction<T> valueConverter) {
+    @NonNull
+    static <T> Builder<T> builder(
+            @NonNull MetricKey<GenericGauge<T>> key, @NonNull ToDoubleFunction<T> valueConverter) {
         return new Builder<>(key, valueConverter);
     }
 
@@ -53,7 +58,8 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
      * @param <T>            the type of value used to observe/update the gauge
      * @return the builder
      */
-    static <T> Builder<T> builder(String name, ToDoubleFunction<T> valueConverter) {
+    @NonNull
+    static <T> Builder<T> builder(@NonNull String name, @NonNull ToDoubleFunction<T> valueConverter) {
         return builder(key(name), valueConverter);
     }
 
@@ -65,7 +71,9 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
      * @param unit the chrono unit to convert the duration to double for export
      * @return the builder
      */
-    static Builder<Duration> durationBuilder(String name, ChronoUnit unit) {
+    @NonNull
+    static Builder<Duration> durationBuilder(@NonNull String name, @NonNull ChronoUnit unit) {
+        Objects.requireNonNull(unit, "unit cannot be null");
         final MetricKey<GenericGauge<Duration>> key = key(name);
         return new Builder<>(key, duration -> duration == null ? 0 : duration.get(unit)).withUnit(Unit.getUnit(unit));
     }
@@ -78,7 +86,8 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
      * @param <E>  the type of the enum
      * @return the builder
      */
-    static <E extends Enum<E>> Builder<E> enumGauge(String name) {
+    @NonNull
+    static <E extends Enum<E>> Builder<E> enumGauge(@NonNull String name) {
         return new Builder<>(key(name), Enum::ordinal);
     }
 
@@ -96,7 +105,7 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
          * @param key            the metric key
          * @param valueConverter the function to convert the value to double for export
          */
-        private Builder(MetricKey<GenericGauge<T>> key, ToDoubleFunction<T> valueConverter) {
+        private Builder(@NonNull MetricKey<GenericGauge<T>> key, @NonNull ToDoubleFunction<T> valueConverter) {
             super(MetricType.GAUGE, key, () -> null, init -> new AtomicReferenceGaugeDataPoint<>(init, valueConverter));
         }
 
@@ -107,7 +116,7 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
          * @return this builder
          */
         @NonNull
-        public Builder<T> withInitValue(T initValue) {
+        public Builder<T> withInitValue(@Nullable T initValue) {
             return withDefaultInitializer(() -> initValue);
         }
 

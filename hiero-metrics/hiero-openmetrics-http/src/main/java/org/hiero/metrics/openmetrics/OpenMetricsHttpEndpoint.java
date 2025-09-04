@@ -4,9 +4,11 @@ package org.hiero.metrics.openmetrics;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.spi.HttpServerProvider;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.logging.log4j.LogManager;
@@ -26,8 +28,9 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
     private final AtomicInteger lastResponseSize = new AtomicInteger(4096);
     private final OpenMetricsSnapshotsWriter writer = new OpenMetricsSnapshotsWriter();
 
-    public OpenMetricsHttpEndpoint(OpenMetricsHttpEndpointConfig config) throws IOException {
+    public OpenMetricsHttpEndpoint(@NonNull OpenMetricsHttpEndpointConfig config) throws IOException {
         super("open-metrics-http-endpoint");
+        Objects.requireNonNull(config, "OpenMetrics HTTP endpoint config must not be null");
 
         final HttpServerProvider provider = HttpServerProvider.provider();
         server = provider.createHttpServer(new InetSocketAddress(config.port()), config.backlog());

@@ -22,7 +22,8 @@ public interface StatelessMetric extends Metric {
      * @param name the name of the metric
      * @return the metric key
      */
-    static MetricKey<StatelessMetric> key(String name) {
+    @NonNull
+    static MetricKey<StatelessMetric> key(@NonNull String name) {
         return MetricKey.of(name, StatelessMetric.class);
     }
 
@@ -32,7 +33,8 @@ public interface StatelessMetric extends Metric {
      * @param key the metric key
      * @return the builder
      */
-    static Builder builder(MetricKey<StatelessMetric> key) {
+    @NonNull
+    static Builder builder(@NonNull MetricKey<StatelessMetric> key) {
         return new Builder(key);
     }
 
@@ -42,7 +44,8 @@ public interface StatelessMetric extends Metric {
      * @param name the metric name
      * @return the builder
      */
-    static Builder builder(String name) {
+    @NonNull
+    static Builder builder(@NonNull String name) {
         return builder(key(name));
     }
 
@@ -55,7 +58,8 @@ public interface StatelessMetric extends Metric {
      * @return this metric
      * @throws IllegalArgumentException if a data point with the same label values already exists
      */
-    StatelessMetric registerDataPoint(DoubleSupplier valueSupplier, Map<String, String> labels);
+    @NonNull
+    StatelessMetric registerDataPoint(@NonNull DoubleSupplier valueSupplier, @NonNull Map<String, String> labels);
 
     /**
      * Stateless metrics do not hold any state, so this is a no-op.
@@ -85,8 +89,9 @@ public interface StatelessMetric extends Metric {
          * @return this builder
          * @throws IllegalArgumentException if a data point with the same label values already exists
          */
-        public Builder registerDataPoint(@NonNull DoubleSupplier valueSupplier, Map<String, String> labels) {
-            // labels should be validated in metric during registration
+        @NonNull
+        public Builder registerDataPoint(@NonNull DoubleSupplier valueSupplier, @NonNull Map<String, String> labels) {
+            // labels will be validated during metric construction
             if (labeledDataPoints.put(labels, valueSupplier) != null) {
                 throw new IllegalArgumentException("A data point with the same label values already exists: " + labels);
             }
@@ -98,6 +103,7 @@ public interface StatelessMetric extends Metric {
          *
          * @return the map of label sets to value suppliers
          */
+        @NonNull
         public Map<Map<String, String>, DoubleSupplier> getLabeledDataPoints() {
             return labeledDataPoints;
         }

@@ -6,7 +6,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * A label is an immutable key-value pair that can be associated with a metric to provide additional context or
- * metadata. Labels are often used to differentiate between different instances of the same metric,
+ * metadata. Labels are often used to differentiate between different instances of the same metric (data points),
  * such as tracking the number of requests to a web server by different HTTP methods (e.g., GET,
  * POST, etc.) or by different response status codes (e.g., 200, 404, 500, etc.).
  */

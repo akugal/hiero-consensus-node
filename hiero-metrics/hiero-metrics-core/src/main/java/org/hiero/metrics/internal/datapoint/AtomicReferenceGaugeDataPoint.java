@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal.datapoint;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
@@ -17,8 +18,8 @@ public final class AtomicReferenceGaugeDataPoint<T> implements GaugeDataPoint<T>
     }
 
     public AtomicReferenceGaugeDataPoint(Supplier<T> initializer, ToDoubleFunction<T> valueConverter) {
-        this.initializer = initializer;
-        this.valueConverter = valueConverter;
+        this.initializer = Objects.requireNonNull(initializer, "initializer cannot be null");
+        this.valueConverter = Objects.requireNonNull(valueConverter, "value converter cannot be null");
         container.set(this.initializer.get());
     }
 

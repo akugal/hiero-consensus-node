@@ -6,8 +6,9 @@ import java.util.function.LongSupplier;
 /**
  * A gauge data point that holds a <code>long</code> value.
  * The gauge can be incremented, decremented, or updated by a specified value.
- * It implements {@link LongSupplier} to provide the current value of the gauge.
- * The gauge can use additional calculations/aggregations on update values.
+ * The gauge can use additional calculations/aggregations on observed values.
+ * <p>
+ * This interface extends {@link LongSupplier} to provide the current value of the gauge.
  */
 public interface LongGaugeDataPoint extends LongSupplier, DataPoint {
 

@@ -8,6 +8,8 @@ import java.util.Optional;
 
 /**
  * A registry for {@link Metric} instances.
+ * <p>
+ * Implementations must be thread-safe.
  */
 public interface MetricRegistry {
 
@@ -36,7 +38,8 @@ public interface MetricRegistry {
 
     /**
      * Registers a metric using the given builder.
-     * This method is not idempotent and must throw an exception if metrics with same name already registered.
+     * <p>
+     * This method is <b>not idempotent</b> and must throw an exception if metrics with same name already registered.
      *
      * @param builder the metric builder, must not be {@code null}
      * @param <M>     the type of the metric

@@ -8,6 +8,8 @@ import java.util.Objects;
 /**
  * A unique key for identifying a {@link Metric} by its name and type.
  * Key instance is immutable and can be used to retrieve a metric from a {@link MetricRegistry}.
+ * <p>
+ * Callers may additionally categorize the metric by calling {@link #withCategory(String)}.
  *
  * @param <M> the type of the metric
  */

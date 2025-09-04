@@ -5,7 +5,7 @@ import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.stat.StatUtils;
 
 /**
- * A {@link DataPoint} that represents a counter of double values that can only be incremented.
+ * A {@link DataPoint} that represents a counter of {@code double} value that can only be incremented.
  * <p>
  * This interface extends {@link DoubleSupplier} to provide the current value of the counter.
  */

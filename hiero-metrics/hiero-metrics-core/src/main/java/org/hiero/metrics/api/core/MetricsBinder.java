@@ -5,6 +5,8 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * Interface for binding a {@link MetricRegistry} for metrics registration or retrieval.
+ * <p>
+ * Use {@link IdempotentMetricsBinder} abstract class for an idempotent and thread-safe implementation.
  */
 public interface MetricsBinder {
 

@@ -5,9 +5,10 @@ import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.stat.StatUtils;
 
 /**
- * A gauge data point that holds a double value that can be updated.
- * The gauge can use additional calculations/aggregations on update values.
- * The value can also be reset to its initial value.
+ * A gauge data point that holds a {@link double} value that can be updated.
+ * The gauge can use additional calculations/aggregations on observed values.
+ * <p>
+ * This interface extends {@link DoubleSupplier} to provide the current value of the gauge.
  */
 public interface DoubleGaugeDataPoint extends DoubleSupplier, DataPoint {
 
