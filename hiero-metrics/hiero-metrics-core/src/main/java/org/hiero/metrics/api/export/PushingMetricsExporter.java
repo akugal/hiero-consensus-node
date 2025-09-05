@@ -2,7 +2,6 @@
 package org.hiero.metrics.api.export;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.io.IOException;
 
 /**
  * Type of {@link MetricsExporter} that receives metrics snapshots pushed to it
@@ -18,7 +17,7 @@ public interface PushingMetricsExporter extends MetricsExporter {
      * Export the given metrics snapshot to the destination.
      *
      * @param snapshot metrics snapshot to export
-     * @throws IOException IO exception during export
+     * @throws MetricsExportException if error happens during export
      */
-    void export(@NonNull MetricsSnapshot snapshot) throws IOException;
+    void export(@NonNull MetricsSnapshot snapshot) throws MetricsExportException;
 }

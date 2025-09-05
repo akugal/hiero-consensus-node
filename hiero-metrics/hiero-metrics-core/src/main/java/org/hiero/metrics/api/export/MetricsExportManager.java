@@ -8,6 +8,7 @@ import org.hiero.metrics.api.core.MetricRegistry;
  * Manager for exporting metrics data points to external systems using set of
  * {@link PushingMetricsExporter} or {@link PullingMetricsExporter}, or both.
  * Requires one or more {@link MetricRegistry} to manage.
+ * Implementations must be thread-safe for all operations.
  */
 public interface MetricsExportManager {
 
@@ -36,7 +37,7 @@ public interface MetricsExportManager {
 
     /**
      * Stop exporting and shutdown the manager.
-     * This method should be called to release resources when the manager is no longer needed.
+     * This method should be idempotent and called to release resources when the manager is no longer needed.
      */
     void shutdown();
 }

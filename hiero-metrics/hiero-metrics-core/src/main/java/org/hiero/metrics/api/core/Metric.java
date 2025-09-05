@@ -3,20 +3,20 @@ package org.hiero.metrics.api.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * Base interface for all metrics.
  * <p>
- * A metric is defined by its {@link MetricMetadata}, a set of
- * constant {@link Label}s and a set of dynamic label names.
+ * A metric is defined by its {@link MetricMetadata}, a {@link Label} set of
+ * constant labels and a set of dynamic label names.
  * <p>
  * Metrics are immutable and thread-safe, but they may hold mutable {@link org.hiero.metrics.api.datapoint.DataPoint}s
  * per dynamic labels set, that can be updated with new measurements.
@@ -36,13 +36,13 @@ public interface Metric {
     MetricMetadata metadata();
 
     /**
-     * @return the immutable list of constant labels associated with this metric.
+     * @return the immutable list of constant labels associated with this metric and any of its data point.
      */
     @NonNull
     List<Label> constantLabels();
 
     /**
-     * @return the immutable list of dynamic label names associated with this metric.
+     * @return the immutable ordered list of dynamic label names associated with this metric.
      */
     @NonNull
     List<String> dynamicLabelNames();
@@ -72,9 +72,8 @@ public interface Metric {
         private String description;
         private String unit;
 
-        protected final TreeMap<String, Label> constantLabels = new TreeMap<>();
-        private final List<String> dynamicLabelNames = new ArrayList<>();
-        private final Set<String> dynamicLabelNamesSet = new HashSet<>();
+        protected final Map<String, Label> constantLabels = new HashMap<>();
+        private final Set<String> dynamicLabelNames = new HashSet<>();
 
         /**
          * Constructor for a metric builder.
@@ -91,7 +90,7 @@ public interface Metric {
          * @return the metric type, never {@code null}
          */
         @NonNull
-        public final MetricType getType() {
+        public final MetricType type() {
             return type;
         }
 
@@ -99,7 +98,7 @@ public interface Metric {
          * @return the metric key, never {@code null}
          */
         @NonNull
-        public MetricKey<M> getKey() {
+        public MetricKey<M> key() {
             return key;
         }
 
@@ -128,19 +127,11 @@ public interface Metric {
         }
 
         /**
-         * @return list of dynamic label names as list, never {@code null}, possibly empty
-         */
-        @NonNull
-        public List<String> getDynamicLabelNames() {
-            return dynamicLabelNames;
-        }
-
-        /**
          * @return dynamic label names as set, never {@code null}, possibly empty
          */
         @NonNull
-        public Set<String> getDynamicLabelNamesSet() {
-            return dynamicLabelNamesSet;
+        public Set<String> getDynamicLabelNames() {
+            return dynamicLabelNames;
         }
 
         /**
@@ -150,7 +141,7 @@ public interface Metric {
          * @return the builder instance
          */
         @NonNull
-        public final B withDescription(String description) {
+        public final B withDescription(@Nullable String description) {
             this.description = description;
             return self();
         }
@@ -162,7 +153,7 @@ public interface Metric {
          * @return the builder instance
          */
         @NonNull
-        public final B withUnit(String unit) {
+        public final B withUnit(@Nullable String unit) {
             this.unit = unit;
             return self();
         }
@@ -175,15 +166,9 @@ public interface Metric {
          * @return the builder instance
          */
         @NonNull
-        public final B withDynamicLabelNames(String... labelNames) {
+        public final B withDynamicLabelNames(@NonNull String... labelNames) {
             Objects.requireNonNull(labelNames, "label names must not be null");
-
-            for (String labelName : labelNames) {
-                if (dynamicLabelNamesSet.add(labelName)) {
-                    dynamicLabelNames.add(labelName);
-                }
-            }
-
+            dynamicLabelNames.addAll(Arrays.asList(labelNames));
             return self();
         }
 
@@ -195,7 +180,7 @@ public interface Metric {
          * @return the builder instance
          */
         @NonNull
-        public final B withConstantLabel(Label label) {
+        public final B withConstantLabel(@NonNull Label label) {
             Objects.requireNonNull(label, "label must not be null");
 
             Label existingLabel = constantLabels.put(label.name(), label);
@@ -213,7 +198,9 @@ public interface Metric {
          * @return the builder instance
          */
         @NonNull
-        public final B withConstantLabels(Collection<Label> labels) {
+        public final B withConstantLabels(@NonNull Collection<Label> labels) {
+            Objects.requireNonNull(labels, "labels must not be null");
+
             for (Label label : labels) {
                 withConstantLabel(label);
             }
@@ -228,7 +215,8 @@ public interface Metric {
          * @return the builder instance
          */
         @NonNull
-        public final B withConstantLabels(Label... labels) {
+        public final B withConstantLabels(@NonNull Label... labels) {
+            Objects.requireNonNull(labels, "labels must not be null");
             return withConstantLabels(Arrays.asList(labels));
         }
 

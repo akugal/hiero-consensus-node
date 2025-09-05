@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import org.hiero.metrics.api.LongGauge;
 import org.hiero.metrics.api.core.MetricRegistry;
+import org.hiero.metrics.api.export.MetricsExportException;
 import org.hiero.metrics.api.export.MetricsExporter;
 import org.hiero.metrics.api.export.MetricsSnapshot;
 import org.hiero.metrics.api.export.PullingMetricsExporter;
@@ -78,7 +79,7 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
     }
 
     @Override
-    protected void registerExportMetrics(String category, MetricRegistry exportMetricsRegistry) {
+    protected void registerExportMetrics(@NonNull String category, @NonNull MetricRegistry exportMetricsRegistry) {
         super.registerExportMetrics(category, exportMetricsRegistry);
 
         if (!pushingExporters.isEmpty()) {
@@ -92,6 +93,7 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
 
     @Override
     protected void init() {
+        super.init();
         for (PullingMetricsExporter pullingExporter : pullingExporters) {
             try {
                 logger.info("Initializing pulling exporter: {}", pullingExporter.name());
@@ -103,8 +105,7 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
         }
 
         logger.info("Scheduling periodic exporting with interval of {} seconds", exportIntervalSeconds);
-        scheduledExportFuture = executorServiceFactory
-                .get()
+        scheduledExportFuture = executorServiceFactory.get()
                 .scheduleAtFixedRate(new ExportRunnable(), 0, exportIntervalSeconds, TimeUnit.SECONDS);
     }
 
@@ -119,7 +120,6 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
             scheduledExportFuture.cancel(false);
             scheduledExportFuture = null;
 
-            // just in case - re-init pulling exporters to get empty snapshots
             for (PullingMetricsExporter pullingExporter : pullingExporters) {
                 try {
                     pullingExporter.close();
@@ -147,13 +147,13 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
                 final long startTime = System.currentTimeMillis();
                 try {
                     pushingExporter.export(snapshot);
-                } catch (IOException ex) {
+                } catch (MetricsExportException ex) {
                     // TODO disable and enable back after some time, completely remove after some time in disabled state
                     logger.error(
                             "Error while exporting metrics snapshot by pushing metrics exporter {}",
                             pushingExporter.name(),
                             ex);
-                } catch (RuntimeException ex) {
+                } catch (Throwable ex) {
                     // TODO remove from pushing exporters list
                     logger.error(
                             "Error while exporting metrics snapshot by pushing metrics exporter {}",

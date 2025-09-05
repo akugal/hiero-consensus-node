@@ -9,13 +9,14 @@ public class SinglePullingExporterMetricsExportManager extends AbstractMetricsEx
 
     private final PullingMetricsExporter exporter;
 
-    public SinglePullingExporterMetricsExportManager(String name, @NonNull PullingMetricsExporter exporter) {
+    public SinglePullingExporterMetricsExportManager(@NonNull String name, @NonNull PullingMetricsExporter exporter) {
         super(name);
         this.exporter = Objects.requireNonNull(exporter, "exporter must not be null");
     }
 
     @Override
     protected void init() {
+        super.init();
         exporter.init(this::takeSnapshot);
     }
 

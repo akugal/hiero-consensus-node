@@ -6,25 +6,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricMetadata;
 
+/**
+ * Base class for all metric implementations requiring {@link Metric.Builder} for construction.
+ */
 public abstract class AbstractMetric implements Metric {
 
     private final MetricMetadata metadata;
     private final List<Label> constantLabels;
     private final List<String> dynamicLabelNames;
-    private final Set<String> dynamicLabelNamesSet;
 
     protected AbstractMetric(Builder<?, ?> builder) {
-        metadata = new MetricMetadata(
-                builder.getType(), builder.getKey().name(), builder.getDescription(), builder.getUnit());
+        metadata =
+                new MetricMetadata(builder.type(), builder.key().name(), builder.getDescription(), builder.getUnit());
 
-        constantLabels = List.copyOf(builder.getConstantLabels());
-        dynamicLabelNames = List.copyOf(builder.getDynamicLabelNames());
-        dynamicLabelNamesSet = Set.of(builder.getDynamicLabelNamesSet().toArray(new String[0]));
+        constantLabels = builder.getConstantLabels().stream().sorted().toList();
+        dynamicLabelNames = builder.getDynamicLabelNames().stream().sorted().toList();
     }
 
     @NonNull
@@ -44,10 +44,6 @@ public abstract class AbstractMetric implements Metric {
         return dynamicLabelNames;
     }
 
-    protected Set<String> getDynamicLabelNamesSet() {
-        return dynamicLabelNamesSet;
-    }
-
     /**
      * Verify that the provided labels map has the correct label names and non-null keys and values.
      *
@@ -55,13 +51,16 @@ public abstract class AbstractMetric implements Metric {
      * @throws IllegalArgumentException if the label names do not match the expected dynamic label names
      * @throws NullPointerException if any label key or value is null
      */
-    protected void verifyLabels(Map<String, String> labels) {
-        Objects.requireNonNull(labels);
-        if (!labels.keySet().equals(getDynamicLabelNamesSet())) {
+    protected void verifyLabels(@NonNull Map<String, String> labels) {
+        Objects.requireNonNull(labels, "Labels map must not be null");
+
+        // check label names match registered ones
+        if (!labels.keySet().equals(dynamicLabelNames)) {
             throw new IllegalArgumentException(
-                    "Expected different label names. Expected: + " + dynamicLabelNames() + ", got " + labels);
+                    "Expected different label names. Expected: + " + dynamicLabelNames + ", got " + labels);
         }
 
+        // Check no null keys and values
         for (Map.Entry<String, String> entry : labels.entrySet()) {
             if (entry.getKey() == null) {
                 throw new NullPointerException("Label key cannot be null");
@@ -74,6 +73,8 @@ public abstract class AbstractMetric implements Metric {
 
     /**
      * Create the full list of labels for a data point, combining constant and dynamic labels.
+     * <p>
+     * All labels wil consist of constant labels sorted by name followed by dynamic labels sorted by name.
      *
      * @param labels labels for the dynamic label names as map
      * @return the full mutable list of labels for the data point

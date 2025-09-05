@@ -24,7 +24,7 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
     private final ConcurrentHashMap<String, Metric> metrics = new ConcurrentHashMap<>();
     private final Collection<Metric> metricsView = Collections.unmodifiableCollection(metrics.values());
 
-    public DefaultMetricRegistry(Label... globalLabels) {
+    public DefaultMetricRegistry(@NonNull Label... globalLabels) {
         Objects.requireNonNull(globalLabels);
         this.globalLabels = MetricUtils.asList(globalLabels);
     }
@@ -56,7 +56,7 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
     public <M extends Metric, B extends Metric.Builder<?, M>> M register(final @NonNull B builder) {
         Objects.requireNonNull(builder, "builder must not be null");
 
-        final MetricKey<M> metricKey = builder.getKey();
+        final MetricKey<M> metricKey = builder.key();
 
         return (M) metrics.compute(metricKey.name(), (name, existingMetric) -> {
             if (existingMetric != null) {

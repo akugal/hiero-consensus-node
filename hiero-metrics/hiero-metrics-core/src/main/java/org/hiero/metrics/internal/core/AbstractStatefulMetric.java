@@ -45,7 +45,7 @@ public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric
         if (noLabelsDataPoint != null) {
             reset(noLabelsDataPoint);
         } else {
-            labeledDataPoints.values().stream().parallel().forEach(this::reset);
+            labeledDataPoints.values().forEach(this::reset);
         }
     }
 
@@ -60,12 +60,12 @@ public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric
 
     @NonNull
     @Override
-    public D getOrCreateLabeled(@NonNull Map<String, String> labels) {
+    public final D getOrCreateLabeled(@NonNull Map<String, String> labels) {
         return getOrCreateLabeled(labels, defaultInitializer);
     }
 
     @Override
-    public D getOrCreateLabeled(@NonNull Map<String, String> labels, @NonNull I initializer) {
+    public final D getOrCreateLabeled(@NonNull Map<String, String> labels, @NonNull I initializer) {
         if (noLabelsDataPoint != null) {
             if (labels != null && !labels.isEmpty()) {
                 throw new IllegalArgumentException(getClass().getSimpleName()

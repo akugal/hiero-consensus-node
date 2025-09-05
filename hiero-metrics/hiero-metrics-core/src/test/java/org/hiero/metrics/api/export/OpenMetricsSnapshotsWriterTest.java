@@ -41,7 +41,7 @@ public class OpenMetricsSnapshotsWriterTest {
                 .registerDataPoint(() -> Runtime.getRuntime().freeMemory(), Map.of("type", "free"))
                 .register(registry);
 
-        LongCounter longCounter = LongCounter.builder("test_long_counter")
+        LongCounter longCounter = LongCounter.builder("request_count")
                 .withUnit("requests")
                 .withConstantLabel(new Label("constant-label", "constant-value"))
                 .withDynamicLabelNames("method")

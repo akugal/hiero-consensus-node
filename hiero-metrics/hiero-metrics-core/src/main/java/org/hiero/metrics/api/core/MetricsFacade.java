@@ -31,26 +31,26 @@ import org.hiero.metrics.internal.export.SinglePullingExporterMetricsExportManag
  * <pre>
  * {@code
  * Configuration configuration = ConfigurationBuilder.create()
- * 	    // init configuration
+ *      // init configuration
  *      .build();
  *
- * 	// create export manager named "my-app", that will discover all implementations
- * 	// of MetricsExporterFactory SPI and create exporters using the provided configuration.
- * 	// Scheduled thread executor would only be used if there is more than just
- * 	// a single pulling exporter to sync exports every 3 seconds.
- * 	MetricsExportManager exportManager = MetricsFacade.createExportManagerWithDiscoveredExporters(
+ * // create export manager named "my-app", that will discover all implementations
+ * // of MetricsExporterFactory SPI and create exporters using the provided configuration.
+ * // Scheduled thread executor would only be used if there is more than just
+ * // a single pulling exporter to sync exports every 3 seconds.
+ * MetricsExportManager exportManager = MetricsFacade.createExportManagerWithDiscoveredExporters(
  * 		"my-app", configuration, Executors::newSingleThreadScheduledExecutor, 3);
  *
- * 	// create metrics registry without global labels and register all metrics found
- * 	// by any implementation of MetricsRegistrationProvider SPI
- *  MetricRegistry metricRegistry = MetricsFacade.createRegistryWithDiscoveredProviders();
+ * // create metrics registry without global labels and register all metrics found
+ * // by any implementation of MetricsRegistrationProvider SPI
+ * MetricRegistry metricRegistry = MetricsFacade.createRegistryWithDiscoveredProviders();
  *
- *  // allow export manager to manage registry and perform exports
- *  exportManager.manageMetricRegistry(metricRegistry);
+ * // allow export manager to manage registry and perform exports
+ * exportManager.manageMetricRegistry(metricRegistry);
  *
- *  // pass metrics registry to required classes to retrieve or register metrics
- *  // Use IdempotentMetricsBinder to bind metrics registry in a thread-safe and idempotent way
- *  }
+ * // pass metrics registry to required classes to retrieve or register metrics
+ * // Use IdempotentMetricsBinder to bind metrics registry in a thread-safe and idempotent way
+ * }
  * </pre>
  */
 public final class MetricsFacade {
@@ -67,7 +67,8 @@ public final class MetricsFacade {
      * @param globalLabels the global labels to apply to all metrics in the registry, may be empty but not {@code null}
      * @return a new {@link MetricRegistry} instance
      */
-    public static MetricRegistry createRegistry(Label... globalLabels) {
+    @NonNull
+    public static MetricRegistry createRegistry(@NonNull Label... globalLabels) {
         return new DefaultMetricRegistry(globalLabels);
     }
 
@@ -78,7 +79,7 @@ public final class MetricsFacade {
      * @param globalLabels the global labels to apply to all metrics in the registry, may be empty but not {@code null}
      * @return a new {@link MetricRegistry} instance with registered metrics
      */
-    public static MetricRegistry createRegistryWithDiscoveredProviders(Label... globalLabels) {
+    public static MetricRegistry createRegistryWithDiscoveredProviders(@NonNull Label... globalLabels) {
         List<MetricsRegistrationProvider> providers = MetricUtils.load(MetricsRegistrationProvider.class);
         MetricRegistry registry = createRegistry(globalLabels);
 

@@ -37,7 +37,7 @@ public abstract class IdempotentMetricsBinder implements MetricsBinder {
      *
      * @return true if the metrics are already bound, false otherwise
      */
-    protected boolean isMetricsBound() {
+    public final boolean isMetricsBound() {
         return metricsBound.get();
     }
 

@@ -99,7 +99,7 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
 
             // state set must not have a label as metric name
             for (String dynamicLabelName : getDynamicLabelNames()) {
-                if (dynamicLabelName.equals(getKey().name())) {
+                if (dynamicLabelName.equals(key().name())) {
                     throw new IllegalStateException(
                             "StateSet metric cannot have a dynamic label with the same name as the metric");
                 }

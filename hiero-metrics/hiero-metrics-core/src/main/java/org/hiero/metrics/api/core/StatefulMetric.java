@@ -11,6 +11,10 @@ import java.util.function.Function;
  * each associated with a unique set of dynamic label values.
  * <p>
  * Implementation is responsible for creating a new data point for each unique set of label values.
+ * <p>
+ * Clients should pay attention the dynamic label values cardinality, as high cardinality can lead to
+ * higher costs for metrics backends. <b>Do not use</b> labels with values having unbounded cardinality,
+ * such as IDs or timestamps.
  *
  * @param <I> the type of the initializer used to create new data points per label set
  * @param <D> the type of the data point
@@ -31,8 +35,10 @@ public interface StatefulMetric<I, D> extends Metric {
      * If a data point with the same label values already exists, it is returned.
      * Otherwise, a new data point is created using the default initializer.
      *
-     * @param labels the map of labels. It is highly recommended to use {@code Map.of(...)}>, since in most cases the
-     *               number of labels is small, and it returns immutable map.
+     * @param labels the map of labels. <br>
+     *               It is highly recommended to use {@code Map.of(...)}
+     *               as efficient and immutable map for small label sets. <br>
+     *               <b>Do not use</b> labels with unbounded cardinality, such as IDs or timestamps.
      * @return the data point with the given label values
      * @throws IllegalArgumentException if the number of labels does not match the number of dynamic labels
      * @throws NullPointerException if labels is null or contains null keys or values
@@ -45,7 +51,10 @@ public interface StatefulMetric<I, D> extends Metric {
      * If a data point with the same label values already exists, it is returned.
      * Otherwise, a new data point is created using the given initializer.
      *
-     * @param labels the label values
+     * @param labels the map of labels. <br>
+     *               It is highly recommended to use {@code Map.of(...)}
+     *               as efficient and immutable map for small label sets. <br>
+     *               <b>Do not use</b> labels with unbounded cardinality, such as IDs or timestamps.
      * @param initializer the initializer to use to create a new data point if one does not already exist
      * @return the data point with the given label values
      * @throws IllegalArgumentException if the number of labels does not match the number of dynamic labels
