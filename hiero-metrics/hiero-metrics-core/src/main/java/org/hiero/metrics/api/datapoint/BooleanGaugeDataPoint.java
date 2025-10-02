@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.datapoint;
 
+import static org.hiero.metrics.api.stat.StatUtils.ONE;
+import static org.hiero.metrics.api.stat.StatUtils.ZERO;
+
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 /**
  * A {@link DataPoint} that represents a {@code boolean} gauge value.
@@ -12,7 +16,7 @@ import java.util.function.BooleanSupplier;
  * The current value can be retrieved using the {@link #getAsBoolean()} method inherited from
  * {@link BooleanSupplier}.
  */
-public interface BooleanGaugeDataPoint extends BooleanSupplier, DataPoint {
+public interface BooleanGaugeDataPoint extends BooleanSupplier, DoubleSupplier, DataPoint {
 
     /**
      * Sets the value of this boolean gauge data point.
@@ -33,5 +37,10 @@ public interface BooleanGaugeDataPoint extends BooleanSupplier, DataPoint {
      */
     default void setFalse() {
         set(false);
+    }
+
+    @Override
+    default double getAsDouble() {
+        return getAsBoolean() ? ONE : ZERO;
     }
 }

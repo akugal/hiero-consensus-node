@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.List;
 import java.util.function.LongSupplier;
 import java.util.function.ToLongFunction;
 import org.hiero.metrics.api.LongGauge;
 import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
-import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
+import org.hiero.metrics.internal.core.LabelValues;
+import org.hiero.metrics.internal.datapoint.DataPointHolder;
+import org.hiero.metrics.internal.export.SingleValueDataPointSnapshot;
 
 public final class DefaultLongGauge extends AbstractStatefulMetric<LongSupplier, LongGaugeDataPoint>
         implements LongGauge {
@@ -23,20 +23,26 @@ public final class DefaultLongGauge extends AbstractStatefulMetric<LongSupplier,
     }
 
     @Override
-    protected void reset(LongGaugeDataPoint dataPoint) {
-        dataPoint.reset();
+    protected SingleValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
+        return new SingleValueDataPointSnapshot(dynamicLabelValues);
     }
 
-    @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> exportDataPoint(LongGaugeDataPoint datapoint) {
-        long value = exportValueSupplier.applyAsLong(datapoint);
-        if (Long.MAX_VALUE == value || Long.MIN_VALUE == value) {
-            // This is a safeguard against using long extreme values as a valid metric value.
-            // MAX_VALUE or MIN_VALUE could be initial values for min or max statistics,
-            // but they should not be reported as actual metric values.
-            return List.of();
+    protected void updateDatapointSnapshot(DataPointHolder<LongGaugeDataPoint> dataPointHolder) {
+        long value = exportValueSupplier.applyAsLong(dataPointHolder.dataPoint());
+        double doubleValue = value;
+
+        if (Long.MAX_VALUE == value) {
+            doubleValue = Double.POSITIVE_INFINITY;
+        } else if (Long.MIN_VALUE == value) {
+            doubleValue = Double.NEGATIVE_INFINITY;
         }
-        return List.of(new DataPointSnapshot.ValueItem(value));
+
+        dataPointHolder.snapshot().setValueAt(0, doubleValue);
+    }
+
+    @Override
+    protected void reset(LongGaugeDataPoint dataPoint) {
+        dataPoint.reset();
     }
 }

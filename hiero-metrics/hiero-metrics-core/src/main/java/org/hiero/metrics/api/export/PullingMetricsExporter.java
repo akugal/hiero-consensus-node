@@ -17,7 +17,7 @@ public interface PullingMetricsExporter extends MetricsExporter {
 
     /**
      * Initialize the exporter with a supplier of {@link MetricsSnapshot}.
-     * The supplier will be called by the exporter when it needs to pull metrics data.
+     * The supplier can be called by the exporter when it needs to pull metrics data.
      *
      * @param snapshotSupplier the supplier of {@link MetricsSnapshot}
      */

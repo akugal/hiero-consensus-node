@@ -4,46 +4,46 @@ package org.hiero.metrics.internal;
 import static org.hiero.metrics.api.stat.StatUtils.ONE;
 import static org.hiero.metrics.api.stat.StatUtils.ZERO;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
 import org.hiero.metrics.api.StateSet;
-import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.datapoint.StateSetDataPoint;
-import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
+import org.hiero.metrics.internal.core.LabelValues;
+import org.hiero.metrics.internal.datapoint.DataPointHolder;
+import org.hiero.metrics.internal.export.FixedMultiValueDataPointSnapshot;
 
-public class DefaultStateSet<T> extends AbstractStatefulMetric<Map<T, Boolean>, StateSetDataPoint<T>>
-        implements StateSet<T> {
+public class DefaultStateSet<E extends Enum<E>> extends AbstractStatefulMetric<List<E>, StateSetDataPoint<E>>
+        implements StateSet<E> {
 
-    private final Map<T, Label> labelsCache = new HashMap<>();
-    private final Function<T, Label> stateLabelFactory;
+    private final E[] enumConstants;
+    private final String[] valueTypes;
 
-    public DefaultStateSet(StateSet.Builder<T> builder) {
+    public DefaultStateSet(StateSet.Builder<E> builder) {
         super(builder);
-        stateLabelFactory = state -> new Label(metadata().name(), state.toString());
-    }
 
-    @Override
-    protected void reset(StateSetDataPoint<T> dataPoint) {
-        dataPoint.reset();
-    }
-
-    @NonNull
-    @Override
-    protected List<DataPointSnapshot.ValueItem> exportDataPoint(StateSetDataPoint<T> datapoint) {
-        final Set<T> states = datapoint.getStates();
-        final List<DataPointSnapshot.ValueItem> items = new ArrayList<>();
-
-        for (T state : states) {
-            items.add(new DataPointSnapshot.ValueItem(
-                    datapoint.getState(state) ? ONE : ZERO, labelsCache.computeIfAbsent(state, stateLabelFactory)));
+        enumConstants = builder.getEnumClass().getEnumConstants();
+        valueTypes = new String[enumConstants.length];
+        for (E enumConstant : enumConstants) {
+            valueTypes[enumConstant.ordinal()] = enumConstant.toString();
         }
+    }
 
-        return items;
+    @Override
+    protected FixedMultiValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
+        return new FixedMultiValueDataPointSnapshot(
+                dynamicLabelValues, metadata().name(), valueTypes);
+    }
+
+    @Override
+    protected void updateDatapointSnapshot(DataPointHolder<StateSetDataPoint<E>> dataPointHolder) {
+        for (E enumConstant : enumConstants) {
+            double value = dataPointHolder.dataPoint().getState(enumConstant) ? ONE : ZERO;
+            dataPointHolder.snapshot().setValueAt(enumConstant.ordinal(), value);
+        }
+    }
+
+    @Override
+    protected void reset(StateSetDataPoint<E> dataPoint) {
+        dataPoint.reset();
     }
 }

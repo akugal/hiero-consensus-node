@@ -22,8 +22,9 @@ public interface MetricsExportManager {
      * Add metrics registry to be exported.
      *
      * @param metricRegistry metrics registry to be exported, mut not be {@code null}
+     * @return {@code true} if the registry is snapshotable and was added to the manager, {@code false} otherwise
      */
-    void manageMetricRegistry(@NonNull MetricRegistry metricRegistry);
+    boolean manageMetricRegistry(@NonNull MetricRegistry metricRegistry);
 
     /**
      * Reset all metrics from all managed metric registries.

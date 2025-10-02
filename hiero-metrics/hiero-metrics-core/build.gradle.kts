@@ -9,5 +9,5 @@ description = "Hiero Metrics Core"
 testModuleInfo {
     requires("org.assertj.core")
     requires("org.junit.jupiter.api")
-    runtimeOnly("org.junit.jupiter.params")
+    requires("org.junit.jupiter.params")
 }

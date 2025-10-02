@@ -8,13 +8,20 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Iterator;
 import java.util.List;
-import java.util.function.Predicate;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricMetadata;
+import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.api.export.MetricSnapshot;
 import org.hiero.metrics.api.export.MetricsSnapshot;
+import org.hiero.metrics.internal.export.SingleValueDataPointSnapshot;
+
+import static org.hiero.metrics.api.export.extension.writer.WriterUtils.COMMA;
+import static org.hiero.metrics.api.export.extension.writer.WriterUtils.appendLabels;
+
 
 /**
  * A {@link MetricsSnapshotsWriter} implementation that writes metrics in CSV format.
@@ -28,81 +35,137 @@ import org.hiero.metrics.api.export.MetricsSnapshot;
  * </pre>
  *
  * <p>Labels are enclosed in quotes and separated by semicolons to handle commas in label values.
- */
-public class CsvMetricsSnapshotsWriter extends AbstractMetricsSnapshotsWriter {
+ *//*
 
-    public static final CsvMetricsSnapshotsWriter DEFAULT =
-            new CsvMetricsSnapshotsWriter(ALLOW_ALL, DEFAULT_DECIMAL_FORMAT);
+   // TODO extend AbstractCachingMetricsSnapshotsWriter
+   // TODO write metadata to separate file
+   public class CsvMetricsSnapshotsWriter extends AbstractCachingMetricsSnapshotsWriter<CsvMetricsSnapshotsWriter.MetricExportData> {
 
-    public CsvMetricsSnapshotsWriter(@NonNull Predicate<MetricMetadata> filterMetrics, @NonNull String decimalFormat) {
-        super(filterMetrics, decimalFormat);
-    }
+       public static final CsvMetricsSnapshotsWriter DEFAULT = builder().build();
 
-    public void writeHeaders(OutputStream outputStream) throws IOException {
-        outputStream.write("timestamp,metric,unit,value,labels\n".getBytes(StandardCharsets.UTF_8));
-    }
+       private CsvMetricsSnapshotsWriter(Builder builder) {
+           super(builder);
+       }
 
-    @Override
-    public void write(@NonNull MetricsSnapshot snapshot, OutputStream outputStream) throws IOException {
-        Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+       @NonNull
+       public static Builder builder() {
+           return new Builder();
+       }
 
-        for (MetricSnapshot metricSnapshot : snapshot.snapshots()) {
-            MetricMetadata metadata = metricSnapshot.metadata();
+       public void writeHeaders(OutputStream outputStream) throws IOException {
+           outputStream.write("timestamp,metric,unit,value,labels\n".getBytes(StandardCharsets.UTF_8));
+       }
 
-            if (!filterMetrics.test(metadata)) {
-                continue;
-            }
+       @Override
+       protected void writeMetricSnapshot(Instant timestamp, MetricSnapshot metricSnapshot, OutputStream output) throws IOException {
+           String metricName = metricSnapshot.metadata().name();
 
-            String timestamp = snapshot.createdTime().toString();
-            String metricName = metadata.name();
+           for (int dIdx = 0; dIdx < metricSnapshot.size(); dIdx++) {
+               DataPointSnapshot dataPoint = metricSnapshot.get(dIdx);
 
-            for (DataPointSnapshot dataPoint : metricSnapshot.dataPoints()) {
-                for (DataPointSnapshot.ValueItem valueItem : dataPoint.valueItems()) {
-                    writer.write(timestamp); // TODO format timestamp
-                    writer.write(',');
+               for (int vIdx = 0; vIdx < dataPoint.valuesSize(); vIdx++) {
+                   output.write(timestamp.toString().getBytes(StandardCharsets.UTF_8));
+                   output.write(',');
+                   output.write(metricName.getBytes(StandardCharsets.UTF_8));
+                   output.write(',');
+                   output.write(metricSnapshot.metadata().unit().getBytes(StandardCharsets.UTF_8));
+                   output.write(',');
+                   output.write(format(dataPoint.valueAt(vIdx)).getBytes(StandardCharsets.UTF_8));
+                   output.write(',');
+                   writeLabels();
+               }
 
-                    writer.write(metricName);
-                    writer.write(',');
 
-                    writer.write(metadata.unit());
-                    writer.write(',');
+               if (dataPoint.isSingleValue()) {
+                   SingleValueDataPointSnapshot singleValueDataPoint = dataPoint.asSingleValue();
 
-                    writer.write(formatter.format(valueItem.value()));
-                    writer.write(',');
+                   writer.write(timestamp); // TODO format timestamp
+                   writer.write(',');
 
-                    writeLabels(writer, dataPoint.labels(), valueItem.labels());
+                   writer.write(metricName);
+                   writer.write(',');
 
-                    writer.write('\n');
-                }
-            }
-        }
+                   writer.write(metadata.unit());
+                   writer.write(',');
 
-        writer.flush(); // Important: flush the buffer
-    }
+                   writer.write(formatter.format(valueItem.value()));
+                   writer.write(',');
 
-    private void writeLabels(Writer writer, List<Label> labels, List<Label> itemLabels) throws IOException {
-        int totalLabels = labels.size() + itemLabels.size();
-        if (totalLabels == 0) {
-            // Empty quoted string for consistency
-            writer.write('"');
-            writer.write('"');
-            return;
-        }
+                   writeLabels(writer, dataPoint.labels(), valueItem.labels());
 
-        writer.write('"'); // Start quote
+                   writer.write('\n');
+               }
 
-        for (int i = 0; i < totalLabels; i++) {
-            if (i > 0) {
-                writer.write(';'); // Use semicolon separator
-            }
+               for (DataPointSnapshot.ValueItem valueItem : dataPoint.valueItems()) {
+                   writer.write(timestamp); // TODO format timestamp
+                   writer.write(',');
 
-            Label label = i < labels.size() ? labels.get(i) : itemLabels.get(i - labels.size());
+                   writer.write(metricName);
+                   writer.write(',');
 
-            writer.write(label.name());
-            writer.write('=');
-            writer.write(label.value());
-        }
+                   writer.write(metadata.unit());
+                   writer.write(',');
 
-        writer.write('"'); // End quote
-    }
-}
+                   writer.write(formatter.format(valueItem.value()));
+                   writer.write(',');
+
+                   writeLabels(writer, dataPoint.labels(), valueItem.labels());
+
+                   writer.write('\n');
+               }
+           }
+       }
+
+       public class MetricExportData extends BaseMetricExportData {
+
+           public MetricExportData(MetricSnapshot metricSnapshot) {
+               super(metricSnapshot);
+           }
+
+           @Override
+           protected TemplateByteArray buildDataPointExportData(DataPointSnapshot dataPointSnapshot) {
+               TemplateByteArray.Builder buffer = TemplateByteArray.builder();
+               buffer.addPlaceholder(); // timestamp
+               buffer.append(COMMA);
+               buffer.append(metricSnapshot().metadata().name());
+               buffer.append(COMMA);
+               buffer.append(metricSnapshot().metadata().unit());
+               buffer.append(COMMA);
+               buffer.addPlaceholder(); // value
+               WriterUtils.appendLabels();
+
+               MetricType metricType = metricSnapshot().metadata().metricType();
+               if (metricType == MetricType.COUNTER) {
+                   buffer.append(COUNTER_SUFFIX);
+               } else if (metricType == MetricType.INFO) {
+                   buffer.append(INFO_SUFFIX);
+               }
+
+               appendLabels(buffer, metricSnapshot(), dataPointSnapshot, OPEN_BRACKET, CLOSE_BRACKET);
+               buffer.append(SPACE);
+               buffer.addPlaceholder();
+
+               if (writeTimestamp) {
+                   buffer.append(SPACE);
+                   buffer.addPlaceholder();
+               }
+
+               return buffer.build();
+           }
+       }
+
+       public static class Builder extends AbstractMetricsSnapshotsWriter.Builder<Builder, CsvMetricsSnapshotsWriter> {
+
+           @Override
+           public CsvMetricsSnapshotsWriter build() {
+               return new CsvMetricsSnapshotsWriter(this);
+           }
+
+           @NonNull
+           @Override
+           protected Builder self() {
+               return this;
+           }
+       }
+   }
+   */

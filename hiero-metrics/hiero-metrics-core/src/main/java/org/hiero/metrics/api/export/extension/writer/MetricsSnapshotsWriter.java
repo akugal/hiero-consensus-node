@@ -14,8 +14,8 @@ public interface MetricsSnapshotsWriter {
     /**
      * Writes {@link MetricsSnapshot} to the provided output stream.
      *
-     * @param outputStream the output stream to write to
-     * @throws IOException if an I/O error occurs
+     * @param output the output to write to
+     * @throws IOException if an error occurs during export
      */
-    void write(@NonNull MetricsSnapshot snapshot, OutputStream outputStream) throws IOException;
+    void write(@NonNull MetricsSnapshot snapshots, @NonNull OutputStream output) throws IOException;
 }

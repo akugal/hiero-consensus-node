@@ -16,8 +16,7 @@ import org.hiero.metrics.api.export.extension.writer.MetricsSnapshotsWriter;
  * An adapter that allows using a {@link MetricsSnapshotsWriter} as a {@link PushingMetricsExporter}.
  * It uses a {@link Supplier} to provide the output stream for writing metrics snapshots.
  */
-public class PushingMetricsExporterWriterAdapter extends AbstractMetricsExporter
-        implements PushingMetricsExporter {
+public class PushingMetricsExporterWriterAdapter extends AbstractMetricsExporter implements PushingMetricsExporter {
 
     private final MetricsSnapshotsWriter writer;
     private final Supplier<OutputStream> streamSupplier;

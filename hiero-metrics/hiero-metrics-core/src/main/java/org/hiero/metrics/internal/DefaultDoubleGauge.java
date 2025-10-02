@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.ToDoubleFunction;
 import org.hiero.metrics.api.DoubleGauge;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
-import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
+import org.hiero.metrics.internal.core.LabelValues;
+import org.hiero.metrics.internal.datapoint.DataPointHolder;
+import org.hiero.metrics.internal.export.SingleValueDataPointSnapshot;
 
 public final class DefaultDoubleGauge extends AbstractStatefulMetric<DoubleSupplier, DoubleGaugeDataPoint>
         implements DoubleGauge {
@@ -23,20 +23,18 @@ public final class DefaultDoubleGauge extends AbstractStatefulMetric<DoubleSuppl
     }
 
     @Override
-    protected void reset(DoubleGaugeDataPoint dataPoint) {
-        dataPoint.reset();
+    protected SingleValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
+        return new SingleValueDataPointSnapshot(dynamicLabelValues);
     }
 
-    @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> exportDataPoint(DoubleGaugeDataPoint datapoint) {
-        double value = exportValueSupplier.applyAsDouble(datapoint);
-        if (Double.MAX_VALUE == value || Double.MIN_VALUE == value) {
-            // This is a safeguard against using double extreme values as a valid metric value.
-            // MAX_VALUE or MIN_VALUE could be initial values for min or max statistics,
-            // but they should not be reported as actual metric values.
-            return List.of();
-        }
-        return List.of(new DataPointSnapshot.ValueItem(datapoint.getAsDouble()));
+    protected void updateDatapointSnapshot(DataPointHolder<DoubleGaugeDataPoint> dataPointHolder) {
+        double value = exportValueSupplier.applyAsDouble(dataPointHolder.dataPoint());
+        dataPointHolder.snapshot().setValueAt(0, value);
+    }
+
+    @Override
+    protected void reset(DoubleGaugeDataPoint dataPoint) {
+        dataPoint.reset();
     }
 }

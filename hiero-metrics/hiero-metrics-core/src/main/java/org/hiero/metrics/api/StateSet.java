@@ -2,32 +2,31 @@
 package org.hiero.metrics.api;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.List;
+import java.util.Objects;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.StateSetDataPoint;
 import org.hiero.metrics.internal.DefaultStateSet;
 import org.hiero.metrics.internal.datapoint.EnumStateSetDataPoint;
-import org.hiero.metrics.internal.datapoint.GenerictStateSetDataPoint;
 
 /**
  * A stateful metric of type {@link MetricType#STATE_SET} that holds a set of states identified
- * by values of specified type.
- * @param <T> the type of the states in the set
+ * by values of specified enum type.
+ * @param <E> the enum type of the states in the set
  */
-public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDataPoint<T>> {
+public interface StateSet<E extends Enum<E>> extends StatefulMetric<List<E>, StateSetDataPoint<E>> {
 
     /**
      * Create a metric key for a {@link StateSet} with the given name.
      *
      * @param name the name of the metric
-     * @param <T>  the type of the states in the set
+     * @param <E>  the type of enum representing states in the set
      * @return the metric key
      */
     @NonNull
-    static <T> MetricKey<StateSet<T>> key(@NonNull String name) {
+    static <E extends Enum<E>> MetricKey<StateSet<E>> key(@NonNull String name) {
         return MetricKey.of(name, StateSet.class);
     }
 
@@ -35,56 +34,47 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
      * Create a builder for a {@link StateSet} with the given metric key.
      *
      * @param key the metric key
-     * @param <T> the type of the states in the set
+     * @param <E>  the type of enum representing states in the set
      * @return the builder
      */
     @NonNull
-    static <T> Builder<T> builder(@NonNull MetricKey<StateSet<T>> key) {
-        return new Builder<>(key);
+    static <E extends Enum<E>> Builder<E> builder(@NonNull MetricKey<StateSet<E>> key, @NonNull Class<E> enumClass) {
+        Objects.requireNonNull(enumClass, "enumClass must not be null");
+        return new Builder<>(key, enumClass);
     }
 
     /**
-     * Create a builder for a {@link StateSet} with the given metric name.
+     * Create a builder for a {@link StateSet} with the given metric name for given enum type.
      *
      * @param name the metric name
-     * @param <T>  the type of the states in the set
+     * @param enumClass the enum type representing the states in the set
+     * @param <E>  the enum type of the states in the set
      * @return the builder
      */
     @NonNull
-    static <T> Builder<T> builder(@NonNull String name) {
-        return builder(key(name));
+    static <E extends Enum<E>> Builder<E> builder(@NonNull String name, @NonNull Class<E> enumClass) {
+        MetricKey<StateSet<E>> key = key(name);
+        return builder(key, enumClass);
     }
 
     /**
-     * Create a builder for a {@link StateSet} with the given metric name and enum class.
-     * The states in the set will be of the specified enum type.
-     *
-     * @param name      the metric name
-     * @param enumClass the enum class representing the states in the set
-     * @param <E>       the type of the enum
-     * @return the builder
-     */
-    @NonNull
-    static <E extends Enum<E>> Builder<E> enumBuilder(@NonNull String name, @NonNull Class<E> enumClass) {
-        return new Builder<>(key(name), init -> new EnumStateSetDataPoint<>(init, enumClass));
-    }
-
-    /**
-     * Builder for {@link StateSet} metrics using {@link GenerictStateSetDataPoint}.
+     * Builder for {@link StateSet} metrics using {@link EnumStateSetDataPoint}.
      * By default, the initial state is empty and false for each state.
-     * @param <T> the type of the states in the set
+     * @param <E> the type of the states in the set
      */
-    final class Builder<T>
-            extends StatefulMetric.Builder<Map<T, Boolean>, StateSetDataPoint<T>, Builder<T>, StateSet<T>> {
+    final class Builder<E extends Enum<E>>
+            extends StatefulMetric.Builder<List<E>, StateSetDataPoint<E>, Builder<E>, StateSet<E>> {
 
-        private Builder(@NonNull MetricKey<StateSet<T>> key) {
-            this(key, GenerictStateSetDataPoint::new);
+        private final Class<E> enumClass;
+
+        private Builder(@NonNull MetricKey<StateSet<E>> key, @NonNull Class<E> enumClass) {
+            super(MetricType.STATE_SET, key, List.of(), init -> new EnumStateSetDataPoint<>(init, enumClass));
+            this.enumClass = enumClass;
         }
 
-        private Builder(
-                @NonNull MetricKey<StateSet<T>> key,
-                @NonNull Function<Map<T, Boolean>, StateSetDataPoint<T>> dataPointFactory) {
-            super(MetricType.STATE_SET, key, Map.of(), dataPointFactory);
+        @NonNull
+        public Class<E> getEnumClass() {
+            return enumClass;
         }
 
         /**
@@ -94,7 +84,7 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
          */
         @NonNull
         @Override
-        protected StateSet<T> buildMetric() {
+        protected StateSet<E> buildMetric() {
             withUnit(null); // StateSet does not have a unit
 
             // state set must not have a label as metric name
@@ -113,7 +103,7 @@ public interface StateSet<T> extends StatefulMetric<Map<T, Boolean>, StateSetDat
          */
         @NonNull
         @Override
-        protected Builder<T> self() {
+        protected Builder<E> self() {
             return this;
         }
     }

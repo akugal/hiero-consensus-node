@@ -19,6 +19,7 @@ import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.DoubleGaugeCompositeDataPoint;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.api.stat.StatUtils;
+import org.hiero.metrics.api.utils.MetricUtils;
 import org.hiero.metrics.internal.DefaultDoubleGaugeComposite;
 import org.hiero.metrics.internal.datapoint.AtomicDoubleGaugeDataPoint;
 import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
@@ -117,7 +118,9 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
         }
 
         /**
-         * Set the label name used to identify the stat type in the exported snapshots.
+         * Set the label name used to identify the stat type in the exported snapshots. <br>
+         * Stat label name must not be blank and must only contain valid characters
+         * - see {@link MetricUtils#validateNameCharacters(String)}. <br>
          * Default is {@value StatUtils#DEFAULT_STAT_LABEL}.
          *
          * @param statLabel the label name
@@ -182,7 +185,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          */
         @NonNull
         public Builder withMaxStat() {
-            return withAccumulatorStat("max", StatUtils.DOUBLE_MAX, Double.MIN_VALUE);
+            return withAccumulatorStat("max", StatUtils.DOUBLE_MAX, Double.NEGATIVE_INFINITY);
         }
 
         /**
@@ -193,7 +196,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          */
         @NonNull
         public Builder withMinStat() {
-            return withAccumulatorStat("min", StatUtils.DOUBLE_MIN, Double.MAX_VALUE);
+            return withAccumulatorStat("min", StatUtils.DOUBLE_MIN, Double.POSITIVE_INFINITY);
         }
 
         /**

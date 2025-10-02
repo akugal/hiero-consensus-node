@@ -2,22 +2,29 @@
 package org.hiero.metrics.internal.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricMetadata;
+import org.hiero.metrics.internal.datapoint.DataPointHolder;
+import org.hiero.metrics.internal.export.BaseDataPointSnapshot;
+import org.hiero.metrics.internal.export.SnapshotableMetric;
+import org.hiero.metrics.internal.export.UpdatableMetricSnapshot;
 
 /**
  * Base class for all metric implementations requiring {@link Metric.Builder} for construction.
  */
-public abstract class AbstractMetric implements Metric {
+public abstract class AbstractMetric<D> implements SnapshotableMetric {
 
     private final MetricMetadata metadata;
     private final List<Label> constantLabels;
     private final List<String> dynamicLabelNames;
+
+    protected final Map<LabelValues, DataPointHolder<D>> dataPoints;
+    private final UpdatableMetricSnapshot<D> metricSnapshot;
 
     protected AbstractMetric(Builder<?, ?> builder) {
         metadata =
@@ -25,6 +32,77 @@ public abstract class AbstractMetric implements Metric {
 
         constantLabels = builder.getConstantLabels().stream().sorted().toList();
         dynamicLabelNames = builder.getDynamicLabelNames().stream().sorted().toList();
+
+        int dataPointsCapacity;
+        if (dynamicLabelNames.isEmpty()) {
+            dataPoints = null;
+            dataPointsCapacity = 1;
+        } else {
+            dataPoints = new ConcurrentHashMap<>();
+            dataPointsCapacity = 8;
+        }
+        metricSnapshot = new UpdatableMetricSnapshot<>(this, this::updateDatapointSnapshot, dataPointsCapacity);
+    }
+
+    protected final DataPointHolder<D> createDataPointHolder(D datapoint, LabelValues dynamicLabelValues) {
+        DataPointHolder<D> dataPointHolder =
+                new DataPointHolder<>(datapoint, createDataPointSnapshot(dynamicLabelValues));
+        metricSnapshot.addDataPointHolder(dataPointHolder);
+        return dataPointHolder;
+    }
+
+    protected abstract BaseDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues);
+
+    protected abstract void updateDatapointSnapshot(DataPointHolder<D> dataPointHolder);
+
+    protected LabelValues createLabelValues(String... namesAndValues) {
+        Objects.requireNonNull(namesAndValues, "Label names and values must not be null");
+
+        if (namesAndValues.length % 2 != 0) {
+            throw new IllegalArgumentException("Label names and values must be in pairs");
+        }
+
+        List<String> labelNames = dynamicLabelNames();
+
+        if (namesAndValues.length / 2 != labelNames.size()) {
+            throw new IllegalArgumentException(
+                    "Expected " + labelNames.size() + " label names and values, got " + namesAndValues.length / 2);
+        }
+
+        if (labelNames.isEmpty()) {
+            return LabelValues.empty();
+        }
+
+        for (int i = 0; i < labelNames.size(); i++) {
+            String labelName = labelNames.get(i);
+
+            int j = 2 * i;
+            while (j < namesAndValues.length) {
+                if (labelName.equals(namesAndValues[j])) {
+                    if (namesAndValues[j + 1] == null) {
+                        throw new IllegalArgumentException("Label value must not be null for label: " + labelName);
+                    }
+                    break;
+                }
+                j += 2;
+            }
+
+            if (j >= namesAndValues.length) {
+                throw new IllegalArgumentException("Missing label name: " + labelName);
+            }
+
+            if (j > 2 * i) {
+                // swap only if not already on it's place
+                String tmpName = namesAndValues[2 * i];
+                String tmpValue = namesAndValues[2 * i + 1];
+                namesAndValues[2 * i] = namesAndValues[j];
+                namesAndValues[2 * i + 1] = namesAndValues[j + 1];
+                namesAndValues[j] = tmpName;
+                namesAndValues[j + 1] = tmpValue;
+            }
+        }
+
+        return new LabelNamesAndValues(namesAndValues);
     }
 
     @NonNull
@@ -34,61 +112,18 @@ public abstract class AbstractMetric implements Metric {
 
     @NonNull
     @Override
-    public List<Label> constantLabels() {
+    public final List<Label> constantLabels() {
         return constantLabels;
     }
 
     @NonNull
     @Override
-    public List<String> dynamicLabelNames() {
+    public final List<String> dynamicLabelNames() {
         return dynamicLabelNames;
     }
 
-    /**
-     * Verify that the provided labels map has the correct label names and non-null keys and values.
-     *
-     * @param labels labels for the dynamic label names as map
-     * @throws IllegalArgumentException if the label names do not match the expected dynamic label names
-     * @throws NullPointerException if any label key or value is null
-     */
-    protected void verifyLabels(@NonNull Map<String, String> labels) {
-        Objects.requireNonNull(labels, "Labels map must not be null");
-
-        // check label names match registered ones
-        if (!labels.keySet().equals(dynamicLabelNames)) {
-            throw new IllegalArgumentException(
-                    "Expected different label names. Expected: + " + dynamicLabelNames + ", got " + labels);
-        }
-
-        // Check no null keys and values
-        for (Map.Entry<String, String> entry : labels.entrySet()) {
-            if (entry.getKey() == null) {
-                throw new NullPointerException("Label key cannot be null");
-            }
-            if (entry.getValue() == null) {
-                throw new NullPointerException("Label value cannot be null: " + entry.getKey());
-            }
-        }
-    }
-
-    /**
-     * Create the full list of labels for a data point, combining constant and dynamic labels.
-     * <p>
-     * All labels wil consist of constant labels sorted by name followed by dynamic labels sorted by name.
-     *
-     * @param labels labels for the dynamic label names as map
-     * @return the full mutable list of labels for the data point
-     */
-    protected List<Label> createDataPointLabels(Map<String, String> labels) {
-        if (constantLabels.isEmpty() && labels.isEmpty()) {
-            return List.of();
-        }
-
-        final List<Label> labelsList = new ArrayList<>(constantLabels.size() + dynamicLabelNames.size());
-        labelsList.addAll(constantLabels);
-        for (String dynamicLabelName : dynamicLabelNames) {
-            labelsList.add(new Label(dynamicLabelName, labels.get(dynamicLabelName)));
-        }
-        return labelsList;
+    @Override
+    public final UpdatableMetricSnapshot<D> snapshot() {
+        return metricSnapshot;
     }
 }

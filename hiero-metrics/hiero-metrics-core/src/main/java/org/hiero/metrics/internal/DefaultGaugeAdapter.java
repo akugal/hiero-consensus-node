@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.hiero.metrics.api.GaugeAdapter;
-import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
+import org.hiero.metrics.internal.core.LabelValues;
+import org.hiero.metrics.internal.datapoint.DataPointHolder;
+import org.hiero.metrics.internal.export.SingleValueDataPointSnapshot;
 
 public final class DefaultGaugeAdapter<I, D> extends AbstractStatefulMetric<I, D> implements GaugeAdapter<I, D> {
 
@@ -22,17 +22,19 @@ public final class DefaultGaugeAdapter<I, D> extends AbstractStatefulMetric<I, D
     }
 
     @Override
-    protected void reset(D dataPoint) {
-        reset.accept(dataPoint);
+    protected SingleValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
+        return new SingleValueDataPointSnapshot(dynamicLabelValues);
     }
 
-    @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> exportDataPoint(D datapoint) {
-        Number value = exportGetter.apply(datapoint);
-        if (value == null) {
-            return List.of();
-        }
-        return List.of(new DataPointSnapshot.ValueItem(value.doubleValue()));
+    protected void updateDatapointSnapshot(DataPointHolder<D> dataPointHolder) {
+        Number value = exportGetter.apply(dataPointHolder.dataPoint());
+        double doubleValue = value != null ? value.doubleValue() : Double.NaN;
+        dataPointHolder.snapshot().setValueAt(0, doubleValue);
+    }
+
+    @Override
+    protected void reset(D dataPoint) {
+        reset.accept(dataPoint);
     }
 }

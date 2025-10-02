@@ -80,7 +80,7 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
     static Builder maxBuilder(@NonNull String name, boolean resetOnExport) {
         return builder(key(name))
                 .withOperator(StatUtils.DOUBLE_MAX, resetOnExport)
-                .withInitValue(Double.MIN_VALUE);
+                .withInitValue(Double.NEGATIVE_INFINITY);
     }
 
     /**
@@ -96,7 +96,7 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
     static Builder minBuilder(@NonNull String name, boolean resetOnExport) {
         return builder(key(name))
                 .withOperator(StatUtils.DOUBLE_MIN, resetOnExport)
-                .withInitValue(Double.MAX_VALUE);
+                .withInitValue(Double.POSITIVE_INFINITY);
     }
 
     /**

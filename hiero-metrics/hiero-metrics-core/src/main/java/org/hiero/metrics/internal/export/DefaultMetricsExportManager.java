@@ -2,9 +2,7 @@
 package org.hiero.metrics.internal.export;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
@@ -93,7 +91,6 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
 
     @Override
     protected void init() {
-        super.init();
         for (PullingMetricsExporter pullingExporter : pullingExporters) {
             try {
                 logger.info("Initializing pulling exporter: {}", pullingExporter.name());
@@ -105,8 +102,8 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
         }
 
         logger.info("Scheduling periodic exporting with interval of {} seconds", exportIntervalSeconds);
-        scheduledExportFuture = executorServiceFactory.get()
-                .scheduleAtFixedRate(new ExportRunnable(), 0, exportIntervalSeconds, TimeUnit.SECONDS);
+        scheduledExportFuture = executorServiceFactory.get().scheduleAtFixedRate(
+                new ExportRunnable(), 0, exportIntervalSeconds, TimeUnit.SECONDS);
     }
 
     @Override
@@ -154,15 +151,16 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
                             pushingExporter.name(),
                             ex);
                 } catch (Throwable ex) {
-                    // TODO remove from pushing exporters list
+                    // TODO remove from pushing exporters list ?
                     logger.error(
                             "Error while exporting metrics snapshot by pushing metrics exporter {}",
                             pushingExporter.name(),
                             ex);
                 } finally {
-                    final Map<String, String> labels = Map.of(PUSHING_EXPORTER_NAME, pushingExporter.name());
                     final long duration = System.currentTimeMillis() - startTime;
-                    pushingExportDurationMetric.getOrCreateLabeled(labels).update(duration);
+                    pushingExportDurationMetric
+                            .getOrCreateLabeled(PUSHING_EXPORTER_NAME, pushingExporter.name())
+                            .update(duration);
                 }
             }
         }

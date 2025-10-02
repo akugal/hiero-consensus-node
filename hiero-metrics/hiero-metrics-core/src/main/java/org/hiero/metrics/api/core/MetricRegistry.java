@@ -23,6 +23,7 @@ public interface MetricRegistry {
 
     /**
      * Returns an unmodifiable collection of all registered metrics.
+     * Order of the metrics is not guaranteed and can change over time as new metrics are registered.
      *
      * @return the registered metrics, never {@code null}
      */

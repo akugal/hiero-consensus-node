@@ -2,8 +2,8 @@
 package org.hiero.metrics.api;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricKey;
@@ -54,12 +54,12 @@ public interface StatelessMetric extends Metric {
      * If a data point with the same label values already exists, an exception is thrown.
      *
      * @param valueSupplier the supplier to get the value of the data point
-     * @param labels        the labels for the data point
+     * @param labelNamesAndValues labels as name followed by value
      * @return this metric
      * @throws IllegalArgumentException if a data point with the same label values already exists
      */
     @NonNull
-    StatelessMetric registerDataPoint(@NonNull DoubleSupplier valueSupplier, @NonNull Map<String, String> labels);
+    StatelessMetric registerDataPoint(@NonNull DoubleSupplier valueSupplier, @NonNull String... labelNamesAndValues);
 
     /**
      * Stateless metrics do not hold any state, so this is a no-op.
@@ -74,7 +74,8 @@ public interface StatelessMetric extends Metric {
      */
     final class Builder extends Metric.Builder<Builder, StatelessMetric> {
 
-        private final Map<Map<String, String>, DoubleSupplier> labeledDataPoints = new HashMap<>();
+        private final List<String[]> labelKeysAndValues = new ArrayList<>();
+        private final List<DoubleSupplier> valuesSuppliers = new ArrayList<>();
 
         private Builder(MetricKey<StatelessMetric> key) {
             super(MetricType.GAUGE, key);
@@ -85,27 +86,31 @@ public interface StatelessMetric extends Metric {
          * If a data point with the same label values already exists, an exception is thrown.
          *
          * @param valueSupplier the supplier to get the value of the data point
-         * @param labels        the labels for the data point
+         * @param labelNamesAndValues pairs of label name followed by label value
          * @return this builder
          * @throws IllegalArgumentException if a data point with the same label values already exists
          */
         @NonNull
-        public Builder registerDataPoint(@NonNull DoubleSupplier valueSupplier, @NonNull Map<String, String> labels) {
+        public Builder registerDataPoint(
+                @NonNull DoubleSupplier valueSupplier, @NonNull String... labelNamesAndValues) {
             // labels will be validated during metric construction
-            if (labeledDataPoints.put(labels, valueSupplier) != null) {
-                throw new IllegalArgumentException("A data point with the same label values already exists: " + labels);
-            }
+            valuesSuppliers.add(valueSupplier);
+            labelKeysAndValues.add(labelNamesAndValues);
             return this;
         }
 
-        /**
-         * Get the map of label sets to their corresponding value suppliers.
-         *
-         * @return the map of label sets to value suppliers
-         */
+        public int getDataPointsSize() {
+            return valuesSuppliers.size();
+        }
+
         @NonNull
-        public Map<Map<String, String>, DoubleSupplier> getLabeledDataPoints() {
-            return labeledDataPoints;
+        public String[] getDataPointsLabelNamesAndValues(int idx) {
+            return labelKeysAndValues.get(idx);
+        }
+
+        @NonNull
+        public DoubleSupplier getValuesSupplier(int idx) {
+            return valuesSuppliers.get(idx);
         }
 
         /**

@@ -5,26 +5,26 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Set;
 
 /**
- * A data point for holding {@code boolean} state of a set of values of genric type.
+ * A data point for holding {@code boolean} state of a set of values of enum type.
  * The state can be set to {@code true} or {@code false} for each value of key.
  *
- * @param <T> the type of the states
+ * @param <E> the enum type of the states
  */
-public interface StateSetDataPoint<T> extends DataPoint {
+public interface StateSetDataPoint<E extends Enum<E>> extends DataPoint {
 
     /**
      * Set the state of the given value to {@code false}.
      *
      * @param value the value to set the state for
      */
-    void setFalse(T value);
+    void setFalse(E value);
 
     /**
      * Set the state of the given value to {@code true}.
      *
      * @param value the value to set the state for
      */
-    void setTrue(T value);
+    void setTrue(E value);
 
     /**
      * Get the state of the given value.
@@ -32,7 +32,7 @@ public interface StateSetDataPoint<T> extends DataPoint {
      * @param value the value to get the state for
      * @return the state of the value, or <code>false</code> if the value is not present
      */
-    boolean getState(T value);
+    boolean getState(E value);
 
     /**
      * Get the set of all values with a state.
@@ -40,5 +40,5 @@ public interface StateSetDataPoint<T> extends DataPoint {
      * @return the set of all values with a state
      */
     @NonNull
-    Set<T> getStates();
+    Set<E> getStates();
 }

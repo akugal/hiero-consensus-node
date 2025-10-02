@@ -1,34 +1,32 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 import org.hiero.metrics.api.StatsGaugeAdapter;
-import org.hiero.metrics.api.core.Label;
-import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
+import org.hiero.metrics.internal.core.LabelValues;
+import org.hiero.metrics.internal.datapoint.DataPointHolder;
+import org.hiero.metrics.internal.export.BaseDataPointSnapshot;
+import org.hiero.metrics.internal.export.FixedMultiValueDataPointSnapshot;
 
 public final class DefaultStatsGaugeAdapter<I, D> extends AbstractStatefulMetric<I, D>
         implements StatsGaugeAdapter<I, D> {
 
-    private final Label[] statLabels;
-    private final Function<D, Number>[] statExportGetters;
+    private final String statLabelName;
+    private final String[] statLabelValues;
+    private final ToDoubleFunction<D>[] statExportGetters;
     private final Consumer<D> reset;
 
     @SuppressWarnings("unchecked")
     public DefaultStatsGaugeAdapter(StatsGaugeAdapter.Builder<I, D> builder) {
         super(builder);
 
+        statLabelName = builder.getStatLabel();
+        statLabelValues = builder.getStatNames().toArray(new String[0]);
+
         reset = builder.getReset() != null ? builder.getReset() : container -> {}; // no-op reset if no specified
-        statExportGetters = builder.getStatExportGetters().toArray(new Function[0]);
-        statLabels = new Label[builder.getStatNames().size()];
-        for (int i = 0; i < statLabels.length; i++) {
-            statLabels[i] =
-                    new Label(builder.getStatLabel(), builder.getStatNames().get(i));
-        }
+        statExportGetters = builder.getStatExportGetters().toArray(new ToDoubleFunction[0]);
     }
 
     @Override
@@ -36,17 +34,16 @@ public final class DefaultStatsGaugeAdapter<I, D> extends AbstractStatefulMetric
         reset.accept(dataPoint);
     }
 
-    @NonNull
     @Override
-    protected List<DataPointSnapshot.ValueItem> exportDataPoint(D datapoint) {
-        List<DataPointSnapshot.ValueItem> valueItems = new ArrayList<>(statExportGetters.length);
-        for (int i = 0; i < statExportGetters.length; i++) {
-            Number value = statExportGetters[i].apply(datapoint);
-            if (value != null) {
-                valueItems.add(new DataPointSnapshot.ValueItem(value.doubleValue(), statLabels[i]));
-            }
-        }
+    protected BaseDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
+        return new FixedMultiValueDataPointSnapshot(dynamicLabelValues, statLabelName, statLabelValues);
+    }
 
-        return valueItems;
+    @Override
+    protected void updateDatapointSnapshot(DataPointHolder<D> dataPointHolder) {
+        for (int i = 0; i < statExportGetters.length; i++) {
+            double value = statExportGetters[i].applyAsDouble(dataPointHolder.dataPoint());
+            dataPointHolder.snapshot().setValueAt(i, value);
+        }
     }
 }

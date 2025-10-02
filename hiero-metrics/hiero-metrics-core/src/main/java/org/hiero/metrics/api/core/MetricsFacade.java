@@ -96,6 +96,8 @@ public final class MetricsFacade {
         return registry;
     }
 
+    //TODO support only one pulling exporter to avoid different clocks and inaccurate data
+
     /**
      * Creates a new {@link MetricsExportManager} using discovered via the Java {@link java.util.ServiceLoader}
      * mechanism implementations of {@link MetricsExporterFactory} to create either {@link PullingMetricsExporter}

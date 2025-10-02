@@ -15,6 +15,9 @@ import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricsRegistrationProvider;
 import org.hiero.metrics.api.utils.MetricUtils;
+import org.hiero.metrics.internal.export.SnapshotableMetric;
+import org.hiero.metrics.internal.export.SnapshotableMetricsRegistry;
+import org.hiero.metrics.internal.export.UpdatableMetricRegistrySnapshot;
 
 public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
 
@@ -24,8 +27,9 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
     private final ConcurrentHashMap<String, Metric> metrics = new ConcurrentHashMap<>();
     private final Collection<Metric> metricsView = Collections.unmodifiableCollection(metrics.values());
 
+    private final UpdatableMetricRegistrySnapshot snapshot = new UpdatableMetricRegistrySnapshot();
+
     public DefaultMetricRegistry(@NonNull Label... globalLabels) {
-        Objects.requireNonNull(globalLabels);
         this.globalLabels = MetricUtils.asList(globalLabels);
     }
 
@@ -66,6 +70,10 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
 
             M metric = builder.withConstantLabels(globalLabels).build();
             logger.info("Registered metric: {} with global labels: {}", metric.metadata(), globalLabels);
+
+            if (metric instanceof SnapshotableMetric snapshotableMetric) {
+                snapshot.add(snapshotableMetric);
+            }
             return metric;
         });
     }
@@ -80,5 +88,11 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
             return Optional.of((M) metric);
         }
         return Optional.empty();
+    }
+
+    @NonNull
+    @Override
+    public UpdatableMetricRegistrySnapshot snapshot() {
+        return snapshot;
     }
 }

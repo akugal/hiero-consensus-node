@@ -16,7 +16,6 @@ public class SinglePullingExporterMetricsExportManager extends AbstractMetricsEx
 
     @Override
     protected void init() {
-        super.init();
         exporter.init(this::takeSnapshot);
     }
 

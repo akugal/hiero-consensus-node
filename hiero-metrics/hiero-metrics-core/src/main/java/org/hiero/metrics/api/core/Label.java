@@ -3,6 +3,7 @@ package org.hiero.metrics.api.core;
 
 import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.metrics.api.utils.MetricUtils;
 
 /**
  * A label is an immutable key-value pair that can be associated with a metric to provide additional context or
@@ -13,13 +14,15 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 public record Label(@NonNull String name, @NonNull String value) implements Comparable<Label> {
 
     /**
-     * Constructs a new label with the specified name and value.
+     * Constructs a new label with the specified name and value. <br>
+     * Label name must not be blank and must only contain valid characters
+     * - see {@link MetricUtils#validateNameCharacters(String)}.
      *
      * @param name  the name of the label, must not be blank
      * @param value the value of the label, must not be blank
      */
     public Label(@NonNull String name, @NonNull String value) {
-        this.name = ArgumentUtils.throwArgBlank(name, "labelName");
+        this.name = MetricUtils.validateNameCharacters(name);
         this.value = ArgumentUtils.throwArgBlank(value, "labelValue");
     }
 

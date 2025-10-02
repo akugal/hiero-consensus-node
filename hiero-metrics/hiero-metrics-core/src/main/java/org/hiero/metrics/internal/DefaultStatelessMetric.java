@@ -2,50 +2,47 @@
 package org.hiero.metrics.internal;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.StatelessMetric;
-import org.hiero.metrics.api.export.DataPointSnapshot;
 import org.hiero.metrics.internal.core.AbstractMetric;
-import org.hiero.metrics.internal.core.SnapshotableMetric;
+import org.hiero.metrics.internal.core.LabelValues;
+import org.hiero.metrics.internal.datapoint.DataPointHolder;
+import org.hiero.metrics.internal.export.BaseDataPointSnapshot;
+import org.hiero.metrics.internal.export.SingleValueDataPointSnapshot;
 
-public final class DefaultStatelessMetric extends AbstractMetric implements StatelessMetric, SnapshotableMetric {
-
-    private final Map<Map<String, String>, DoubleSupplier> labeledDataPoints = new ConcurrentHashMap<>();
+public final class DefaultStatelessMetric extends AbstractMetric<DoubleSupplier> implements StatelessMetric {
 
     public DefaultStatelessMetric(StatelessMetric.Builder builder) {
         super(builder);
 
-        for (Map.Entry<Map<String, String>, DoubleSupplier> entry :
-                builder.getLabeledDataPoints().entrySet()) {
-            registerDataPoint(entry.getValue(), entry.getKey());
+        int dataPointsSize = builder.getDataPointsSize();
+        for (int i = 0; i < dataPointsSize; i++) {
+            registerDataPoint(builder.getValuesSupplier(i), builder.getDataPointsLabelNamesAndValues(i));
         }
     }
 
-    @NonNull
     @Override
-    public List<DataPointSnapshot> snapshot() {
-        List<DataPointSnapshot> snapshots = new ArrayList<>(labeledDataPoints.size());
-        for (Map.Entry<Map<String, String>, DoubleSupplier> entry : labeledDataPoints.entrySet()) {
-            snapshots.add(new DataPointSnapshot(
-                    createDataPointLabels(entry.getKey()), entry.getValue().getAsDouble()));
-        }
-        return snapshots;
+    protected BaseDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
+        return new SingleValueDataPointSnapshot(dynamicLabelValues);
+    }
+
+    @Override
+    protected void updateDatapointSnapshot(DataPointHolder<DoubleSupplier> dataPointHolder) {
+        dataPointHolder.snapshot().setValueAt(0, dataPointHolder.dataPoint().getAsDouble());
     }
 
     @NonNull
     @Override
     public StatelessMetric registerDataPoint(
-            @NonNull DoubleSupplier valueSupplier, @NonNull Map<String, String> labels) {
+            @NonNull DoubleSupplier valueSupplier, @NonNull String... labelNamesAndValues) {
         Objects.requireNonNull(valueSupplier, "Value supplier must not be null");
-        verifyLabels(labels);
 
-        if (labeledDataPoints.putIfAbsent(Map.copyOf(labels), valueSupplier) != null) {
-            throw new IllegalArgumentException("A data point with the same label values already exists: " + labels);
+        LabelValues labelValues = createLabelValues(labelNamesAndValues);
+        DataPointHolder<DoubleSupplier> dataPointHolder = createDataPointHolder(valueSupplier, labelValues);
+        if (dataPoints.putIfAbsent(labelValues, dataPointHolder) != null) {
+            throw new IllegalArgumentException(
+                    "A data point with the same label values already exists: " + labelValues);
         }
 
         return this;

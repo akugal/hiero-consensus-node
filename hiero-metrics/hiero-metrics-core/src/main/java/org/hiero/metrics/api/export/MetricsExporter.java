@@ -8,6 +8,7 @@ import java.io.Closeable;
  * Base interface for metrics exporters.
  * <p>
  * Metrics exporter able to handle {@link MetricsSnapshot} into specific destination.
+ * Implementations expected to be synchronous to properly re-use snapshots.
  *
  * @see PullingMetricsExporter
  * @see PushingMetricsExporter

@@ -3,25 +3,18 @@ package org.hiero.metrics.internal.export;
 
 import com.swirlds.base.ArgumentUtils;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hiero.metrics.api.LongGauge;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricsFacade;
-import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
-import org.hiero.metrics.api.export.MetricSnapshot;
 import org.hiero.metrics.api.export.MetricsExportManager;
 import org.hiero.metrics.api.export.MetricsSnapshot;
-import org.hiero.metrics.api.utils.Unit;
-import org.hiero.metrics.internal.core.SnapshotableMetricsRegistry;
 
 public abstract class AbstractMetricsExportManager implements MetricsExportManager {
 
@@ -29,10 +22,8 @@ public abstract class AbstractMetricsExportManager implements MetricsExportManag
 
     private final String name;
     private final Set<Set<Label>> registriesGlobalLabels = new HashSet<>();
-    private final List<MetricRegistry> metricRegistries = new ArrayList<>();
-
-    private SnapshotableMetricsRegistry exportMetricsRegistry;
-    private LongGaugeDataPoint snapshotDurationMetric;
+    private final List<SnapshotableMetricsRegistry> metricRegistries = new ArrayList<>();
+    private final DefaultMetricsSnapshot snapshots = new DefaultMetricsSnapshot();
 
     protected AbstractMetricsExportManager(@NonNull String name) {
         this.name = ArgumentUtils.throwArgBlank(name, "name");
@@ -44,16 +35,19 @@ public abstract class AbstractMetricsExportManager implements MetricsExportManag
         return name;
     }
 
-    /**
-     * Initializes the manager.
-     * Called only once when first metrics registry is managed by this manager
-     * when {@link #manageMetricRegistry(MetricRegistry)} is called.
-     */
-    protected void init() {
-        exportMetricsRegistry =
+    private void initExportMetrics() {
+        SnapshotableMetricsRegistry exportMetricsRegistry =
                 (SnapshotableMetricsRegistry) MetricsFacade.createRegistry(new Label("export_manager", name));
         registerExportMetrics("export", exportMetricsRegistry);
+        snapshots.addRegistry(exportMetricsRegistry);
     }
+
+    /**
+     * Initializes the manager.
+     * Called only once when first snapshotable metrics registry is managed by this manager
+     * when {@link #manageMetricRegistry(MetricRegistry)} is called.
+     */
+    protected abstract void init();
 
     /**
      * Register export metrics.
@@ -62,68 +56,48 @@ public abstract class AbstractMetricsExportManager implements MetricsExportManag
      * @param exportMetricsRegistry registry to register export metrics with
      */
     protected void registerExportMetrics(@NonNull String category, @NonNull MetricRegistry exportMetricsRegistry) {
-        snapshotDurationMetric = exportMetricsRegistry
-                .register(LongGauge.builder(LongGauge.key("snapshot_duration").withCategory(category))
-                        .withDescription("Snapshot duration time in milliseconds")
-                        .withUnit(Unit.MILLISECOND_UNIT))
-                .getNotLabeled();
+        // nothing by default
     }
 
     @Override
-    public final void manageMetricRegistry(@NonNull MetricRegistry registry) {
-        boolean firstRegistry = false;
-        HashSet<Label> globalLabels = new HashSet<>(registry.globalLabels());
+    public final boolean manageMetricRegistry(@NonNull MetricRegistry registry) {
+        if (registry instanceof SnapshotableMetricsRegistry snapshotableRegistry) {
+            boolean firstSnapshotableRegistry = false;
+            HashSet<Label> globalLabels = new HashSet<>(registry.globalLabels());
 
-        synchronized (this) {
-            if (!registriesGlobalLabels.add(globalLabels)) {
-                throw new IllegalArgumentException(
-                        "Metric registry has duplicate global labels with another registry: " + globalLabels);
+            synchronized (this) {
+                if (!registriesGlobalLabels.add(globalLabels)) {
+                    throw new IllegalArgumentException(
+                            "Metric registry has duplicate global labels with another registry: " + globalLabels);
+                }
+
+                if (metricRegistries.isEmpty()) {
+                    firstSnapshotableRegistry = true;
+                    initExportMetrics();
+                }
+
+                metricRegistries.add(snapshotableRegistry);
+                snapshots.addRegistry(snapshotableRegistry);
             }
 
-            if (registriesGlobalLabels.size() == 1) {
-                firstRegistry = true;
+            logger.info("Added metrics registry with global labels: {}", globalLabels);
+
+            if (firstSnapshotableRegistry) {
+                init();
             }
 
-            metricRegistries.add(registry);
+            return true;
         }
-
-        logger.info("Added metrics registry with global labels: {}", globalLabels);
-
-        if (firstRegistry) {
-            init();
-        }
+        return false;
     }
 
-    // returns immutable list of snapshots
     @NonNull
-    protected synchronized final Optional<MetricsSnapshot> takeSnapshot() {
+    protected final synchronized Optional<MetricsSnapshot> takeSnapshot() {
         if (metricRegistries.isEmpty()) {
             return Optional.empty();
         }
 
-        final List<MetricSnapshot> snapshots = new ArrayList<>();
-        final long startTime = System.currentTimeMillis();
-
-        if (metricRegistries.size() == 1) {
-            if (metricRegistries.getFirst() instanceof SnapshotableMetricsRegistry snapshotable) {
-                snapshots.addAll(snapshotable.snapshot());
-            } else {
-                return Optional.empty();
-            }
-        } else {
-            for (MetricRegistry registry : metricRegistries) {
-                if (registry instanceof SnapshotableMetricsRegistry snapshotable) {
-                    snapshots.addAll(snapshotable.snapshot());
-                }
-            }
-        }
-
-        // snapshotDurationMetric should be not null when at least one metrics registry is managed
-        long durationMs = System.currentTimeMillis() - startTime;
-        snapshotDurationMetric.update(durationMs);
-        snapshots.addAll(exportMetricsRegistry.snapshot());
-
-        return Optional.of(new MetricsSnapshot(Collections.unmodifiableList(snapshots), Instant.now()));
+        return Optional.of(snapshots.update());
     }
 
     @Override

@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.hiero.metrics.api.utils.MetricUtils;
+import org.hiero.metrics.internal.export.SnapshotableMetric;
+
 /**
  * Base interface for all metrics.
  * <p>
@@ -24,7 +27,7 @@ import java.util.Set;
  * <p>
  * Since metric can support aggregations (like sum, min, max, avg, etc.), this interface doesn't expose
  * export or snapshot functionality, but usually each metric implementation will extend
- * {@link org.hiero.metrics.internal.core.SnapshotableMetric} that is internal and used by
+ * {@link SnapshotableMetric} that is internal and used by
  * {@link org.hiero.metrics.api.export.MetricsExportManager} to export metrics.
  */
 public interface Metric {
@@ -147,20 +150,27 @@ public interface Metric {
         }
 
         /**
-         * Sets the metric unit.
+         * Sets the metric unit. <br>
+         * Unit, if not null or empty, must only contain valid characters
+         * - see {@link MetricUtils#validateNameCharacters(String)}.
          *
          * @param unit the metric unit, may be {@code null}
          * @return the builder instance
          */
         @NonNull
         public final B withUnit(@Nullable String unit) {
+            if (unit != null && unit.isBlank()) {
+                MetricUtils.validateNameCharacters(unit);
+            }
             this.unit = unit;
             return self();
         }
 
         /**
          * Adds dynamic label names to the metric. Dynamic label names must be unique and must not conflict with
-         * constant label names. Exception will be thrown at metric build time if there are conflicts.
+         * constant label names. Exception will be thrown at metric build time if there are conflicts. <br>
+         * Label name must not be blank and must only contain valid characters
+         *  - see {@link MetricUtils#validateNameCharacters(String)}.
          *
          * @param labelNames the dynamic label names to add, must not be {@code null}
          * @return the builder instance
@@ -168,6 +178,9 @@ public interface Metric {
         @NonNull
         public final B withDynamicLabelNames(@NonNull String... labelNames) {
             Objects.requireNonNull(labelNames, "label names must not be null");
+            for (String labelName : labelNames) {
+                MetricUtils.validateNameCharacters(labelName);
+            }
             dynamicLabelNames.addAll(Arrays.asList(labelNames));
             return self();
         }

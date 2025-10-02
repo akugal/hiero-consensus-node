@@ -26,7 +26,7 @@ public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
 
     private final HttpServer server;
     private final AtomicInteger lastResponseSize = new AtomicInteger(4096);
-    private final OpenMetricsSnapshotsWriter writer = new OpenMetricsSnapshotsWriter();
+    private final OpenMetricsSnapshotsWriter writer = OpenMetricsSnapshotsWriter.DEFAULT;
 
     public OpenMetricsHttpEndpoint(@NonNull OpenMetricsHttpEndpointConfig config) throws IOException {
         super("open-metrics-http-endpoint");

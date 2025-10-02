@@ -13,43 +13,46 @@ import org.hiero.metrics.api.export.AbstractMetricsExporter;
 import org.hiero.metrics.api.export.MetricsExportException;
 import org.hiero.metrics.api.export.MetricsSnapshot;
 import org.hiero.metrics.api.export.PushingMetricsExporter;
-import org.hiero.metrics.api.export.extension.writer.CsvMetricsSnapshotsWriter;
+//import org.hiero.metrics.api.export.extension.writer.CsvMetricsSnapshotsWriter;
+
 
 /**
  * A {@link PushingMetricsExporter} that writes metrics snapshots to a CSV file.
- */
-public class CsvFileMetricsExporter extends AbstractMetricsExporter implements PushingMetricsExporter {
+ *//*
 
-    private final Path filePath;
-    private final CsvMetricsSnapshotsWriter writer;
+   public class CsvFileMetricsExporter extends AbstractMetricsExporter implements PushingMetricsExporter {
 
-    public CsvFileMetricsExporter(@NonNull String name, @NonNull Path filePath) throws IOException {
-        super(name);
-        this.filePath = Objects.requireNonNull(filePath, "file path must not be null");
-        writer = CsvMetricsSnapshotsWriter.DEFAULT;
+       private final Path filePath;
+       private final CsvMetricsSnapshotsWriter writer;
 
-        if (!Files.exists(filePath)) {
-            if (filePath.getParent() != null) {
-                Files.createDirectories(filePath.getParent());
-            }
-            Files.createFile(filePath);
-            try (OutputStream outputStream = Files.newOutputStream(filePath, APPEND)) {
-                writer.writeHeaders(outputStream);
-            }
-        }
-    }
+       public CsvFileMetricsExporter(@NonNull String name, @NonNull Path filePath) throws IOException {
+           super(name);
+           this.filePath = Objects.requireNonNull(filePath, "file path must not be null");
+           writer = CsvMetricsSnapshotsWriter.DEFAULT;
 
-    @Override
-    public void export(@NonNull MetricsSnapshot snapshot) throws MetricsExportException {
-        try (OutputStream outputStream = Files.newOutputStream(filePath, APPEND)) {
-            writer.write(snapshot, outputStream);
-        } catch (IOException e) {
-            throw new MetricsExportException("Error exporting metrics by " + name(), e);
-        }
-    }
+           if (!Files.exists(filePath)) {
+               if (filePath.getParent() != null) {
+                   Files.createDirectories(filePath.getParent());
+               }
+               Files.createFile(filePath);
+               try (OutputStream outputStream = Files.newOutputStream(filePath, APPEND)) {
+                   writer.writeHeaders(outputStream);
+               }
+           }
+       }
 
-    @Override
-    public void close() throws IOException {
-        // No resources to close
-    }
-}
+       @Override
+       public void export(@NonNull MetricsSnapshot snapshot) throws MetricsExportException {
+           try (OutputStream outputStream = Files.newOutputStream(filePath, APPEND)) {
+               writer.write(snapshot, outputStream);
+           } catch (IOException e) {
+               throw new MetricsExportException("Error exporting metrics by " + name(), e);
+           }
+       }
+
+       @Override
+       public void close() throws IOException {
+           // No resources to close
+       }
+   }
+   */

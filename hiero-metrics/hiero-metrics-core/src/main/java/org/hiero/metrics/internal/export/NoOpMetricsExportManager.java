@@ -19,8 +19,8 @@ public class NoOpMetricsExportManager implements MetricsExportManager {
     }
 
     @Override
-    public void manageMetricRegistry(@NonNull MetricRegistry metricRegistry) {
-        // no op
+    public boolean manageMetricRegistry(@NonNull MetricRegistry metricRegistry) {
+        return false;
     }
 
     @Override

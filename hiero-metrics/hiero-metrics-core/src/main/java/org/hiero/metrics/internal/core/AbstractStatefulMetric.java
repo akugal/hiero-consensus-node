@@ -3,25 +3,18 @@ package org.hiero.metrics.internal.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import org.hiero.metrics.api.core.StatefulMetric;
-import org.hiero.metrics.api.export.DataPointSnapshot;
+import org.hiero.metrics.internal.datapoint.DataPointHolder;
 
-public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric
-        implements StatefulMetric<I, D>, SnapshotableMetric {
+public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric<D> implements StatefulMetric<I, D> {
 
     private final I defaultInitializer;
     private final Function<I, D> dataPointFactory;
 
     @Nullable
-    private final D noLabelsDataPoint;
-
-    private final Map<Map<String, String>, D> labeledDataPoints;
+    private final DataPointHolder<D> noLabelsDataPoint;
 
     protected AbstractStatefulMetric(StatefulMetric.Builder<I, D, ?, ?> builder) {
         super(builder);
@@ -30,11 +23,9 @@ public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric
         defaultInitializer = builder.getDefaultInitializer();
 
         if (dynamicLabelNames().isEmpty()) {
-            noLabelsDataPoint = dataPointFactory.apply(defaultInitializer);
-            labeledDataPoints = Map.of();
+            noLabelsDataPoint = createDataPointHolder(dataPointFactory.apply(defaultInitializer), LabelValues.empty());
         } else {
             noLabelsDataPoint = null;
-            labeledDataPoints = new ConcurrentHashMap<>();
         }
     }
 
@@ -43,9 +34,9 @@ public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric
     @Override
     public final void reset() {
         if (noLabelsDataPoint != null) {
-            reset(noLabelsDataPoint);
+            reset(noLabelsDataPoint.dataPoint());
         } else {
-            labeledDataPoints.values().forEach(this::reset);
+            dataPoints.values().stream().map(DataPointHolder::dataPoint).forEach(this::reset);
         }
     }
 
@@ -55,56 +46,37 @@ public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric
         if (noLabelsDataPoint == null) {
             throw new IllegalStateException("This metric has dynamic labels, so you must call getOrCreateLabeled()");
         }
-        return noLabelsDataPoint;
-    }
-
-    @NonNull
-    @Override
-    public final D getOrCreateLabeled(@NonNull Map<String, String> labels) {
-        return getOrCreateLabeled(labels, defaultInitializer);
+        return noLabelsDataPoint.dataPoint();
     }
 
     @Override
-    public final D getOrCreateLabeled(@NonNull Map<String, String> labels, @NonNull I initializer) {
+    public D getOrCreateLabeled(@NonNull String... namesAndValues) {
         if (noLabelsDataPoint != null) {
-            if (labels != null && !labels.isEmpty()) {
-                throw new IllegalArgumentException(getClass().getSimpleName()
-                        + " "
-                        + metadata().name()
-                        + " was created without label names, so you must not provide label values.");
-            }
-            return noLabelsDataPoint;
+            throw new IllegalStateException("This metric has no dynamic labels, so you must call getNotLabeled()");
         }
+        return dataPoints
+                .computeIfAbsent(createLabelValues(namesAndValues), this::createDataPointHolder)
+                .dataPoint();
+    }
 
+    @Override
+    public D getOrCreateLabeled(@NonNull I initializer, @NonNull String... namesAndValues) {
+        if (noLabelsDataPoint != null) {
+            throw new IllegalStateException("This metric has no dynamic labels, so you must call getNotLabeled()");
+        }
         Objects.requireNonNull(initializer);
-        verifyLabels(labels);
-        return labeledDataPoints.computeIfAbsent(Map.copyOf(labels), l -> dataPointFactory.apply(initializer));
+        return dataPoints
+                .computeIfAbsent(
+                        createLabelValues(namesAndValues),
+                        labelValues -> createDataPointHolder(labelValues, initializer))
+                .dataPoint();
     }
 
-    @NonNull
-    @Override
-    public final List<DataPointSnapshot> snapshot() {
-        if (noLabelsDataPoint != null) {
-            List<DataPointSnapshot.ValueItem> valueItems = exportDataPoint(noLabelsDataPoint);
-            if (valueItems.isEmpty()) {
-                return List.of();
-            } else {
-                return List.of(new DataPointSnapshot(constantLabels(), valueItems));
-            }
-        } else if (labeledDataPoints.isEmpty()) {
-            return List.of();
-        } else {
-            List<DataPointSnapshot> snapshots = new ArrayList<>(labeledDataPoints.size());
-            for (Map.Entry<Map<String, String>, D> entry : labeledDataPoints.entrySet()) {
-                List<DataPointSnapshot.ValueItem> valueItems = exportDataPoint(entry.getValue());
-                if (!valueItems.isEmpty()) {
-                    snapshots.add(new DataPointSnapshot(createDataPointLabels(entry.getKey()), valueItems));
-                }
-            }
-            return snapshots;
-        }
+    private DataPointHolder<D> createDataPointHolder(LabelValues labelValues) {
+        return createDataPointHolder(labelValues, defaultInitializer);
     }
 
-    @NonNull
-    protected abstract List<DataPointSnapshot.ValueItem> exportDataPoint(D datapoint);
+    private DataPointHolder<D> createDataPointHolder(LabelValues labelValues, @NonNull I initializer) {
+        return createDataPointHolder(dataPointFactory.apply(initializer), labelValues);
+    }
 }

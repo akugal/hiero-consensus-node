@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.List;
 import java.util.function.LongSupplier;
 import org.hiero.metrics.api.LongCounter;
 import org.hiero.metrics.api.datapoint.LongCounterDataPoint;
-import org.hiero.metrics.api.export.DataPointSnapshot;
-import org.hiero.metrics.internal.core.AbstractStatefulMetric;
+import org.hiero.metrics.internal.core.AbstractStatefulSingleValueMetric;
 
-public final class DefaultLongCounter extends AbstractStatefulMetric<LongSupplier, LongCounterDataPoint>
+public final class DefaultLongCounter extends AbstractStatefulSingleValueMetric<LongSupplier, LongCounterDataPoint>
         implements LongCounter {
 
     public DefaultLongCounter(LongCounter.Builder builder) {
@@ -19,11 +16,5 @@ public final class DefaultLongCounter extends AbstractStatefulMetric<LongSupplie
     @Override
     protected void reset(LongCounterDataPoint dataPoint) {
         dataPoint.reset();
-    }
-
-    @NonNull
-    @Override
-    protected List<DataPointSnapshot.ValueItem> exportDataPoint(LongCounterDataPoint datapoint) {
-        return List.of(new DataPointSnapshot.ValueItem(datapoint.getAsLong()));
     }
 }

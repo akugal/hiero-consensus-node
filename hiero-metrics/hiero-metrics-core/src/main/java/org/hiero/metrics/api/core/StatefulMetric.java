@@ -2,7 +2,6 @@
 package org.hiero.metrics.api.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -30,37 +29,9 @@ public interface StatefulMetric<I, D> extends Metric {
     @NonNull
     D getNotLabeled();
 
-    /**
-     * Get or create a data point with the given label values.
-     * If a data point with the same label values already exists, it is returned.
-     * Otherwise, a new data point is created using the default initializer.
-     *
-     * @param labels the map of labels. <br>
-     *               It is highly recommended to use {@code Map.of(...)}
-     *               as efficient and immutable map for small label sets. <br>
-     *               <b>Do not use</b> labels with unbounded cardinality, such as IDs or timestamps.
-     * @return the data point with the given label values
-     * @throws IllegalArgumentException if the number of labels does not match the number of dynamic labels
-     * @throws NullPointerException if labels is null or contains null keys or values
-     */
-    @NonNull
-    D getOrCreateLabeled(@NonNull Map<String, String> labels);
+    D getOrCreateLabeled(@NonNull String... namesAndValues);
 
-    /**
-     * Get or create a data point with the given label values.
-     * If a data point with the same label values already exists, it is returned.
-     * Otherwise, a new data point is created using the given initializer.
-     *
-     * @param labels the map of labels. <br>
-     *               It is highly recommended to use {@code Map.of(...)}
-     *               as efficient and immutable map for small label sets. <br>
-     *               <b>Do not use</b> labels with unbounded cardinality, such as IDs or timestamps.
-     * @param initializer the initializer to use to create a new data point if one does not already exist
-     * @return the data point with the given label values
-     * @throws IllegalArgumentException if the number of labels does not match the number of dynamic labels
-     * @throws NullPointerException if labels or initializer is null or contains null keys or values
-     */
-    D getOrCreateLabeled(@NonNull Map<String, String> labels, @NonNull I initializer);
+    D getOrCreateLabeled(@NonNull I initializer, @NonNull String... namesAndValues);
 
     /**
      * Base abstract builder for {@link StatefulMetric}.
