@@ -3,8 +3,8 @@ package org.hiero.metrics.api.export.extension.writer;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.hiero.metrics.api.export.DataPointSnapshot;
-import org.hiero.metrics.api.export.MetricSnapshot;
+import org.hiero.metrics.api.export.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.snapshot.MetricSnapshot;
 
 public abstract class BaseMetricExportData {
 
@@ -23,9 +23,9 @@ public abstract class BaseMetricExportData {
         dataPointCache.clear();
     }
 
-    public final TemplateByteArray getAndUpdateDataPointExportData(DataPointSnapshot dataPointSnapshot) {
-        return dataPointCache.computeIfAbsent(dataPointSnapshot, this::buildDataPointExportData);
+    public final TemplateByteArray getOrCreateDatapointExportTemplate(DataPointSnapshot dataPointSnapshot) {
+        return dataPointCache.computeIfAbsent(dataPointSnapshot, this::buildDataPointExportTemplate);
     }
 
-    protected abstract TemplateByteArray buildDataPointExportData(DataPointSnapshot dataPointSnapshot);
+    protected abstract TemplateByteArray buildDataPointExportTemplate(DataPointSnapshot dataPointSnapshot);
 }

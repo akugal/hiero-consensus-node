@@ -9,19 +9,21 @@ import org.hiero.metrics.api.core.ArrayAccessor;
 
 /**
  * Thread-safe append-only array allowing concurrent writes with single-threaded reads.
+ * This class is not a general purpose collection, it is designed for specific use case of collecting metrics
+ * from multiple threads and then processing them from a single exporter thread.
  * <p>
  * Usage pattern:
  * <ul>
  *   <li>Multiple threads can call {@code add()} concurrently</li>
- *   <li>Call {@code readyToRead()} before reading</li>
- *   <li>Use {@code size()} and {@code getItem()} for reading</li>
+ *   <li>Call {@code readyToRead()} before reading from single thread</li>
+ *   <li>Use {@code size()} and {@code getItem()} for reading from the same thread called {@code readyToRead()}</li>
  * </ul>
  * <p>
  * {@link #readyToRead(Consumer)} can be used to update ready to read items with provided consumer.
  */
 public class AppendArray<T> implements ArrayAccessor<T> {
 
-    private volatile T[] items;
+    private T[] items;
     private final AtomicInteger size = new AtomicInteger();
 
     private T[] readItemsRef;
@@ -39,7 +41,7 @@ public class AppendArray<T> implements ArrayAccessor<T> {
         if (idx >= items.length) {
             synchronized (this) {
                 if (idx >= items.length) {
-                    T[] newArray = (T[]) new Object[idx * 2];
+                    T[] newArray = (T[]) new Object[size.get() * 2];
                     System.arraycopy(items, 0, newArray, 0, items.length);
                     items = newArray;
                 }

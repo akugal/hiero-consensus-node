@@ -8,10 +8,10 @@ import org.hiero.metrics.api.StatelessMetric;
 import org.hiero.metrics.internal.core.AbstractMetric;
 import org.hiero.metrics.internal.core.LabelValues;
 import org.hiero.metrics.internal.datapoint.DataPointHolder;
-import org.hiero.metrics.internal.export.BaseDataPointSnapshot;
-import org.hiero.metrics.internal.export.SingleValueDataPointSnapshot;
+import org.hiero.metrics.internal.export.snapshot.DefaultSingleValueDataPointSnapshot;
 
-public final class DefaultStatelessMetric extends AbstractMetric<DoubleSupplier> implements StatelessMetric {
+public final class DefaultStatelessMetric extends AbstractMetric<DoubleSupplier, DefaultSingleValueDataPointSnapshot>
+        implements StatelessMetric {
 
     public DefaultStatelessMetric(StatelessMetric.Builder builder) {
         super(builder);
@@ -23,13 +23,13 @@ public final class DefaultStatelessMetric extends AbstractMetric<DoubleSupplier>
     }
 
     @Override
-    protected BaseDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
-        return new SingleValueDataPointSnapshot(dynamicLabelValues);
+    protected DefaultSingleValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
+        return new DefaultSingleValueDataPointSnapshot(dynamicLabelValues);
     }
 
     @Override
-    protected void updateDatapointSnapshot(DataPointHolder<DoubleSupplier> dataPointHolder) {
-        dataPointHolder.snapshot().setValueAt(0, dataPointHolder.dataPoint().getAsDouble());
+    protected void updateDatapointSnapshot(DataPointHolder<DoubleSupplier, DefaultSingleValueDataPointSnapshot> dataPointHolder) {
+        dataPointHolder.snapshot().update(dataPointHolder.dataPoint().getAsDouble());
     }
 
     @NonNull
@@ -39,7 +39,7 @@ public final class DefaultStatelessMetric extends AbstractMetric<DoubleSupplier>
         Objects.requireNonNull(valueSupplier, "Value supplier must not be null");
 
         LabelValues labelValues = createLabelValues(labelNamesAndValues);
-        DataPointHolder<DoubleSupplier> dataPointHolder = createDataPointHolder(valueSupplier, labelValues);
+        DataPointHolder<DoubleSupplier, DefaultSingleValueDataPointSnapshot> dataPointHolder = createDataPointHolder(valueSupplier, labelValues);
         if (dataPoints.putIfAbsent(labelValues, dataPointHolder) != null) {
             throw new IllegalArgumentException(
                     "A data point with the same label values already exists: " + labelValues);

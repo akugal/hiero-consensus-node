@@ -4,7 +4,7 @@ package org.hiero.metrics.api.export.extension.writer;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.OutputStream;
-import org.hiero.metrics.api.export.MetricsSnapshot;
+import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
 
 /**
  * Interface for writing {@link MetricsSnapshot} to an output stream.

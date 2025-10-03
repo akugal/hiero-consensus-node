@@ -7,8 +7,8 @@ import java.io.OutputStream;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import org.hiero.metrics.api.export.DataPointSnapshot;
-import org.hiero.metrics.api.export.MetricSnapshot;
+import org.hiero.metrics.api.export.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.snapshot.MetricSnapshot;
 
 /**
  * Abstract base class for {@link MetricsSnapshotsWriter} implementations.
@@ -35,14 +35,10 @@ public abstract class AbstractCachingMetricsSnapshotsWriter<M extends BaseMetric
         beforeMetricWrite(metricExportData, output);
         for (int i = 0; i < metricSnapshot.size(); i++) {
             DataPointSnapshot dataPointSnapshot = metricSnapshot.get(i);
-            TemplateByteArray dataPointExportData = metricExportData.getAndUpdateDataPointExportData(dataPointSnapshot);
-            writeDataPoint(timestamp, dataPointSnapshot, dataPointExportData, output);
+            TemplateByteArray dataPointExportTemplate = metricExportData.getOrCreateDatapointExportTemplate(dataPointSnapshot);
+            writeDataPoint(timestamp, dataPointSnapshot, dataPointExportTemplate, output);
         }
         afterMetricWrite(metricExportData, output);
-    }
-
-    protected byte[][] dataPointPlaceholder(byte[] valueBytes) {
-        return new byte[][] {valueBytes};
     }
 
     protected void beforeMetricWrite(@NonNull M metricExportData, @NonNull OutputStream output) throws IOException {
@@ -56,7 +52,7 @@ public abstract class AbstractCachingMetricsSnapshotsWriter<M extends BaseMetric
     protected abstract void writeDataPoint(
             @NonNull Instant timestamp,
             @NonNull DataPointSnapshot dataPointSnapshot,
-            @NonNull TemplateByteArray dataPointExportData,
+            @NonNull TemplateByteArray dataPointExportTemplate,
             @NonNull OutputStream output)
             throws IOException;
 

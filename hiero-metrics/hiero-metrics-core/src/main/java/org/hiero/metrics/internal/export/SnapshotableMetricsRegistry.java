@@ -3,6 +3,7 @@ package org.hiero.metrics.internal.export;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import org.hiero.metrics.api.core.MetricRegistry;
+import org.hiero.metrics.internal.export.snapshot.UpdatableMetricRegistrySnapshot;
 
 /**
  * An extension of {@link MetricRegistry} that provides a method to take snapshots of all registered

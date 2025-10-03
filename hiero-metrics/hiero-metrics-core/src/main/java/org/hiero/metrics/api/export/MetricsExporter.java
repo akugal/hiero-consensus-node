@@ -2,6 +2,8 @@
 package org.hiero.metrics.api.export;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
+
 import java.io.Closeable;
 
 /**

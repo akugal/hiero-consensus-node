@@ -18,7 +18,6 @@ import java.util.function.ToDoubleFunction;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
-import org.hiero.metrics.api.export.extension.writer.WriterUtils;
 import org.hiero.metrics.api.stat.StatUtils;
 import org.hiero.metrics.api.utils.MetricUtils;
 import org.hiero.metrics.internal.DefaultStatsGaugeAdapter;

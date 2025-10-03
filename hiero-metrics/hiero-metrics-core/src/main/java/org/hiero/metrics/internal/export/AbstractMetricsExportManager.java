@@ -14,7 +14,8 @@ import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricsFacade;
 import org.hiero.metrics.api.export.MetricsExportManager;
-import org.hiero.metrics.api.export.MetricsSnapshot;
+import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
+import org.hiero.metrics.internal.export.snapshot.DefaultMetricsSnapshot;
 
 public abstract class AbstractMetricsExportManager implements MetricsExportManager {
 

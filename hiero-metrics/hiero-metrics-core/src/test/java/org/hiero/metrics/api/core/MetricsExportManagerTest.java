@@ -1,17 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hiero.metrics.api.stat.StatUtils.DEFAULT_STAT_LABEL;
-
-import java.util.List;
-import org.hiero.metrics.api.DoubleGaugeComposite;
-import org.hiero.metrics.api.export.DataPointSnapshot;
-import org.hiero.metrics.api.export.MetricSnapshot;
-import org.hiero.metrics.api.export.MetricsExportManager;
-import org.hiero.metrics.api.export.extension.PullingMetricsExporterAdapter;
-import org.junit.jupiter.api.Test;
-
 /*public class MetricsExportManagerTest {
 
     @Test

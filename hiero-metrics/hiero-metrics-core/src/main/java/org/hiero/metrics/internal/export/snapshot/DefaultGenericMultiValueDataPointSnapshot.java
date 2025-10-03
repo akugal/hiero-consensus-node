@@ -1,18 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.internal.export;
+package org.hiero.metrics.internal.export.snapshot;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Arrays;
+
+import org.hiero.metrics.api.export.snapshot.GenericMultiValueDataPointSnapshot;
 import org.hiero.metrics.internal.core.LabelValues;
 
-public final class FixedMultiValueDataPointSnapshot extends BaseDataPointSnapshot {
+/**
+ * Default implementation of {@link GenericMultiValueDataPointSnapshot}.
+ */
+public final class DefaultGenericMultiValueDataPointSnapshot extends BaseDataPointSnapshot
+        implements GenericMultiValueDataPointSnapshot {
 
     private final String valueClassifier;
     private final String[] valueTypes;
     private final double[] values;
 
-    public FixedMultiValueDataPointSnapshot(
+    public DefaultGenericMultiValueDataPointSnapshot(
             @NonNull LabelValues dynamicLabelValues, @NonNull String valueClassifier, @NonNull String[] valueTypes) {
         super(dynamicLabelValues);
         this.valueClassifier = valueClassifier;
@@ -28,7 +33,7 @@ public final class FixedMultiValueDataPointSnapshot extends BaseDataPointSnapsho
     }
 
     @Override
-    public int valuesSize() {
+    public int valuesCount() {
         return values.length;
     }
 
@@ -37,14 +42,19 @@ public final class FixedMultiValueDataPointSnapshot extends BaseDataPointSnapsho
         return values[idx];
     }
 
-    @Nullable
+    @NonNull
     @Override
     public String valueTypeAt(int idx) {
         return valueTypes[idx];
     }
 
-    @Override
-    public void setValueAt(int idx, double value) {
+    /**
+     * Sets the value at the specified index.
+     *
+     * @param idx the index of the value to set
+     * @param value the value to set
+     */
+    public void updateValueAt(int idx, double value) {
         values[idx] = value;
     }
 }

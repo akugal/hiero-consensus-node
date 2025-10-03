@@ -7,10 +7,10 @@ import org.hiero.metrics.api.StatsGaugeAdapter;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 import org.hiero.metrics.internal.core.LabelValues;
 import org.hiero.metrics.internal.datapoint.DataPointHolder;
-import org.hiero.metrics.internal.export.BaseDataPointSnapshot;
-import org.hiero.metrics.internal.export.FixedMultiValueDataPointSnapshot;
+import org.hiero.metrics.internal.export.snapshot.DefaultGenericMultiValueDataPointSnapshot;
 
-public final class DefaultStatsGaugeAdapter<I, D> extends AbstractStatefulMetric<I, D>
+public final class DefaultStatsGaugeAdapter<I, D>
+        extends AbstractStatefulMetric<I, D, DefaultGenericMultiValueDataPointSnapshot>
         implements StatsGaugeAdapter<I, D> {
 
     private final String statLabelName;
@@ -35,15 +35,15 @@ public final class DefaultStatsGaugeAdapter<I, D> extends AbstractStatefulMetric
     }
 
     @Override
-    protected BaseDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
-        return new FixedMultiValueDataPointSnapshot(dynamicLabelValues, statLabelName, statLabelValues);
+    protected DefaultGenericMultiValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
+        return new DefaultGenericMultiValueDataPointSnapshot(dynamicLabelValues, statLabelName, statLabelValues);
     }
 
     @Override
-    protected void updateDatapointSnapshot(DataPointHolder<D> dataPointHolder) {
+    protected void updateDatapointSnapshot(DataPointHolder<D, DefaultGenericMultiValueDataPointSnapshot> dataPointHolder) {
         for (int i = 0; i < statExportGetters.length; i++) {
             double value = statExportGetters[i].applyAsDouble(dataPointHolder.dataPoint());
-            dataPointHolder.snapshot().setValueAt(i, value);
+            dataPointHolder.snapshot().updateValueAt(i, value);
         }
     }
 }

@@ -104,7 +104,7 @@ public final class TemplateByteArray {
          * @param data the string to append
          * @return this builder
          */
-        public Builder append(String data) {
+        public Builder appendUtf8(String data) {
             return append(data.getBytes(StandardCharsets.UTF_8));
         }
 

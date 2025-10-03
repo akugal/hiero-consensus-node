@@ -9,22 +9,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricMetadata;
+import org.hiero.metrics.api.export.snapshot.DataPointSnapshot;
 import org.hiero.metrics.internal.datapoint.DataPointHolder;
-import org.hiero.metrics.internal.export.BaseDataPointSnapshot;
 import org.hiero.metrics.internal.export.SnapshotableMetric;
-import org.hiero.metrics.internal.export.UpdatableMetricSnapshot;
+import org.hiero.metrics.internal.export.snapshot.UpdatableMetricSnapshot;
 
 /**
  * Base class for all metric implementations requiring {@link Metric.Builder} for construction.
  */
-public abstract class AbstractMetric<D> implements SnapshotableMetric {
+public abstract class AbstractMetric<D, S extends DataPointSnapshot> implements SnapshotableMetric {
 
     private final MetricMetadata metadata;
     private final List<Label> constantLabels;
     private final List<String> dynamicLabelNames;
 
-    protected final Map<LabelValues, DataPointHolder<D>> dataPoints;
-    private final UpdatableMetricSnapshot<D> metricSnapshot;
+    protected final Map<LabelValues, DataPointHolder<D, S>> dataPoints;
+    private final UpdatableMetricSnapshot<D, S> metricSnapshot;
 
     protected AbstractMetric(Builder<?, ?> builder) {
         metadata =
@@ -44,16 +44,16 @@ public abstract class AbstractMetric<D> implements SnapshotableMetric {
         metricSnapshot = new UpdatableMetricSnapshot<>(this, this::updateDatapointSnapshot, dataPointsCapacity);
     }
 
-    protected final DataPointHolder<D> createDataPointHolder(D datapoint, LabelValues dynamicLabelValues) {
-        DataPointHolder<D> dataPointHolder =
+    protected final DataPointHolder<D, S> createDataPointHolder(D datapoint, LabelValues dynamicLabelValues) {
+        DataPointHolder<D, S> dataPointHolder =
                 new DataPointHolder<>(datapoint, createDataPointSnapshot(dynamicLabelValues));
         metricSnapshot.addDataPointHolder(dataPointHolder);
         return dataPointHolder;
     }
 
-    protected abstract BaseDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues);
+    protected abstract S createDataPointSnapshot(LabelValues dynamicLabelValues);
 
-    protected abstract void updateDatapointSnapshot(DataPointHolder<D> dataPointHolder);
+    protected abstract void updateDatapointSnapshot(DataPointHolder<D, S> dataPointHolder);
 
     protected LabelValues createLabelValues(String... namesAndValues) {
         Objects.requireNonNull(namesAndValues, "Label names and values must not be null");
@@ -123,7 +123,7 @@ public abstract class AbstractMetric<D> implements SnapshotableMetric {
     }
 
     @Override
-    public final UpdatableMetricSnapshot<D> snapshot() {
+    public final UpdatableMetricSnapshot<D, S> snapshot() {
         return metricSnapshot;
     }
 }

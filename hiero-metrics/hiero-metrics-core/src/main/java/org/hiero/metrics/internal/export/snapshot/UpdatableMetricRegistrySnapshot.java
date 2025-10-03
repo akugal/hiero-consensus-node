@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.internal.export;
+package org.hiero.metrics.internal.export.snapshot;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import org.hiero.metrics.api.core.ArrayAccessor;
-import org.hiero.metrics.api.export.MetricSnapshot;
+import org.hiero.metrics.api.export.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.snapshot.MetricSnapshot;
 import org.hiero.metrics.internal.core.AppendArray;
+import org.hiero.metrics.internal.export.SnapshotableMetric;
 
 public final class UpdatableMetricRegistrySnapshot implements ArrayAccessor<MetricSnapshot> {
 
-    private final AppendArray<UpdatableMetricSnapshot<?>> snapshots = new AppendArray<>(64);
+    private final AppendArray<UpdatableMetricSnapshot<?, DataPointSnapshot>> snapshots = new AppendArray<>(64);
 
     public void updateSnapshot() {
         snapshots.readyToRead(UpdatableMetricSnapshot::updateSnapshot);

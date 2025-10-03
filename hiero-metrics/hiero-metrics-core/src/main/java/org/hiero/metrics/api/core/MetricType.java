@@ -21,10 +21,5 @@ public enum MetricType {
      * A metric that represents state set information, typically used to describe discrete states or conditions.
      * Values per key are either {@code true} or {@code false} that are mapped to 1 and 0 respectively.
      */
-    STATE_SET,
-    /**
-     * A metric that represents static information like software version or build information via labels.
-     * Value is always {@code 1}.
-     */
-    INFO
+    STATE_SET
 }

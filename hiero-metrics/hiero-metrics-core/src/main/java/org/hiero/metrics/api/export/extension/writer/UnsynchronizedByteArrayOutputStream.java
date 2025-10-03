@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -66,9 +67,23 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
         return new String(buffer, 0, size);
     }
 
+    /**
+     * Writes a single byte to the stream.
+     *
+     * @param b the byte to write
+     */
     public void write(byte b) {
         ensureCapacity(size + 1);
         buffer[size++] = b;
+    }
+
+    /**
+     * Writes the bytes of the specified string to the stream using UTF-8 encoding.
+     *
+     * @param string the string to write
+     */
+    public void writeUtf8(String string) {
+        write(string.getBytes(StandardCharsets.UTF_8));
     }
 
     /**

@@ -14,7 +14,7 @@ import org.hiero.metrics.api.LongGauge;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.export.MetricsExportException;
 import org.hiero.metrics.api.export.MetricsExporter;
-import org.hiero.metrics.api.export.MetricsSnapshot;
+import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
 import org.hiero.metrics.api.export.PullingMetricsExporter;
 import org.hiero.metrics.api.export.PushingMetricsExporter;
 import org.hiero.metrics.api.utils.Unit;

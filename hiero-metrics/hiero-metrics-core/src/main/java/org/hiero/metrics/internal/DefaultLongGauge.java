@@ -8,9 +8,10 @@ import org.hiero.metrics.api.datapoint.LongGaugeDataPoint;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 import org.hiero.metrics.internal.core.LabelValues;
 import org.hiero.metrics.internal.datapoint.DataPointHolder;
-import org.hiero.metrics.internal.export.SingleValueDataPointSnapshot;
+import org.hiero.metrics.internal.export.snapshot.DefaultSingleValueDataPointSnapshot;
 
-public final class DefaultLongGauge extends AbstractStatefulMetric<LongSupplier, LongGaugeDataPoint>
+public final class DefaultLongGauge
+        extends AbstractStatefulMetric<LongSupplier, LongGaugeDataPoint, DefaultSingleValueDataPointSnapshot>
         implements LongGauge {
 
     private final ToLongFunction<LongGaugeDataPoint> exportValueSupplier;
@@ -23,12 +24,12 @@ public final class DefaultLongGauge extends AbstractStatefulMetric<LongSupplier,
     }
 
     @Override
-    protected SingleValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
-        return new SingleValueDataPointSnapshot(dynamicLabelValues);
+    protected DefaultSingleValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
+        return new DefaultSingleValueDataPointSnapshot(dynamicLabelValues);
     }
 
     @Override
-    protected void updateDatapointSnapshot(DataPointHolder<LongGaugeDataPoint> dataPointHolder) {
+    protected void updateDatapointSnapshot(DataPointHolder<LongGaugeDataPoint, DefaultSingleValueDataPointSnapshot> dataPointHolder) {
         long value = exportValueSupplier.applyAsLong(dataPointHolder.dataPoint());
         double doubleValue = value;
 
@@ -38,7 +39,7 @@ public final class DefaultLongGauge extends AbstractStatefulMetric<LongSupplier,
             doubleValue = Double.NEGATIVE_INFINITY;
         }
 
-        dataPointHolder.snapshot().setValueAt(0, doubleValue);
+        dataPointHolder.snapshot().update(doubleValue);
     }
 
     @Override

@@ -17,7 +17,7 @@ import org.hiero.metrics.api.core.MetricsRegistrationProvider;
 import org.hiero.metrics.api.utils.MetricUtils;
 import org.hiero.metrics.internal.export.SnapshotableMetric;
 import org.hiero.metrics.internal.export.SnapshotableMetricsRegistry;
-import org.hiero.metrics.internal.export.UpdatableMetricRegistrySnapshot;
+import org.hiero.metrics.internal.export.snapshot.UpdatableMetricRegistrySnapshot;
 
 public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
 

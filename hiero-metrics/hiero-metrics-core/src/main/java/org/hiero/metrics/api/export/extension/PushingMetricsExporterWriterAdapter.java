@@ -5,10 +5,10 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
-import java.util.function.Supplier;
+
 import org.hiero.metrics.api.export.AbstractMetricsExporter;
 import org.hiero.metrics.api.export.MetricsExportException;
-import org.hiero.metrics.api.export.MetricsSnapshot;
+import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
 import org.hiero.metrics.api.export.PushingMetricsExporter;
 import org.hiero.metrics.api.export.extension.writer.MetricsSnapshotsWriter;
 

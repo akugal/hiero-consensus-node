@@ -1,27 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.export.extension.writer;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Iterator;
-import java.util.List;
-import org.hiero.metrics.api.core.Label;
-import org.hiero.metrics.api.core.MetricMetadata;
-import org.hiero.metrics.api.core.MetricType;
-import org.hiero.metrics.api.export.DataPointSnapshot;
-import org.hiero.metrics.api.export.MetricSnapshot;
-import org.hiero.metrics.api.export.MetricsSnapshot;
-import org.hiero.metrics.internal.export.SingleValueDataPointSnapshot;
-
-import static org.hiero.metrics.api.export.extension.writer.WriterUtils.COMMA;
-import static org.hiero.metrics.api.export.extension.writer.WriterUtils.appendLabels;
-
 
 /**
  * A {@link MetricsSnapshotsWriter} implementation that writes metrics in CSV format.

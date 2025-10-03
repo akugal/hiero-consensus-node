@@ -8,9 +8,10 @@ import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.internal.core.AbstractStatefulMetric;
 import org.hiero.metrics.internal.core.LabelValues;
 import org.hiero.metrics.internal.datapoint.DataPointHolder;
-import org.hiero.metrics.internal.export.FixedMultiValueDataPointSnapshot;
+import org.hiero.metrics.internal.export.snapshot.DefaultGenericMultiValueDataPointSnapshot;
 
-public final class DefaultDoubleGaugeComposite extends AbstractStatefulMetric<Object, DoubleGaugeCompositeDataPoint>
+public final class DefaultDoubleGaugeComposite
+        extends AbstractStatefulMetric<Object, DoubleGaugeCompositeDataPoint, DefaultGenericMultiValueDataPointSnapshot>
         implements DoubleGaugeComposite {
 
     private final String statLabelName;
@@ -28,16 +29,16 @@ public final class DefaultDoubleGaugeComposite extends AbstractStatefulMetric<Ob
     }
 
     @Override
-    protected FixedMultiValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
-        return new FixedMultiValueDataPointSnapshot(dynamicLabelValues, statLabelName, statLabelValues);
+    protected DefaultGenericMultiValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
+        return new DefaultGenericMultiValueDataPointSnapshot(dynamicLabelValues, statLabelName, statLabelValues);
     }
 
     @Override
-    protected void updateDatapointSnapshot(DataPointHolder<DoubleGaugeCompositeDataPoint> dataPointHolder) {
+    protected void updateDatapointSnapshot(DataPointHolder<DoubleGaugeCompositeDataPoint, DefaultGenericMultiValueDataPointSnapshot> dataPointHolder) {
         DoubleGaugeCompositeDataPoint dataPoint = dataPointHolder.dataPoint();
         for (int i = 0; i < dataPoint.size(); i++) {
             double value = exportValueSupplier.applyAsDouble(dataPoint.get(i));
-            dataPointHolder.snapshot().setValueAt(i, value);
+            dataPointHolder.snapshot().updateValueAt(i, value);
         }
     }
 

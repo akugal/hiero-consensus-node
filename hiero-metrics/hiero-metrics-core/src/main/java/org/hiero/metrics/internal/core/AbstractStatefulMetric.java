@@ -6,15 +6,17 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
 import java.util.function.Function;
 import org.hiero.metrics.api.core.StatefulMetric;
+import org.hiero.metrics.api.export.snapshot.DataPointSnapshot;
 import org.hiero.metrics.internal.datapoint.DataPointHolder;
 
-public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric<D> implements StatefulMetric<I, D> {
+public abstract class AbstractStatefulMetric<I, D, S extends DataPointSnapshot> extends AbstractMetric<D, S>
+        implements StatefulMetric<I, D> {
 
     private final I defaultInitializer;
     private final Function<I, D> dataPointFactory;
 
     @Nullable
-    private final DataPointHolder<D> noLabelsDataPoint;
+    private final DataPointHolder<D, S> noLabelsDataPoint;
 
     protected AbstractStatefulMetric(StatefulMetric.Builder<I, D, ?, ?> builder) {
         super(builder);
@@ -72,11 +74,11 @@ public abstract class AbstractStatefulMetric<I, D> extends AbstractMetric<D> imp
                 .dataPoint();
     }
 
-    private DataPointHolder<D> createDataPointHolder(LabelValues labelValues) {
+    private DataPointHolder<D, S> createDataPointHolder(LabelValues labelValues) {
         return createDataPointHolder(labelValues, defaultInitializer);
     }
 
-    private DataPointHolder<D> createDataPointHolder(LabelValues labelValues, @NonNull I initializer) {
+    private DataPointHolder<D, S> createDataPointHolder(LabelValues labelValues, @NonNull I initializer) {
         return createDataPointHolder(dataPointFactory.apply(initializer), labelValues);
     }
 }

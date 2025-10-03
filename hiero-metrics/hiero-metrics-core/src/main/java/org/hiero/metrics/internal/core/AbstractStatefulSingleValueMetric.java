@@ -4,22 +4,22 @@ package org.hiero.metrics.internal.core;
 import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.internal.datapoint.DataPointHolder;
-import org.hiero.metrics.internal.export.SingleValueDataPointSnapshot;
+import org.hiero.metrics.internal.export.snapshot.DefaultSingleValueDataPointSnapshot;
 
 public abstract class AbstractStatefulSingleValueMetric<I, D extends DoubleSupplier>
-        extends AbstractStatefulMetric<I, D> {
+        extends AbstractStatefulMetric<I, D, DefaultSingleValueDataPointSnapshot> {
 
     protected AbstractStatefulSingleValueMetric(StatefulMetric.Builder<I, D, ?, ?> builder) {
         super(builder);
     }
 
     @Override
-    protected SingleValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
-        return new SingleValueDataPointSnapshot(dynamicLabelValues);
+    protected DefaultSingleValueDataPointSnapshot createDataPointSnapshot(LabelValues dynamicLabelValues) {
+        return new DefaultSingleValueDataPointSnapshot(dynamicLabelValues);
     }
 
     @Override
-    protected void updateDatapointSnapshot(DataPointHolder<D> dataPointHolder) {
-        dataPointHolder.snapshot().setValueAt(0, dataPointHolder.dataPoint().getAsDouble());
+    protected void updateDatapointSnapshot(DataPointHolder<D, DefaultSingleValueDataPointSnapshot> dataPointHolder) {
+        dataPointHolder.snapshot().update(dataPointHolder.dataPoint().getAsDouble());
     }
 }

@@ -180,6 +180,7 @@ public interface Metric {
             Objects.requireNonNull(labelNames, "label names must not be null");
             for (String labelName : labelNames) {
                 MetricUtils.validateNameCharacters(labelName);
+                validateLabelNameNoEqualMetricName(labelName);
             }
             dynamicLabelNames.addAll(Arrays.asList(labelNames));
             return self();
@@ -195,6 +196,7 @@ public interface Metric {
         @NonNull
         public final B withConstantLabel(@NonNull Label label) {
             Objects.requireNonNull(label, "label must not be null");
+            validateLabelNameNoEqualMetricName(label.name());
 
             Label existingLabel = constantLabels.put(label.name(), label);
             if (existingLabel != null && !existingLabel.equals(label)) {
@@ -277,5 +279,12 @@ public interface Metric {
          */
         @NonNull
         protected abstract B self();
+
+        private void validateLabelNameNoEqualMetricName(String labelName) {
+            if (labelName.equals(key.name())) {
+                throw new IllegalArgumentException(
+                        "Dynamic label name must not be the same as metric name: " + labelName);
+            }
+        }
     }
 }

@@ -1,32 +1,33 @@
 // SPDX-License-Identifier: Apache-2.0
-package org.hiero.metrics.internal.export;
+package org.hiero.metrics.internal.export.snapshot;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.hiero.metrics.api.core.ArrayAccessor;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricMetadata;
-import org.hiero.metrics.api.export.DataPointSnapshot;
-import org.hiero.metrics.api.export.MetricSnapshot;
+import org.hiero.metrics.api.export.snapshot.DataPointSnapshot;
+import org.hiero.metrics.api.export.snapshot.MetricSnapshot;
 import org.hiero.metrics.internal.core.AppendArray;
 import org.hiero.metrics.internal.datapoint.DataPointHolder;
 
-public final class UpdatableMetricSnapshot<D> implements MetricSnapshot {
+public final class UpdatableMetricSnapshot<D, S extends DataPointSnapshot> implements MetricSnapshot {
 
     private final Metric metric;
-    private final Consumer<DataPointHolder<D>> snapshotUpdater;
-    private final AppendArray<DataPointHolder<D>> dataPointHolders;
+    private final Consumer<DataPointHolder<D, S>> snapshotUpdater;
+    private final AppendArray<DataPointHolder<D, S>> dataPointHolders;
 
-    public UpdatableMetricSnapshot(Metric metric, Consumer<DataPointHolder<D>> snapshotUpdater, int capacity) {
+    public UpdatableMetricSnapshot(Metric metric,
+                                   Consumer<DataPointHolder<D, S>> snapshotUpdater,
+                                   int capacity) {
         this.metric = metric;
         this.snapshotUpdater = snapshotUpdater;
         this.dataPointHolders = new AppendArray<>(capacity);
     }
 
-    public void addDataPointHolder(DataPointHolder<D> dataPoint) {
+    public void addDataPointHolder(DataPointHolder<D, S> dataPoint) {
         dataPointHolders.add(dataPoint);
     }
 

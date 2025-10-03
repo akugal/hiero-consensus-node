@@ -8,10 +8,11 @@ module org.hiero.metrics.core {
     exports org.hiero.metrics.api.utils;
     exports org.hiero.metrics.api.datapoint;
     exports org.hiero.metrics.api.export;
+    exports org.hiero.metrics.api.export.snapshot;
     exports org.hiero.metrics.api.export.extension;
+    exports org.hiero.metrics.api.export.extension.writer;
     exports org.hiero.metrics.api.stat;
     exports org.hiero.metrics.api.stat.container;
-    exports org.hiero.metrics.api.export.extension.writer;
 
     requires transitive com.swirlds.base;
     requires transitive com.swirlds.config.api;
