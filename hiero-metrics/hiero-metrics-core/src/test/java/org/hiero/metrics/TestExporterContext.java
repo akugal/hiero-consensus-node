@@ -6,8 +6,7 @@ import org.hiero.metrics.api.core.MetricsFacade;
 import org.hiero.metrics.api.export.MetricsExportManager;
 import org.hiero.metrics.api.export.extension.PullingMetricsExporterAdapter;
 import org.hiero.metrics.api.export.extension.writer.MetricsSnapshotsWriter;
-
-import java.io.ByteArrayOutputStream;
+import org.hiero.metrics.api.export.extension.writer.UnsynchronizedByteArrayOutputStream;
 import java.io.IOException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -30,7 +29,7 @@ public class TestExporterContext {
     }
 
     public void exportAndVerify(String expected) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        UnsynchronizedByteArrayOutputStream outputStream = new UnsynchronizedByteArrayOutputStream();
         snapshotsWriter.write(exporter.getSnapshot().get(), outputStream);
         assertThat(outputStream.toString()).isEqualTo(expected);
     }

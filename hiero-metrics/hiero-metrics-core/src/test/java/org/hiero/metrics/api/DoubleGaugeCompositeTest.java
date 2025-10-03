@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-
 import org.hiero.metrics.api.datapoint.DoubleGaugeCompositeDataPoint;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 public class DoubleGaugeCompositeTest {
 

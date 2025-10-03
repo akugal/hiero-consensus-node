@@ -11,7 +11,7 @@ import org.hiero.metrics.api.export.MetricsSnapshot;
 import org.hiero.metrics.api.export.PullingMetricsExporter;
 
 /**
- * An abstract base class for {@link PullingMetricsExporter} implementations.
+ * Base class for {@link PullingMetricsExporter} implementations.
  * It provides a mechanism to supply metrics snapshots via a {@link Supplier}.
  */
 public class PullingMetricsExporterAdapter extends AbstractMetricsExporter implements PullingMetricsExporter {
@@ -27,6 +27,10 @@ public class PullingMetricsExporterAdapter extends AbstractMetricsExporter imple
         this.snapshotSupplier = Objects.requireNonNull(snapshotSupplier);
     }
 
+    /**
+     * @return an {@link Optional} containing the latest {@link MetricsSnapshot} if available,
+     *         or an empty {@link Optional} if no snapshot is available.
+     */
     @NonNull
     public final Optional<MetricsSnapshot> getSnapshot() {
         return snapshotSupplier.get();

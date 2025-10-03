@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.export;
 
+import org.hiero.metrics.ConsoleMetricsExporter;
 import org.hiero.metrics.TestExporterContext;
 import org.hiero.metrics.api.BooleanGauge;
 import org.hiero.metrics.api.DoubleCounter;
@@ -12,7 +13,6 @@ import org.hiero.metrics.api.StatsGaugeAdapter;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricsFacade;
-import org.hiero.metrics.api.export.extension.PushingMetricsExporterWriterAdapter;
 import org.hiero.metrics.api.export.extension.writer.OpenMetricsSnapshotsWriter;
 import org.hiero.metrics.api.stat.StatUtils;
 import org.junit.jupiter.api.MethodOrderer;
@@ -486,8 +486,7 @@ public class OpenMetricsExportComprehensiveTest {
     public void demo() throws InterruptedException {
         MetricRegistry registry = MetricsFacade.createRegistry(new Label("env", "test"));
         MetricsExportManager snapshotManager = MetricsFacade.createExportManager(
-                new PushingMetricsExporterWriterAdapter(
-                        "console", OpenMetricsSnapshotsWriter.DEFAULT, () -> System.out),
+                new ConsoleMetricsExporter(OpenMetricsSnapshotsWriter.DEFAULT),
                 1);
         snapshotManager.manageMetricRegistry(registry);
 

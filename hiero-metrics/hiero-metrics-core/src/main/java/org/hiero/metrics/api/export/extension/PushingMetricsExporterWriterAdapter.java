@@ -13,31 +13,44 @@ import org.hiero.metrics.api.export.PushingMetricsExporter;
 import org.hiero.metrics.api.export.extension.writer.MetricsSnapshotsWriter;
 
 /**
- * An adapter that allows using a {@link MetricsSnapshotsWriter} as a {@link PushingMetricsExporter}.
- * It uses a {@link Supplier} to provide the output stream for writing metrics snapshots.
+ * An abstract class for adapting {@link MetricsSnapshotsWriter} as a {@link PushingMetricsExporter}.
+ * Subclasses must implement the {@link #openStream()} method to provide an {@link OutputStream}
+ * where the metrics snapshots will be written.
  */
-public class PushingMetricsExporterWriterAdapter extends AbstractMetricsExporter implements PushingMetricsExporter {
+public abstract class PushingMetricsExporterWriterAdapter extends AbstractMetricsExporter implements PushingMetricsExporter {
 
     private final MetricsSnapshotsWriter writer;
-    private final Supplier<OutputStream> streamSupplier;
 
+    /**
+     * Creates a new {@link PushingMetricsExporterWriterAdapter} with the given name and writer.
+     *
+     * @param name   the name of the exporter
+     * @param writer the writer to use for writing metrics snapshots
+     * @throws NullPointerException if any of the parameters is null
+     */
     public PushingMetricsExporterWriterAdapter(
             @NonNull String name,
-            @NonNull MetricsSnapshotsWriter writer,
-            @NonNull Supplier<OutputStream> streamSupplier) {
+            @NonNull MetricsSnapshotsWriter writer) {
         super(name);
         this.writer = Objects.requireNonNull(writer, "writer must not be null");
-        this.streamSupplier = Objects.requireNonNull(streamSupplier, "output stream supplier must not be null");
     }
 
     @Override
     public void export(@NonNull MetricsSnapshot snapshot) throws MetricsExportException {
-        try (OutputStream stream = streamSupplier.get()) {
+        try (OutputStream stream = openStream()) {
             writer.write(snapshot, stream);
         } catch (IOException e) {
             throw new MetricsExportException("Error exporting metrics by " + name(), e);
         }
     }
+
+    /**
+     * Opens an {@link OutputStream} where the metrics snapshots will be written.
+     *
+     * @return an {@link OutputStream} for writing metrics snapshots
+     * @throws IOException if an I/O error occurs while opening the stream
+     */
+    protected abstract OutputStream openStream() throws IOException;
 
     @Override
     public void close() throws IOException {
