@@ -28,7 +28,8 @@ public final class DefaultStatelessMetric extends AbstractMetric<DoubleSupplier,
     }
 
     @Override
-    protected void updateDatapointSnapshot(DataPointHolder<DoubleSupplier, DefaultSingleValueDataPointSnapshot> dataPointHolder) {
+    protected void updateDatapointSnapshot(
+            DataPointHolder<DoubleSupplier, DefaultSingleValueDataPointSnapshot> dataPointHolder) {
         dataPointHolder.snapshot().update(dataPointHolder.dataPoint().getAsDouble());
     }
 
@@ -39,7 +40,8 @@ public final class DefaultStatelessMetric extends AbstractMetric<DoubleSupplier,
         Objects.requireNonNull(valueSupplier, "Value supplier must not be null");
 
         LabelValues labelValues = createLabelValues(labelNamesAndValues);
-        DataPointHolder<DoubleSupplier, DefaultSingleValueDataPointSnapshot> dataPointHolder = createDataPointHolder(valueSupplier, labelValues);
+        DataPointHolder<DoubleSupplier, DefaultSingleValueDataPointSnapshot> dataPointHolder =
+                createDataPointHolder(valueSupplier, labelValues);
         if (dataPoints.putIfAbsent(labelValues, dataPointHolder) != null) {
             throw new IllegalArgumentException(
                     "A data point with the same label values already exists: " + labelValues);

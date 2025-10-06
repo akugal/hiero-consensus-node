@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal.export.snapshot;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -26,7 +27,7 @@ public final class DefaultStateSetDataPointSnapshot<E extends Enum<E>> extends B
      *
      * @param idx   the index of the state to update
      * @param value the new value for the state (true for active, false for inactive)
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= states.length)
+     * @throws IndexOutOfBoundsException if the index is out of range of {@link #states()} length
      */
     public void updateState(int idx, boolean value) {
         this.states[idx] = value;

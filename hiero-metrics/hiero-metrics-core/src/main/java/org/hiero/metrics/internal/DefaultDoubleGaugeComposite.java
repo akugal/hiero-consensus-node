@@ -34,7 +34,8 @@ public final class DefaultDoubleGaugeComposite
     }
 
     @Override
-    protected void updateDatapointSnapshot(DataPointHolder<DoubleGaugeCompositeDataPoint, DefaultGenericMultiValueDataPointSnapshot> dataPointHolder) {
+    protected void updateDatapointSnapshot(
+            DataPointHolder<DoubleGaugeCompositeDataPoint, DefaultGenericMultiValueDataPointSnapshot> dataPointHolder) {
         DoubleGaugeCompositeDataPoint dataPoint = dataPointHolder.dataPoint();
         for (int i = 0; i < dataPoint.size(); i++) {
             double value = exportValueSupplier.applyAsDouble(dataPoint.get(i));

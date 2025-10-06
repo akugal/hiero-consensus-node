@@ -3,7 +3,6 @@ package org.hiero.metrics.internal.export.snapshot;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Arrays;
-
 import org.hiero.metrics.api.export.snapshot.GenericMultiValueDataPointSnapshot;
 import org.hiero.metrics.internal.core.LabelValues;
 

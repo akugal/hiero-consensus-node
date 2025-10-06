@@ -29,7 +29,8 @@ public final class DefaultLongGauge
     }
 
     @Override
-    protected void updateDatapointSnapshot(DataPointHolder<LongGaugeDataPoint, DefaultSingleValueDataPointSnapshot> dataPointHolder) {
+    protected void updateDatapointSnapshot(
+            DataPointHolder<LongGaugeDataPoint, DefaultSingleValueDataPointSnapshot> dataPointHolder) {
         long value = exportValueSupplier.applyAsLong(dataPointHolder.dataPoint());
         double doubleValue = value;
 

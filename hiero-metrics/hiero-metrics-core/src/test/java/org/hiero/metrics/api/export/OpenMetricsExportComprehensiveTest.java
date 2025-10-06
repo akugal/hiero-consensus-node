@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.export;
 
+import java.io.IOException;
+import java.util.function.IntSupplier;
 import org.hiero.metrics.ConsoleMetricsExporter;
 import org.hiero.metrics.TestExporterContext;
 import org.hiero.metrics.api.BooleanGauge;
@@ -20,9 +22,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-
-import java.io.IOException;
-import java.util.function.IntSupplier;
 
 public class OpenMetricsExportComprehensiveTest {
 
@@ -58,23 +57,20 @@ public class OpenMetricsExportComprehensiveTest {
         @Test
         @Order(1)
         public void testInitWithoutObservation() throws IOException {
-            onlyName = BooleanGauge.builder("only_name")
-                    .register(context.getRegistry());
-            nameAndCategory = BooleanGauge.builder(BooleanGauge.key("name_category").withCategory("bool"))
+            onlyName = BooleanGauge.builder("only_name").register(context.getRegistry());
+            nameAndCategory = BooleanGauge.builder(
+                            BooleanGauge.key("name_category").withCategory("bool"))
                     .register(context.getRegistry());
             nameAndDescription = BooleanGauge.builder("name_description")
                     .withDescription("Boolean gauge with description")
                     .register(context.getRegistry());
-            nameAndUnit = BooleanGauge.builder("name_unit")
-                    .withUnit("bool_unit")
-                    .register(context.getRegistry());
+            nameAndUnit =
+                    BooleanGauge.builder("name_unit").withUnit("bool_unit").register(context.getRegistry());
             nameAndDescriptionAndUnit = BooleanGauge.builder("name_description_unit")
                     .withDescription("Boolean gauge with description and unit")
                     .withUnit("bool_unit")
                     .register(context.getRegistry());
-            trueInit = BooleanGauge.builder("true_init")
-                    .withInitValue(true)
-                    .register(context.getRegistry());
+            trueInit = BooleanGauge.builder("true_init").withInitValue(true).register(context.getRegistry());
             constLabel = BooleanGauge.builder("const_label")
                     .withConstantLabel(new Label("c1", "c1_v1"))
                     .register(context.getRegistry());
@@ -86,7 +82,8 @@ public class OpenMetricsExportComprehensiveTest {
                     .withDynamicLabelNames("d1", "d2")
                     .register(context.getRegistry());
 
-            context.exportAndVerify("""
+            context.exportAndVerify(
+                    """
                 # TYPE only_name gauge
                 only_name 0
                 # TYPE bool:name_category gauge
@@ -139,7 +136,8 @@ public class OpenMetricsExportComprehensiveTest {
             manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v1").setFalse(); // new data point
             manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v1").setTrue(); // changes to true
 
-            context.exportAndVerify("""
+            context.exportAndVerify(
+                    """
                 # TYPE only_name gauge
                 only_name 0
                 # TYPE bool:name_category gauge
@@ -197,7 +195,8 @@ public class OpenMetricsExportComprehensiveTest {
             manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v2").setTrue(); // changes to true
             manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v2").set(false); // changes to false
 
-            context.exportAndVerify("""
+            context.exportAndVerify(
+                    """
                 # TYPE only_name gauge
                 only_name 1
                 # TYPE bool:name_category gauge
@@ -231,7 +230,8 @@ public class OpenMetricsExportComprehensiveTest {
         @Test
         @Order(4)
         public void testNoChangesWithoutObservation() throws IOException {
-            context.exportAndVerify("""
+            context.exportAndVerify(
+                    """
                 # TYPE only_name gauge
                 only_name 1
                 # TYPE bool:name_category gauge
@@ -282,23 +282,20 @@ public class OpenMetricsExportComprehensiveTest {
         @Test
         @Order(1)
         public void testInitWithoutObservation() throws IOException {
-            onlyName = DoubleCounter.builder("only_name")
-                    .register(context.getRegistry());
-            nameAndCategory = DoubleCounter.builder(DoubleCounter.key("name_category").withCategory("cnt"))
+            onlyName = DoubleCounter.builder("only_name").register(context.getRegistry());
+            nameAndCategory = DoubleCounter.builder(
+                            DoubleCounter.key("name_category").withCategory("cnt"))
                     .register(context.getRegistry());
             nameAndDescription = DoubleCounter.builder("name_description")
                     .withDescription("Double counter with description")
                     .register(context.getRegistry());
-            nameAndUnit = DoubleCounter.builder("name_unit")
-                    .withUnit("requests")
-                    .register(context.getRegistry());
+            nameAndUnit =
+                    DoubleCounter.builder("name_unit").withUnit("requests").register(context.getRegistry());
             nameAndDescriptionAndUnit = DoubleCounter.builder("name_description_unit")
                     .withDescription("Double counter with description and unit")
                     .withUnit("requests")
                     .register(context.getRegistry());
-            customInit = DoubleCounter.builder("custom_init")
-                    .withInitValue(1.1)
-                    .register(context.getRegistry());
+            customInit = DoubleCounter.builder("custom_init").withInitValue(1.1).register(context.getRegistry());
             constLabel = DoubleCounter.builder("const_label")
                     .withConstantLabel(new Label("c1", "c1_v1"))
                     .register(context.getRegistry());
@@ -310,7 +307,8 @@ public class OpenMetricsExportComprehensiveTest {
                     .withDynamicLabelNames("d1", "d2")
                     .register(context.getRegistry());
 
-            context.exportAndVerify("""
+            context.exportAndVerify(
+                    """
                 # TYPE only_name counter
                 only_name_total 0
                 # TYPE cnt:name_category counter
@@ -358,10 +356,13 @@ public class OpenMetricsExportComprehensiveTest {
             dynamicLabel.getOrCreateLabeled("d1", "d1_v1").increment(0.01); // changes to 1.01
             dynamicLabel.getOrCreateLabeled("d1", "d1_v2").increment(0); // new data point, stays 0
 
-            manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v1").increment(1.99); // new data point, changes to 1.99
+            manyLabels
+                    .getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v1")
+                    .increment(1.99); // new data point, changes to 1.99
             manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v1").increment(1.01); // changes to 3.0
 
-            context.exportAndVerify("""
+            context.exportAndVerify(
+                    """
                 # TYPE only_name counter
                 only_name_total 0
                 # TYPE cnt:name_category counter
@@ -390,104 +391,103 @@ public class OpenMetricsExportComprehensiveTest {
         }
 
         /**@Test
-        @Order(3)
-        public void testObserve2() throws IOException {
-            onlyName.getNotLabeled().setTrue(); // changes to true
-
-            nameAndCategory.getNotLabeled().setTrue(); // changes to true
-
-            nameAndDescription.getNotLabeled().setFalse(); // changes to false
-
-            nameAndUnit.getNotLabeled().setTrue(); // changes to true
-
-            // nameAndDescriptionAndUnit - no observation, stays true
-
-            trueInit.getNotLabeled().setFalse();
-            trueInit.getNotLabeled().setTrue();
-            trueInit.getNotLabeled().setFalse(); // changes to false
-
-            // constLabel - no observation, stays true
-
-            dynamicLabel.getOrCreateLabeled("d1", "d1_v1").setFalse();
-            // no change for d1_v2, stays false
-            dynamicLabel.getOrCreateLabeled("d1", "d1_v3").setTrue(); // new vdata point
-
-            // no changes for d1_v1, d2_v1
-            manyLabels.getOrCreateLabeled("d1", "d1_v2", "d2", "d2_v1").setTrue(); // new data point
-            manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v2").setFalse(); // new data point
-
-            context.exportAndVerify("""
-                # TYPE only_name gauge
-                only_name 1
-                # TYPE bool:name_category gauge
-                bool:name_category 1
-                # TYPE name_description gauge
-                # HELP name_description Boolean gauge with description
-                name_description 0
-                # TYPE name_unit_bool_unit gauge
-                # UNIT name_unit_bool_unit bool_unit
-                name_unit_bool_unit 1
-                # TYPE name_description_unit_bool_unit gauge
-                # UNIT name_description_unit_bool_unit bool_unit
-                # HELP name_description_unit_bool_unit Boolean gauge with description and unit
-                name_description_unit_bool_unit 1
-                # TYPE true_init gauge
-                true_init 0
-                # TYPE const_label gauge
-                const_label{c1="c1_v1"} 1
-                # TYPE dynamic_label gauge
-                dynamic_label{d1="d1_v1"} 0
-                dynamic_label{d1="d1_v2"} 0
-                dynamic_label{d1="d1_v3"} 1
-                # TYPE many_labels gauge
-                many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 1
-                many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v1"} 1
-                many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 0
-                # EOF
-                """);
-        }
-
-        @Test
-        @Order(4)
-        public void testNoChangesWithoutObservation() throws IOException {
-            context.exportAndVerify("""
-                # TYPE only_name gauge
-                only_name 1
-                # TYPE bool:name_category gauge
-                bool:name_category 1
-                # TYPE name_description gauge
-                # HELP name_description Boolean gauge with description
-                name_description 0
-                # TYPE name_unit_bool_unit gauge
-                # UNIT name_unit_bool_unit bool_unit
-                name_unit_bool_unit 1
-                # TYPE name_description_unit_bool_unit gauge
-                # UNIT name_description_unit_bool_unit bool_unit
-                # HELP name_description_unit_bool_unit Boolean gauge with description and unit
-                name_description_unit_bool_unit 1
-                # TYPE true_init gauge
-                true_init 0
-                # TYPE const_label gauge
-                const_label{c1="c1_v1"} 1
-                # TYPE dynamic_label gauge
-                dynamic_label{d1="d1_v1"} 0
-                dynamic_label{d1="d1_v2"} 0
-                dynamic_label{d1="d1_v3"} 1
-                # TYPE many_labels gauge
-                many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 1
-                many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v1"} 1
-                many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 0
-                # EOF
-                """);
-        }*/
+         * @Order(3)
+         * public void testObserve2() throws IOException {
+         * onlyName.getNotLabeled().setTrue(); // changes to true
+         *
+         * nameAndCategory.getNotLabeled().setTrue(); // changes to true
+         *
+         * nameAndDescription.getNotLabeled().setFalse(); // changes to false
+         *
+         * nameAndUnit.getNotLabeled().setTrue(); // changes to true
+         *
+         * // nameAndDescriptionAndUnit - no observation, stays true
+         *
+         * trueInit.getNotLabeled().setFalse();
+         * trueInit.getNotLabeled().setTrue();
+         * trueInit.getNotLabeled().setFalse(); // changes to false
+         *
+         * // constLabel - no observation, stays true
+         *
+         * dynamicLabel.getOrCreateLabeled("d1", "d1_v1").setFalse();
+         * // no change for d1_v2, stays false
+         * dynamicLabel.getOrCreateLabeled("d1", "d1_v3").setTrue(); // new vdata point
+         *
+         * // no changes for d1_v1, d2_v1
+         * manyLabels.getOrCreateLabeled("d1", "d1_v2", "d2", "d2_v1").setTrue(); // new data point
+         * manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v2").setFalse(); // new data point
+         *
+         * context.exportAndVerify("""
+         * # TYPE only_name gauge
+         * only_name 1
+         * # TYPE bool:name_category gauge
+         * bool:name_category 1
+         * # TYPE name_description gauge
+         * # HELP name_description Boolean gauge with description
+         * name_description 0
+         * # TYPE name_unit_bool_unit gauge
+         * # UNIT name_unit_bool_unit bool_unit
+         * name_unit_bool_unit 1
+         * # TYPE name_description_unit_bool_unit gauge
+         * # UNIT name_description_unit_bool_unit bool_unit
+         * # HELP name_description_unit_bool_unit Boolean gauge with description and unit
+         * name_description_unit_bool_unit 1
+         * # TYPE true_init gauge
+         * true_init 0
+         * # TYPE const_label gauge
+         * const_label{c1="c1_v1"} 1
+         * # TYPE dynamic_label gauge
+         * dynamic_label{d1="d1_v1"} 0
+         * dynamic_label{d1="d1_v2"} 0
+         * dynamic_label{d1="d1_v3"} 1
+         * # TYPE many_labels gauge
+         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 1
+         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v1"} 1
+         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 0
+         * # EOF
+         * """);
+         * }
+         *
+         * @Test
+         * @Order(4)
+         * public void testNoChangesWithoutObservation() throws IOException {
+         * context.exportAndVerify("""
+         * # TYPE only_name gauge
+         * only_name 1
+         * # TYPE bool:name_category gauge
+         * bool:name_category 1
+         * # TYPE name_description gauge
+         * # HELP name_description Boolean gauge with description
+         * name_description 0
+         * # TYPE name_unit_bool_unit gauge
+         * # UNIT name_unit_bool_unit bool_unit
+         * name_unit_bool_unit 1
+         * # TYPE name_description_unit_bool_unit gauge
+         * # UNIT name_description_unit_bool_unit bool_unit
+         * # HELP name_description_unit_bool_unit Boolean gauge with description and unit
+         * name_description_unit_bool_unit 1
+         * # TYPE true_init gauge
+         * true_init 0
+         * # TYPE const_label gauge
+         * const_label{c1="c1_v1"} 1
+         * # TYPE dynamic_label gauge
+         * dynamic_label{d1="d1_v1"} 0
+         * dynamic_label{d1="d1_v2"} 0
+         * dynamic_label{d1="d1_v3"} 1
+         * # TYPE many_labels gauge
+         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 1
+         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v1"} 1
+         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 0
+         * # EOF
+         * """);
+         * }*/
     }
 
     @Test
     public void demo() throws InterruptedException {
         MetricRegistry registry = MetricsFacade.createRegistry(new Label("env", "test"));
-        MetricsExportManager snapshotManager = MetricsFacade.createExportManager(
-                new ConsoleMetricsExporter(OpenMetricsSnapshotsWriter.DEFAULT),
-                1);
+        MetricsExportManager snapshotManager =
+                MetricsFacade.createExportManager(new ConsoleMetricsExporter(OpenMetricsSnapshotsWriter.DEFAULT), 1);
         snapshotManager.manageMetricRegistry(registry);
 
         BooleanGauge booleanGauge = BooleanGauge.builder("boolean_gauge")
@@ -544,6 +544,5 @@ public class OpenMetricsExportComprehensiveTest {
         statGauge.getOrCreateLabeled(labels2).update(12);
 
         Thread.sleep(1200);
-
     }
 }

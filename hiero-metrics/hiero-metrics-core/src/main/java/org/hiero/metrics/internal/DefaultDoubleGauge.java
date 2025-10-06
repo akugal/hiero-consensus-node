@@ -29,7 +29,8 @@ public final class DefaultDoubleGauge
     }
 
     @Override
-    protected void updateDatapointSnapshot(DataPointHolder<DoubleGaugeDataPoint, DefaultSingleValueDataPointSnapshot> dataPointHolder) {
+    protected void updateDatapointSnapshot(
+            DataPointHolder<DoubleGaugeDataPoint, DefaultSingleValueDataPointSnapshot> dataPointHolder) {
         double value = exportValueSupplier.applyAsDouble(dataPointHolder.dataPoint());
         dataPointHolder.snapshot().update(value);
     }

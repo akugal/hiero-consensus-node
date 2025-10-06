@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.export.snapshot;
 
 /**
@@ -18,7 +19,7 @@ public interface StateSetDataPointSnapshot<E extends Enum<E>> extends DataPointS
      *
      * @param idx the index of the state to check
      * @return true if the state is active, false otherwise
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= states().length)
+     * @throws IndexOutOfBoundsException if the index is out of range of {@link #states()} length
      */
     boolean state(int idx);
 }

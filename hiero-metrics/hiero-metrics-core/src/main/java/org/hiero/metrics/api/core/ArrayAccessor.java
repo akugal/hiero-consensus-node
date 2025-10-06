@@ -9,7 +9,7 @@ import java.util.Iterator;
  * It extends {@link Iterable} for easy iteration, but it is recommended to use indexed access using loop:
  * <br>
  * <pre>
- *     for (int i = 0; i < arrayAccessor.size(); i++) {
+ *     for (int i = 0; i &lt; arrayAccessor.size(); i++) {
  *          T element = arrayAccessor.get(i);
  *          // process element
  *     }
@@ -27,7 +27,7 @@ public interface ArrayAccessor<T> extends Iterable<T> {
     /**
      * @param index the index of the element to return
      * @return the element at the specified index
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     @NonNull
     T get(int index);

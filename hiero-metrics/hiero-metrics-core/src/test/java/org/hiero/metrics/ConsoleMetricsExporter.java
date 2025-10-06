@@ -1,11 +1,11 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import org.hiero.metrics.api.export.extension.PushingMetricsExporterWriterAdapter;
-import org.hiero.metrics.api.export.extension.writer.MetricsSnapshotsWriter;
-
 import java.io.IOException;
 import java.io.OutputStream;
+import org.hiero.metrics.api.export.extension.PushingMetricsExporterWriterAdapter;
+import org.hiero.metrics.api.export.extension.writer.MetricsSnapshotsWriter;
 
 public class ConsoleMetricsExporter extends PushingMetricsExporterWriterAdapter {
 

@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.api.utils;
 
+import com.swirlds.base.ArgumentUtils;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.regex.Pattern;
-
-import com.swirlds.base.ArgumentUtils;
 import org.hiero.metrics.api.core.Label;
 
 /**
@@ -56,8 +55,8 @@ public final class MetricUtils {
     public static String validateNameCharacters(String name) {
         ArgumentUtils.throwArgBlank(name, "name");
         if (!NAME_PATTERN.matcher(name).matches()) {
-            throw new IllegalArgumentException("Name contains illegal character: " + name
-                    + ". Required pattern is " + NAME_REGEX);
+            throw new IllegalArgumentException(
+                    "Name contains illegal character: " + name + ". Required pattern is " + NAME_REGEX);
         }
         return name;
     }

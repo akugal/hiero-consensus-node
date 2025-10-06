@@ -2,9 +2,8 @@
 package org.hiero.metrics.api.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import org.hiero.metrics.api.utils.MetricUtils;
-
 import java.util.Objects;
+import org.hiero.metrics.api.utils.MetricUtils;
 
 /**
  * A unique key for identifying a {@link Metric} by its name and type.
@@ -17,6 +16,7 @@ public final class MetricKey<M extends Metric> {
 
     @NonNull
     private final String name;
+
     @NonNull
     private final Class<M> type;
 
@@ -82,8 +82,7 @@ public final class MetricKey<M extends Metric> {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (MetricKey) obj;
-        return Objects.equals(this.name, that.name) &&
-                Objects.equals(this.type, that.type);
+        return Objects.equals(this.name, that.name) && Objects.equals(this.type, that.type);
     }
 
     @Override
@@ -93,9 +92,6 @@ public final class MetricKey<M extends Metric> {
 
     @Override
     public String toString() {
-        return "MetricKey[" +
-                "name=" + name + ", " +
-                "type=" + type + ']';
+        return "MetricKey[" + "name=" + name + ", " + "type=" + type + ']';
     }
-
 }

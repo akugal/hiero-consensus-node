@@ -40,7 +40,8 @@ public final class DefaultStatsGaugeAdapter<I, D>
     }
 
     @Override
-    protected void updateDatapointSnapshot(DataPointHolder<D, DefaultGenericMultiValueDataPointSnapshot> dataPointHolder) {
+    protected void updateDatapointSnapshot(
+            DataPointHolder<D, DefaultGenericMultiValueDataPointSnapshot> dataPointHolder) {
         for (int i = 0; i < statExportGetters.length; i++) {
             double value = statExportGetters[i].applyAsDouble(dataPointHolder.dataPoint());
             dataPointHolder.snapshot().updateValueAt(i, value);

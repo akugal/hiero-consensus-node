@@ -4,7 +4,6 @@ package org.hiero.metrics.internal.export.snapshot;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import java.util.function.Consumer;
-
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricMetadata;
@@ -19,9 +18,7 @@ public final class UpdatableMetricSnapshot<D, S extends DataPointSnapshot> imple
     private final Consumer<DataPointHolder<D, S>> snapshotUpdater;
     private final AppendArray<DataPointHolder<D, S>> dataPointHolders;
 
-    public UpdatableMetricSnapshot(Metric metric,
-                                   Consumer<DataPointHolder<D, S>> snapshotUpdater,
-                                   int capacity) {
+    public UpdatableMetricSnapshot(Metric metric, Consumer<DataPointHolder<D, S>> snapshotUpdater, int capacity) {
         this.metric = metric;
         this.snapshotUpdater = snapshotUpdater;
         this.dataPointHolders = new AppendArray<>(capacity);

@@ -5,19 +5,19 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
-
 import org.hiero.metrics.api.export.AbstractMetricsExporter;
 import org.hiero.metrics.api.export.MetricsExportException;
-import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
 import org.hiero.metrics.api.export.PushingMetricsExporter;
 import org.hiero.metrics.api.export.extension.writer.MetricsSnapshotsWriter;
+import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
 
 /**
  * An abstract class for adapting {@link MetricsSnapshotsWriter} as a {@link PushingMetricsExporter}.
  * Subclasses must implement the {@link #openStream()} method to provide an {@link OutputStream}
  * where the metrics snapshots will be written.
  */
-public abstract class PushingMetricsExporterWriterAdapter extends AbstractMetricsExporter implements PushingMetricsExporter {
+public abstract class PushingMetricsExporterWriterAdapter extends AbstractMetricsExporter
+        implements PushingMetricsExporter {
 
     private final MetricsSnapshotsWriter writer;
 
@@ -28,9 +28,7 @@ public abstract class PushingMetricsExporterWriterAdapter extends AbstractMetric
      * @param writer the writer to use for writing metrics snapshots
      * @throws NullPointerException if any of the parameters is null
      */
-    public PushingMetricsExporterWriterAdapter(
-            @NonNull String name,
-            @NonNull MetricsSnapshotsWriter writer) {
+    public PushingMetricsExporterWriterAdapter(@NonNull String name, @NonNull MetricsSnapshotsWriter writer) {
         super(name);
         this.writer = Objects.requireNonNull(writer, "writer must not be null");
     }

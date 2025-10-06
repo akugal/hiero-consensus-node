@@ -2,7 +2,6 @@
 package org.hiero.metrics.internal.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import org.hiero.metrics.api.core.ArrayAccessor;

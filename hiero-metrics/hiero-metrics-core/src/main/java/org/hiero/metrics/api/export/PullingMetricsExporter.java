@@ -2,10 +2,9 @@
 package org.hiero.metrics.api.export;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
-
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
 
 /**
  * Type of {@link MetricsExporter} that pulls metrics snapshots from

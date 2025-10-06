@@ -1,5 +1,9 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import java.io.IOException;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricsFacade;
@@ -7,9 +11,6 @@ import org.hiero.metrics.api.export.MetricsExportManager;
 import org.hiero.metrics.api.export.extension.PullingMetricsExporterAdapter;
 import org.hiero.metrics.api.export.extension.writer.MetricsSnapshotsWriter;
 import org.hiero.metrics.api.export.extension.writer.UnsynchronizedByteArrayOutputStream;
-import java.io.IOException;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class TestExporterContext {
 

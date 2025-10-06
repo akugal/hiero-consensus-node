@@ -17,7 +17,6 @@ public class DefaultStateSet<E extends Enum<E>>
 
     public DefaultStateSet(StateSet.Builder<E> builder) {
         super(builder);
-
         enumConstants = builder.getEnumClass().getEnumConstants();
     }
 
@@ -27,7 +26,8 @@ public class DefaultStateSet<E extends Enum<E>>
     }
 
     @Override
-    protected void updateDatapointSnapshot(DataPointHolder<StateSetDataPoint<E>, DefaultStateSetDataPointSnapshot<E>> dataPointHolder) {
+    protected void updateDatapointSnapshot(
+            DataPointHolder<StateSetDataPoint<E>, DefaultStateSetDataPointSnapshot<E>> dataPointHolder) {
         for (E enumConstant : enumConstants) {
             boolean value = dataPointHolder.dataPoint().getState(enumConstant);
             dataPointHolder.snapshot().updateState(enumConstant.ordinal(), value);
