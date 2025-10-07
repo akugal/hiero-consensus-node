@@ -19,6 +19,20 @@ import org.hiero.metrics.api.export.PushingMetricsExporter;
 import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
 import org.hiero.metrics.api.utils.Unit;
 
+/**
+ * A default implementation of the {@link org.hiero.metrics.api.export.MetricsExportManager} interface
+ * that supports multiple pulling and pushing exporters.
+ * <p>
+ * Pulling exporters are initialized during the manager's {@link #init()} method call and are provided with a
+ * supplier of the latest metrics snapshot. They can pull the latest snapshot whenever they need it.
+ * <p>
+ * Pushing exporters are periodically invoked in a separate thread at a fixed interval to push the latest metrics
+ * snapshot. The interval is configurable during the manager's construction. See {@link ExportRunnable}.
+ * <p>
+ * The manager ensures thread-safety when taking snapshots and updating the reference for pulling exporters.
+ * It also handles exceptions thrown by exporters during initialization and exporting, logging errors without
+ * disrupting the overall exporting process.
+ */
 public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
 
     private static final String PUSHING_EXPORTER_NAME = "name";
@@ -138,6 +152,9 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
         }
     }
 
+    /**
+     * A runnable that takes a snapshot, updates reference for pulling exporters and pushes it to all pushing exporters.
+     */
     private class ExportRunnable implements Runnable {
 
         @Override

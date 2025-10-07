@@ -16,6 +16,9 @@ import org.hiero.metrics.internal.datapoint.LongAccumulatorGaugeDataPoint;
 
 /**
  * A stateful metric of type {@link MetricType#GAUGE} that holds {@link LongGaugeDataPoint} per label set.
+ * <p>
+ * The gauge could be configured to hold the last value set, or to accumulate values using an operator
+ * (e.g. sum, min, max). See {@link Builder} for details.
  */
 public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoint> {
 
@@ -55,8 +58,10 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
     }
 
     /**
-     * A builder for a {@link LongGauge} using {@link AtomicLongGaugeDataPoint} or
-     * {@link LongAccumulatorGaugeDataPoint} if operator is provided with {@link #withOperator(LongBinaryOperator, boolean)}.
+     * A builder for a {@link LongGauge} using {@link LongGaugeDataPoint} per label set.
+     * <p>
+     * By default, it will export last value set, but could be configured to export accumulated values
+     * using {@link #withOperator(LongBinaryOperator, boolean)}. <br>
      * Default initial value is <code>0L</code>.
      */
     final class Builder extends StatefulMetric.Builder<LongSupplier, LongGaugeDataPoint, Builder, LongGauge> {

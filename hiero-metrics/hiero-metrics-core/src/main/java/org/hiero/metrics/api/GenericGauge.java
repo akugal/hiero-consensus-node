@@ -12,15 +12,16 @@ import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricType;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.datapoint.GaugeDataPoint;
+import org.hiero.metrics.api.stat.StatUtils;
 import org.hiero.metrics.api.utils.Unit;
 import org.hiero.metrics.internal.DefaultGenericGauge;
 import org.hiero.metrics.internal.datapoint.AtomicReferenceGaugeDataPoint;
 
 /**
- * A stateful metric of type {@link MetricType#GAUGE} that holds custom value (convertable to numerical value on export)
- * per label set.
+ * A stateful metric of type {@link MetricType#GAUGE} that holds {@link GaugeDataPoint} per label set. <br>
+ * Data points simply hold last observed custom value (convertable to numerical value on export).
  *
- * @param <T> the type of value used to observe/update the gauge
+ * @param <T> the type of value used to observe/update the gauge and convert to double for export
  */
 public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPoint<T>> {
 
@@ -78,7 +79,8 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
     static Builder<Duration> durationBuilder(@NonNull String name, @NonNull ChronoUnit unit) {
         Objects.requireNonNull(unit, "unit cannot be null");
         final MetricKey<GenericGauge<Duration>> key = key(name);
-        return new Builder<>(key, duration -> duration == null ? 0 : duration.get(unit)).withUnit(Unit.getUnit(unit));
+        return new Builder<>(key, duration -> duration == null ? StatUtils.ZERO : duration.get(unit))
+                .withUnit(Unit.getUnit(unit));
     }
 
     /**
@@ -96,7 +98,8 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
     }
 
     /**
-     * A builder for a {@link GenericGauge} using {@link AtomicReferenceGaugeDataPoint}.
+     * A builder for a {@link GenericGauge} using {@link GaugeDataPoint} per label set.
+     * <p>
      * Default initial value is {@code null}.
      *
      * @param <T> the type of value used to observe/update the gauge

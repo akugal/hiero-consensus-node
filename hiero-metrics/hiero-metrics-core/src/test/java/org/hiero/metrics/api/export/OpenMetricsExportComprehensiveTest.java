@@ -490,11 +490,11 @@ public class OpenMetricsExportComprehensiveTest {
                             LongCounter.key("name_category").withCategory("cnt"))
                     .register(context.getRegistry());
             nameAndDescription = LongCounter.builder("name_description")
-                    .withDescription("Double counter with description")
+                    .withDescription("Long counter with description")
                     .register(context.getRegistry());
             nameAndUnit = LongCounter.builder("name_unit").withUnit("requests").register(context.getRegistry());
             nameAndDescriptionAndUnit = LongCounter.builder("name_description_unit")
-                    .withDescription("Double counter with description and unit")
+                    .withDescription("Long counter with description and unit")
                     .withUnit("requests")
                     .register(context.getRegistry());
             customInit = LongCounter.builder("custom_init").withInitValue(10).register(context.getRegistry());
@@ -725,19 +725,19 @@ public class OpenMetricsExportComprehensiveTest {
 
             context.exportAndVerify(
                     """
-                            # TYPE only_name counter
-                            # TYPE cnt:name_category counter
-                            # TYPE name_description counter
-                            # HELP name_description Double gauge with description
-                            # TYPE name_unit_requests counter
-                            # UNIT name_unit_requests requests
-                            # TYPE name_description_unit_requests counter
-                            # UNIT name_description_unit_requests requests
-                            # HELP name_description_unit_requests Double gauge with description and unit
-                            # TYPE custom_init counter
-                            # TYPE const_label counter
-                            # TYPE dynamic_label counter
-                            # TYPE many_labels counter
+                            # TYPE only_name gauge
+                            # TYPE cnt:name_category gauge
+                            # TYPE max_reset:name_description gauge
+                            # HELP max_reset:name_description Double gauge with description
+                            # TYPE min:name_unit_requests gauge
+                            # UNIT min:name_unit_requests requests
+                            # TYPE agg:name_description_unit_requests gauge
+                            # UNIT agg:name_description_unit_requests requests
+                            # HELP agg:name_description_unit_requests Double gauge with description and unit
+                            # TYPE custom_init gauge
+                            # TYPE const_label gauge
+                            # TYPE dynamic_label gauge
+                            # TYPE many_labels gauge
                             # EOF
                             """);
         }

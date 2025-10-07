@@ -12,8 +12,11 @@ import org.hiero.metrics.internal.DefaultStateSet;
 import org.hiero.metrics.internal.datapoint.EnumStateSetDataPoint;
 
 /**
- * A stateful metric of type {@link MetricType#STATE_SET} that holds a set of states identified
- * by values of specified enum type.
+ * A stateful metric of type {@link MetricType#STATE_SET} that holds {@link StateSetDataPoint} per label set.
+ * <p>
+ * This requires enum type to ensure states are fixed size.<br>
+ * This metric won't have a unit (if set, will be overridden to {@code null} during metric construction).
+ *
  * @param <E> the enum type of the states in the set
  */
 public interface StateSet<E extends Enum<E>> extends StatefulMetric<List<E>, StateSetDataPoint<E>> {
@@ -60,8 +63,10 @@ public interface StateSet<E extends Enum<E>> extends StatefulMetric<List<E>, Sta
     }
 
     /**
-     * Builder for {@link StateSet} metrics using {@link EnumStateSetDataPoint}.
+     * Builder for {@link StateSet} using {@link StateSetDataPoint} per label set.
+     * <p>
      * By default, the initial state is empty and false for each state.
+     *
      * @param <E> the type of the states in the set
      */
     final class Builder<E extends Enum<E>>

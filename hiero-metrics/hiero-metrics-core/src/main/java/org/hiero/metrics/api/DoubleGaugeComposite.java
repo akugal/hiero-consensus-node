@@ -28,7 +28,8 @@ import org.hiero.metrics.internal.datapoint.DoubleGaugeCompositeArrayDataPoint;
 /**
  * A stateful metric of type {@link MetricType#GAUGE} that holds {@link DoubleGaugeCompositeDataPoint} per label set.
  * General use case is to track multiple related statistics (e.g. min, max, sum, count, latest) for the same metric
- * without creating multiple individual metrics.
+ * without creating multiple individual metrics. <br>
+ * If custom logic is not required to handle observed values, then consider using {@link StatsGaugeAdapter}.
  * <p>
  * On export each {@link DoubleGaugeDataPoint} within {@link DoubleGaugeCompositeDataPoint} has additional label
  * to be identified - see {@link Builder} for details
@@ -71,7 +72,8 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
     }
 
     /**
-     * A builder for a {@link DoubleGaugeComposite}.
+     * A builder for a {@link DoubleGaugeComposite} using {@link DoubleGaugeCompositeArrayDataPoint} per label set.
+     * <p>
      * Default additional label for export is {@value StatUtils#DEFAULT_STAT_LABEL}, and can be changed via
      * {@link #withStatLabel(String)}.
      */
@@ -181,7 +183,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
 
         /**
          * Add a new stat to be tracked by this composite gauge that simply holds the maximum of all values set.
-         * The initial value is {@link Double#MIN_VALUE}.
+         * The initial value is {@link Double#NEGATIVE_INFINITY}.
          *
          * @return this builder
          */
@@ -192,7 +194,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
 
         /**
          * Add a new stat to be tracked by this composite gauge that simply holds the minimum of all values set.
-         * The initial value is {@link Double#MAX_VALUE}.
+         * The initial value is {@link Double#POSITIVE_INFINITY}.
          *
          * @return this builder
          */

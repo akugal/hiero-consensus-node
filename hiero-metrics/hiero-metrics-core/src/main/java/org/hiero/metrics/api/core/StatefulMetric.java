@@ -16,9 +16,10 @@ import java.util.function.Function;
  * such as IDs or timestamps.
  * <p>
  * Data points are created lazily, when requested via {@link #getOrCreateLabeled(String...)},
- * {@link #getOrCreateLabeled(Object, String...)} or {@link #getOrCreateNotLabeled()}, so no data point will be exported
- * until at least one observation is made using these methods. If initial value of data point has to be exported
- * even before observation, {@code getOrCreate} method can be called to instantiate datapoint.
+ * {@link #getOrCreateLabeled(Object, String...)} or {@link #getOrCreateNotLabeled()} for observation,
+ * so no data point will be exported until at least one observation is made using these methods.
+ * If initial value of data point has to be exported even before observation,
+ * {@code getOrCreate} method can be called to instantiate datapoint.
  *
  * @param <I> the type of the initializer used to create new data points per label set
  * @param <D> the type of the data point
@@ -43,7 +44,7 @@ public interface StatefulMetric<I, D> extends Metric {
      * Label names and values are used as is without array copying,
      * so caller must not modify array after calling this method.
      *
-     * @param namesAndValues - alternating label names and values, e.g. "label1", "value1", "label2", "value2"
+     * @param namesAndValues alternating label names and values, e.g. "label1", "value1", "label2", "value2"
      * @return the data point with the specified labels
      * @throws IllegalStateException if metric has no dynamic labels specified during creation
      * @throws IllegalArgumentException if provided label names do not match {@link #dynamicLabelNames()}
@@ -61,7 +62,7 @@ public interface StatefulMetric<I, D> extends Metric {
      * so caller must not modify array after calling this method.
      *
      * @param initializer the initializer to create new data points, must not be {@code null}
-     * @param namesAndValues - alternating label names and values, e.g. "label1", "value1", "label2", "value2"
+     * @param namesAndValues alternating label names and values, e.g. "label1", "value1", "label2", "value2"
      * @return the data point with the specified labels
      * @throws IllegalStateException if metric has no dynamic labels specified during creation
      * @throws IllegalArgumentException if provided label names do not match {@link #dynamicLabelNames()}

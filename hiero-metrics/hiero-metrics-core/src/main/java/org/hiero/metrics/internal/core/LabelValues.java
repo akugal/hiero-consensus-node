@@ -3,6 +3,9 @@ package org.hiero.metrics.internal.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 
+/**
+ * Represents a set of label values for a specific combination of dynamic labels.
+ */
 public abstract sealed class LabelValues permits LabelNamesAndValues, EmptyLabelValues {
 
     private int hashCode = 0;

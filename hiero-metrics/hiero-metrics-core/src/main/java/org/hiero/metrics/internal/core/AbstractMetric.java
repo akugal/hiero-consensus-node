@@ -14,6 +14,16 @@ import org.hiero.metrics.internal.export.snapshot.UpdatableMetricSnapshot;
 
 /**
  * Base class for all metric implementations requiring {@link Metric.Builder} for construction.
+ * <p>
+ * Implements common functionality like storing metadata, constant and dynamic labels, and managing
+ * datapoint snapshots.<br>
+ * Constant and dynamic labels are alphabetically sorted to ensure consistent ordering.
+ * <p>
+ * Subclasses must implement methods to create and update datapoint snapshots.
+ * Snapshot objects are reused during export to minimize object allocations.
+ *
+ * @param <D> The type of the data point associated with this metric.
+ * @param <S> The type of the {@link DataPointSnapshot} associated with this metric.
  */
 public abstract class AbstractMetric<D, S extends DataPointSnapshot> implements SnapshotableMetric<S> {
 
@@ -79,8 +89,8 @@ public abstract class AbstractMetric<D, S extends DataPointSnapshot> implements 
                 throw new IllegalArgumentException("Missing label name: " + labelName);
             }
 
+            // swap only if not already on its place
             if (j > 2 * i) {
-                // swap only if not already on it's place
                 String tmpName = namesAndValues[2 * i];
                 String tmpValue = namesAndValues[2 * i + 1];
                 namesAndValues[2 * i] = namesAndValues[j];

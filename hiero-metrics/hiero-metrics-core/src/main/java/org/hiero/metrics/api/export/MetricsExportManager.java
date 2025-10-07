@@ -5,7 +5,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import org.hiero.metrics.api.core.MetricRegistry;
 
 /**
- * Manager for exporting metrics data points to external systems using set of
+ * Manager for exporting metrics data points from all managed registries to external systems using set of
  * {@link PushingMetricsExporter} or {@link PullingMetricsExporter}, or both.
  * <p>
  * Requires one or more {@link MetricRegistry} to manage.

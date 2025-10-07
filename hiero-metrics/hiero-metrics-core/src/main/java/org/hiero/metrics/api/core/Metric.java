@@ -17,7 +17,9 @@ import org.hiero.metrics.api.utils.MetricUtils;
  * Base interface for all metrics.
  * <p>
  * A metric is defined by its {@link MetricMetadata}, a {@link Label} set of
- * constant labels and a set of dynamic label names (may have no labels at all).
+ * constant labels and a set of dynamic label names (may have no labels at all). Metric cannot have duplicate
+ * label names, and dynamic label names must not conflict with constant label names. Labels are used to differentiate
+ * different data points associated with the metric.
  * <p>
  * Metrics are immutable and thread-safe, but they may hold mutable {@link org.hiero.metrics.api.datapoint.DataPoint}s
  * per dynamic labels set, that can be updated with new measurements.

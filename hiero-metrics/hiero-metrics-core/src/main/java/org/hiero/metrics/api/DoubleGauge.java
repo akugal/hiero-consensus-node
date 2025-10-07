@@ -18,6 +18,9 @@ import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
 
 /**
  * A stateful metric of type {@link MetricType#GAUGE} that holds {@link DoubleGaugeDataPoint} per label set.
+ * <p>
+ * The gauge could be configured to hold the last value set, or to accumulate values using an operator
+ * (e.g. sum, min, max). See {@link Builder} for details.
  */
 public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeDataPoint> {
 
@@ -57,10 +60,11 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
     }
 
     /**
-     * Builder for {@link DoubleGauge} using {@link AtomicDoubleGaugeDataPoint}
-     * or {@link DoubleAccumulatorGaugeDataPoint} if operator is provided
-     * with {@link #withOperator(DoubleBinaryOperator, boolean)}.
-     * Default initial value is {@code 0.0}.
+     * Builder for {@link DoubleGauge} using {@link DoubleGaugeDataPoint} per label set.
+     * <p>
+     * By default, it will export last value set, but could be configured to export accumulated values
+     * using {@link #withOperator(DoubleBinaryOperator, boolean)}. <br>
+     * Default initial value is {@code 0.0}, but could be modified with {@link #withInitValue(double)}.
      */
     final class Builder extends StatefulMetric.Builder<DoubleSupplier, DoubleGaugeDataPoint, Builder, DoubleGauge> {
 
@@ -91,7 +95,7 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
         }
 
         /**
-         * Set the aggregation operator to use when updating the gauge value.
+         * Set the aggregation operator to use when updating the gauge value (applied to previous and new value).
          * If not set, the gauge will simply hold the last value set.
          *
          * @param operator      the aggregation operator, must not be {@code null}
@@ -106,8 +110,8 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
         }
 
         /**
-         * Set the aggregation operator to {@code min} and initial value to {@link Double#MAX_VALUE},
-         * which won't be exported if not observed at least once.
+         * Set the aggregation operator to track {@code max} spikes of the values.
+         * Initial value is {@link Double#NEGATIVE_INFINITY}, which won't be exported if not observed at least once.
          * The gauge will be reset to its initial value after each export.
          *
          * @return this builder
@@ -117,8 +121,8 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
         }
 
         /**
-         * Set the aggregation operator to {@code max} and initial value to {@link Double#MIN_VALUE},
-         * which won't be exported if not observed at least once.
+         * Set the aggregation operator to track {@code min} spikes of the values.
+         * Initial value is {@link Double#POSITIVE_INFINITY}, which won't be exported if not observed at least once.
          * The gauge will be reset to its initial value after each export.
          *
          * @return this builder

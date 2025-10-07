@@ -10,6 +10,18 @@ import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.export.snapshot.DataPointSnapshot;
 import org.hiero.metrics.internal.datapoint.DataPointHolder;
 
+/**
+ * Base class for all stateful metric implementations requiring {@link StatefulMetric.Builder} for
+ * construction.
+ * <p>
+ * Holds a map of data points for each combination of dynamic label values or a single data point if no dynamic
+ * labels are defined. All data points are created lazily using the provided data point factory function only
+ * when requested for observation.
+ *
+ * @param <I> The type of the initializer used to create new data points.
+ * @param <D> The type of the data point associated with this metric.
+ * @param <S> The type of the {@link DataPointSnapshot} associated with this metric.
+ */
 public abstract class AbstractStatefulMetric<I, D, S extends DataPointSnapshot> extends AbstractMetric<D, S>
         implements StatefulMetric<I, D> {
 

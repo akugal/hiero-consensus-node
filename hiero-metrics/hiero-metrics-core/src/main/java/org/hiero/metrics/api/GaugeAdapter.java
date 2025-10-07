@@ -15,14 +15,21 @@ import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.internal.DefaultGaugeAdapter;
 
 /**
- * A stateful metric of type {@link MetricType#GAUGE} that holds custom data point per label set.
- * It allows to adapt any external class holding single numerical value to a gauge metric.
+ * A stateful metric of type {@link MetricType#GAUGE} that holds custom data point (provided by the client code)
+ * per label set. It allows to adapt any external class holding single numerical value to a gauge metric.
  * For multiple numerical values {@link StatsGaugeAdapter} can be used.
  * <p>
- * It is responsibility of the client to ensure that external data point is thread safe and provides atomic updates.
+ * This metric can be used for cases when some custom logic is required to handle observed values,
+ * which cannot be achieved with accumulating {@link LongGauge} or {@link DoubleGauge} or with {@link GenericGauge}.<br>
+ * If aggregation can be archived using accumulating operations, then use {@link LongGauge} or {@link DoubleGauge}.<br>
+ * If latest set custom value type has to be reported, then {@link GenericGauge} should be used.
+ * <p>
+ * It is responsibility of the client to ensure that external data point is thread safe and provides atomic updates,
+ * if needed.
  *
  * @param <I> the type of the initializer used to create the data point
- * @param <D> the type of the data point
+ * @param <D> the type of the data point used to hold the gauge value and provide method for observations
+ *           and numerical value state access
  */
 public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
 

@@ -17,6 +17,19 @@ import org.hiero.metrics.api.export.MetricsExportManager;
 import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
 import org.hiero.metrics.internal.export.snapshot.DefaultMetricsSnapshot;
 
+/**
+ * Base class for {@link MetricsExportManager} implementations.
+ * <p>
+ * Manages multiple metric registries and provides a combined snapshot of their metrics.<br>
+ * With first managed {@link SnapshotableMetricsRegistry} instance, it calls {@link #init()} method
+ * to allow subclasses to perform any necessary initialization.
+ * Before that, this manger allows subclasses to register export metrics by calling
+ * {@link #registerExportMetrics(String, MetricRegistry)} from {@link #initExportMetrics()}.
+ * <p>
+ * Metrics and datapoints snapshots are taken from all managed registries and are reusable objects, so
+ * {@link #takeSnapshot()} is synchronized to ensure thread-safety and just updates the snapshots
+ * from associated metrics and their datapoints.
+ */
 public abstract class AbstractMetricsExportManager implements MetricsExportManager {
 
     protected static final Logger logger = LogManager.getLogger(MetricsExportManager.class);

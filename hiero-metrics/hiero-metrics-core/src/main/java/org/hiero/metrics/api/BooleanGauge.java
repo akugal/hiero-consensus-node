@@ -12,7 +12,8 @@ import org.hiero.metrics.internal.DefaultBooleanGauge;
 import org.hiero.metrics.internal.datapoint.AtomicBooleanGaugeDataPoint;
 
 /**
- * A stateful metric of type {@link MetricType#GAUGE} that holds {@link BooleanGaugeDataPoint} per label set.
+ * A stateful metric of type {@link MetricType#GAUGE} that holds {@link BooleanGaugeDataPoint} per label set. <br>
+ * Last set {@code boolean} value will be reported during export.
  */
 public interface BooleanGauge extends StatefulMetric<BooleanSupplier, BooleanGaugeDataPoint> {
 
@@ -52,8 +53,9 @@ public interface BooleanGauge extends StatefulMetric<BooleanSupplier, BooleanGau
     }
 
     /**
-     * Builder for {@link BooleanGauge} metrics using {@link AtomicBooleanGaugeDataPoint} implementation.
-     * By default, initial value is {@code false}.
+     * Builder for {@link BooleanGauge} using {@link BooleanGaugeDataPoint} per label set.
+     * <p>
+     * Default initial value is {@code false}, but could be modified using {@link #withInitValue(boolean)}.
      */
     final class Builder extends StatefulMetric.Builder<BooleanSupplier, BooleanGaugeDataPoint, Builder, BooleanGauge> {
 

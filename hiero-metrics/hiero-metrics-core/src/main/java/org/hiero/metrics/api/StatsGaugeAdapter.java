@@ -24,7 +24,16 @@ import org.hiero.metrics.internal.DefaultStatsGaugeAdapter;
 
 /**
  * A stateful metric of type {@link MetricType#GAUGE} similar to {@link GaugeAdapter} but holding multiple
- * numerical values per data dynamic labels set.
+ * custom data points (provided by the client code) per label set.
+ * <p>
+ * This metric can be used for cases when some custom logic or aggregation is required to handle observed values,
+ * which cannot be achieved with {@link DoubleGaugeComposite} that using multiple accumulating {@link DoubleGauge}
+ * instances to hold multiple values per label set.<br>
+ * <p>
+ * On export each value will have additional label to classify the value type - see {@link Builder#getStatLabel()}.
+ * <p>
+ * It is responsibility of the client to ensure that external data point is thread safe and provides atomic updates,
+ * if needed.
  *
  * @param <I> the type of the initializer used to create the data point
  * @param <D> the type of the data point held by the metric
@@ -80,6 +89,7 @@ public interface StatsGaugeAdapter<I, D> extends StatefulMetric<I, D> {
 
     /**
      * Builder for a {@link StatsGaugeAdapter}.
+     * <p>
      * Default additional label for export is {@value StatUtils#DEFAULT_STAT_LABEL}, and can be changed via
      * {@link #withStatLabel(String)}.
      *

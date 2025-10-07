@@ -6,6 +6,13 @@ import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.internal.datapoint.DataPointHolder;
 import org.hiero.metrics.internal.export.snapshot.DefaultSingleValueDataPointSnapshot;
 
+/**
+ * Base class for all stateful metrics with single double value data points
+ * using {@link DefaultSingleValueDataPointSnapshot} as snapshot implementation.
+ *
+ * @param <I> the type of the initializer used to create new data points
+ * @param <D> the type of the data point, must implement DoubleSupplier
+ */
 public abstract class AbstractStatefulSingleValueMetric<I, D extends DoubleSupplier>
         extends AbstractStatefulMetric<I, D, DefaultSingleValueDataPointSnapshot> {
 

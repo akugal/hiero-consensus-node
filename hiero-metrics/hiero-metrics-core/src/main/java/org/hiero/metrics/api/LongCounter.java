@@ -53,8 +53,12 @@ public interface LongCounter extends StatefulMetric<LongSupplier, LongCounterDat
     }
 
     /**
-     * Builder for {@link LongCounter} metrics using {@link LongAdderCounterDataPoint}.
-     * By default, initial value is {@code 0L}.
+     * Builder for {@link LongCounter} using {@link LongCounterDataPoint} per label set.
+     * <p>
+     * Default initial value is {@code 0L}. <br>
+     * By default, {@link java.util.concurrent.atomic.LongAdder} is used in the data point implementation, but
+     * could be changed to use {@link java.util.concurrent.atomic.AtomicLong} by calling
+     * {@link #withLowThreadContention()} if no high contention on update is expected.
      */
     final class Builder extends StatefulMetric.Builder<LongSupplier, LongCounterDataPoint, Builder, LongCounter> {
 

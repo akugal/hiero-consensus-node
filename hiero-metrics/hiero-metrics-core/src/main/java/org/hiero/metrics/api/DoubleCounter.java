@@ -52,8 +52,9 @@ public interface DoubleCounter extends StatefulMetric<DoubleSupplier, DoubleCoun
     }
 
     /**
-     * Builder for {@link DoubleCounter} metrics using {@link DoubleAdderCounterDataPoint}.
-     * By default, initial value is {@code 0.0}.
+     * Builder for {@link DoubleCounter} using {@link DoubleCounterDataPoint} per label set.
+     * <p>
+     * Default initial value is {@code 0.0}, but could be modified using {@link #withInitValue(double)}.
      */
     final class Builder extends StatefulMetric.Builder<DoubleSupplier, DoubleCounterDataPoint, Builder, DoubleCounter> {
 
