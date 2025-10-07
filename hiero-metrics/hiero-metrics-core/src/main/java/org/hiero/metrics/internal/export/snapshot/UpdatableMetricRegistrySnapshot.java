@@ -10,13 +10,14 @@ import org.hiero.metrics.internal.export.SnapshotableMetric;
 
 public final class UpdatableMetricRegistrySnapshot implements ArrayAccessor<MetricSnapshot> {
 
-    private final AppendArray<UpdatableMetricSnapshot<?, DataPointSnapshot>> snapshots = new AppendArray<>(64);
+    private final AppendArray<UpdatableMetricSnapshot<?, ? extends DataPointSnapshot>> snapshots =
+            new AppendArray<>(64);
 
     public void updateSnapshot() {
         snapshots.readyToRead(UpdatableMetricSnapshot::updateSnapshot);
     }
 
-    public void add(SnapshotableMetric snapshotableMetric) {
+    public void add(SnapshotableMetric<? extends DataPointSnapshot> snapshotableMetric) {
         snapshots.add(snapshotableMetric.snapshot());
     }
 

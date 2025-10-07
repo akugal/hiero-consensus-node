@@ -14,6 +14,7 @@ import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricKey;
 import org.hiero.metrics.api.core.MetricsRegistrationProvider;
+import org.hiero.metrics.api.export.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.utils.MetricUtils;
 import org.hiero.metrics.internal.export.SnapshotableMetric;
 import org.hiero.metrics.internal.export.SnapshotableMetricsRegistry;
@@ -74,7 +75,7 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
             M metric = builder.withConstantLabels(globalLabels).build();
             logger.info("Registered metric: {} with global labels: {}", metric.metadata(), globalLabels);
 
-            if (metric instanceof SnapshotableMetric snapshotableMetric) {
+            if (metric instanceof SnapshotableMetric<? extends DataPointSnapshot> snapshotableMetric) {
                 snapshot.add(snapshotableMetric);
             }
             return metric;
