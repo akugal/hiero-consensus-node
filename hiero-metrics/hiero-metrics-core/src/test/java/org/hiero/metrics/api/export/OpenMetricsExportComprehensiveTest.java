@@ -17,6 +17,7 @@ import org.hiero.metrics.api.core.MetricRegistry;
 import org.hiero.metrics.api.core.MetricsFacade;
 import org.hiero.metrics.api.export.extension.writer.OpenMetricsSnapshotsWriter;
 import org.hiero.metrics.api.stat.StatUtils;
+import org.hiero.metrics.api.stat.container.AtomicDouble;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
@@ -42,17 +43,17 @@ public class OpenMetricsExportComprehensiveTest {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class BooleanGaugeTest {
 
-        static final TestExporterContext context = new TestExporterContext(OpenMetricsSnapshotsWriter.DEFAULT);
+        private static final TestExporterContext context = new TestExporterContext(OpenMetricsSnapshotsWriter.DEFAULT);
 
-        static BooleanGauge onlyName;
-        static BooleanGauge nameAndCategory;
-        static BooleanGauge nameAndDescription;
-        static BooleanGauge nameAndUnit;
-        static BooleanGauge nameAndDescriptionAndUnit;
-        static BooleanGauge trueInit;
-        static BooleanGauge constLabel;
-        static BooleanGauge dynamicLabel;
-        static BooleanGauge manyLabels;
+        private static BooleanGauge onlyName;
+        private static BooleanGauge nameAndCategory;
+        private static BooleanGauge nameAndDescription;
+        private static BooleanGauge nameAndUnit;
+        private static BooleanGauge nameDescriptionAndUnit;
+        private static BooleanGauge trueInit;
+        private static BooleanGauge constLabel;
+        private static BooleanGauge dynamicLabel;
+        private static BooleanGauge manyLabels;
 
         @Test
         @Order(1)
@@ -66,7 +67,7 @@ public class OpenMetricsExportComprehensiveTest {
                     .register(context.getRegistry());
             nameAndUnit =
                     BooleanGauge.builder("name_unit").withUnit("bool_unit").register(context.getRegistry());
-            nameAndDescriptionAndUnit = BooleanGauge.builder("name_description_unit")
+            nameDescriptionAndUnit = BooleanGauge.builder("name_description_unit")
                     .withDescription("Boolean gauge with description and unit")
                     .withUnit("bool_unit")
                     .register(context.getRegistry());
@@ -115,8 +116,8 @@ public class OpenMetricsExportComprehensiveTest {
 
             // nameAndUnit - no observation, stays false and not reported
 
-            nameAndDescriptionAndUnit.getOrCreateNotLabeled().setTrue();
-            nameAndDescriptionAndUnit.getOrCreateNotLabeled().setTrue(); // changes to true
+            nameDescriptionAndUnit.getOrCreateNotLabeled().setTrue();
+            nameDescriptionAndUnit.getOrCreateNotLabeled().setTrue(); // changes to true
 
             // trueInit - no observation, stays true and to be reported
 
@@ -258,17 +259,17 @@ public class OpenMetricsExportComprehensiveTest {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class DoubleCounterTest {
 
-        static final TestExporterContext context = new TestExporterContext(OpenMetricsSnapshotsWriter.DEFAULT);
+        private static final TestExporterContext context = new TestExporterContext(OpenMetricsSnapshotsWriter.DEFAULT);
 
-        static DoubleCounter onlyName;
-        static DoubleCounter nameAndCategory;
-        static DoubleCounter nameAndDescription;
-        static DoubleCounter nameAndUnit;
-        static DoubleCounter nameAndDescriptionAndUnit;
-        static DoubleCounter customInit;
-        static DoubleCounter constLabel;
-        static DoubleCounter dynamicLabel;
-        static DoubleCounter manyLabels;
+        private static DoubleCounter onlyName;
+        private static DoubleCounter nameAndCategory;
+        private static DoubleCounter nameAndDescription;
+        private static DoubleCounter nameAndUnit;
+        private static DoubleCounter nameDescriptionAndUnit;
+        private static DoubleCounter customInit;
+        private static DoubleCounter constLabel;
+        private static DoubleCounter dynamicLabel;
+        private static DoubleCounter manyLabels;
 
         @Test
         @Order(1)
@@ -282,7 +283,7 @@ public class OpenMetricsExportComprehensiveTest {
                     .register(context.getRegistry());
             nameAndUnit =
                     DoubleCounter.builder("name_unit").withUnit("requests").register(context.getRegistry());
-            nameAndDescriptionAndUnit = DoubleCounter.builder("name_description_unit")
+            nameDescriptionAndUnit = DoubleCounter.builder("name_description_unit")
                     .withDescription("Double counter with description and unit")
                     .withUnit("requests")
                     .register(context.getRegistry());
@@ -328,8 +329,8 @@ public class OpenMetricsExportComprehensiveTest {
 
             // nameAndUnit - no observation, stays 0 and not reported
 
-            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment();
-            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(1.123); // +2.123, changes to 2.123
+            nameDescriptionAndUnit.getOrCreateNotLabeled().increment();
+            nameDescriptionAndUnit.getOrCreateNotLabeled().increment(1.123); // +2.123, changes to 2.123
 
             // customInit - no observation, stays 1.1 and not reported
 
@@ -384,8 +385,8 @@ public class OpenMetricsExportComprehensiveTest {
             nameAndUnit.getOrCreateNotLabeled().increment(1.123);
             nameAndUnit.getOrCreateNotLabeled().increment(1.123);
 
-            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(1.123);
-            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(); // +2.123, changes to 4.246
+            nameDescriptionAndUnit.getOrCreateNotLabeled().increment(1.123);
+            nameDescriptionAndUnit.getOrCreateNotLabeled().increment(); // +2.123, changes to 4.246
 
             customInit.getOrCreateNotLabeled().increment(0.001); // changes to 1.101
 
@@ -470,17 +471,17 @@ public class OpenMetricsExportComprehensiveTest {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class LongCounterTest {
 
-        static final TestExporterContext context = new TestExporterContext(OpenMetricsSnapshotsWriter.DEFAULT);
+        private static final TestExporterContext context = new TestExporterContext(OpenMetricsSnapshotsWriter.DEFAULT);
 
-        static LongCounter onlyName;
-        static LongCounter nameAndCategory;
-        static LongCounter nameAndDescription;
-        static LongCounter nameAndUnit;
-        static LongCounter nameAndDescriptionAndUnit;
-        static LongCounter customInit;
-        static LongCounter constLabel;
-        static LongCounter dynamicLabel;
-        static LongCounter manyLabels;
+        private static LongCounter onlyName;
+        private static LongCounter nameAndCategory;
+        private static LongCounter nameAndDescription;
+        private static LongCounter nameAndUnit;
+        private static LongCounter nameDescriptionAndUnit;
+        private static LongCounter customInit;
+        private static LongCounter constLabel;
+        private static LongCounter dynamicLabel;
+        private static LongCounter manyLabels;
 
         @Test
         @Order(1)
@@ -493,7 +494,7 @@ public class OpenMetricsExportComprehensiveTest {
                     .withDescription("Long counter with description")
                     .register(context.getRegistry());
             nameAndUnit = LongCounter.builder("name_unit").withUnit("requests").register(context.getRegistry());
-            nameAndDescriptionAndUnit = LongCounter.builder("name_description_unit")
+            nameDescriptionAndUnit = LongCounter.builder("name_description_unit")
                     .withDescription("Long counter with description and unit")
                     .withUnit("requests")
                     .register(context.getRegistry());
@@ -539,8 +540,8 @@ public class OpenMetricsExportComprehensiveTest {
 
             // nameAndUnit - no observation, stays 0 and not reported
 
-            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment();
-            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(4); // +5, changes to 5
+            nameDescriptionAndUnit.getOrCreateNotLabeled().increment();
+            nameDescriptionAndUnit.getOrCreateNotLabeled().increment(4); // +5, changes to 5
 
             // customInit - no observation, stays 10 and not reported
 
@@ -593,8 +594,8 @@ public class OpenMetricsExportComprehensiveTest {
             nameAndUnit.getOrCreateNotLabeled().increment(2);
             nameAndUnit.getOrCreateNotLabeled().increment(8); // +10, changes to 10
 
-            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(1);
-            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(); // +2 changes to 7
+            nameDescriptionAndUnit.getOrCreateNotLabeled().increment(1);
+            nameDescriptionAndUnit.getOrCreateNotLabeled().increment(); // +2 changes to 7
 
             customInit.getOrCreateNotLabeled().increment(); // changes to 11
 
@@ -680,66 +681,430 @@ public class OpenMetricsExportComprehensiveTest {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class DoubleGaugeTest {
 
-        static final TestExporterContext context = new TestExporterContext(OpenMetricsSnapshotsWriter.DEFAULT);
+        private static final TestExporterContext context = new TestExporterContext(OpenMetricsSnapshotsWriter.DEFAULT);
 
-        static DoubleGauge onlyName;
-        static DoubleGauge nameAndCategory;
-        static DoubleGauge nameAndDescription;
-        static DoubleGauge nameAndUnit;
-        static DoubleGauge nameAndDescriptionAndUnit;
-        static DoubleGauge customInit;
-        static DoubleGauge constLabel;
-        static DoubleGauge dynamicLabel;
-        static DoubleGauge manyLabels;
+        private static DoubleGauge onlyName;
+        private static DoubleGauge nameAndDescriptionMaxReset;
+        private static DoubleGauge nameAndUnitMinReset;
+        private static DoubleGauge nameDescriptionAndUnitAggNoReset;
+        private static DoubleGauge customInitAggReset;
+        private static DoubleGauge constLabel;
+        private static DoubleGauge dynamicLabelSumReset;
+        private static DoubleGauge manyLabelsSumNoReset;
 
         @Test
         @Order(1)
         public void testInitWithoutObservation() throws IOException {
             onlyName = DoubleGauge.builder("only_name").register(context.getRegistry());
-            nameAndCategory = DoubleGauge.builder(
-                            DoubleGauge.key("name_category").withCategory("cnt"))
-                    .register(context.getRegistry());
-            nameAndDescription = DoubleGauge.builder(
+            nameAndDescriptionMaxReset = DoubleGauge.builder(
                             DoubleGauge.key("name_description").withCategory("max_reset"))
                     .withDescription("Double gauge with description")
+                    .withTrackingMaxSpike()
                     .register(context.getRegistry());
-            nameAndUnit = DoubleGauge.builder(DoubleGauge.key("name_unit").withCategory("min"))
-                    .withUnit("requests")
+            nameAndUnitMinReset = DoubleGauge.builder(
+                            DoubleGauge.key("name_unit").withCategory("min_reset"))
+                    .withUnit("currency")
+                    .withTrackingMinSpike()
                     .register(context.getRegistry());
-            nameAndDescriptionAndUnit = DoubleGauge.builder(
-                            DoubleGauge.key("name_description_unit").withCategory("agg"))
+            nameDescriptionAndUnitAggNoReset = DoubleGauge.builder(
+                            DoubleGauge.key("name_description_unit").withCategory("agg_no_reset"))
                     .withDescription("Double gauge with description and unit")
-                    .withUnit("requests")
+                    .withOperator((prev, cur) -> prev + cur + 0.01, false) // sum + 0.01
+                    .withUnit("currency")
                     .register(context.getRegistry());
-            customInit = DoubleGauge.builder("custom_init").withInitValue(0.001).register(context.getRegistry());
+            customInitAggReset = DoubleGauge.builder(
+                            DoubleGauge.key("custom_init").withCategory("agg_reset"))
+                    .withInitValue(0.001)
+                    .withOperator((prev, cur) -> prev + cur + 0.01, true) // sum + 0.01
+                    .register(context.getRegistry());
             constLabel = DoubleGauge.builder("const_label")
                     .withConstantLabel(new Label("c1", "c1_v1"))
                     .register(context.getRegistry());
-            dynamicLabel = DoubleGauge.builder("dynamic_label")
+            dynamicLabelSumReset = DoubleGauge.builder(
+                            DoubleGauge.key("dynamic_label").withCategory("sum_reset"))
+                    .withOperator(StatUtils.DOUBLE_SUM, true)
                     .withDynamicLabelNames("d1")
                     .register(context.getRegistry());
-            manyLabels = DoubleGauge.builder("many_labels")
+            manyLabelsSumNoReset = DoubleGauge.builder(
+                            DoubleGauge.key("many_labels").withCategory("sum_no_reset"))
+                    .withOperator(StatUtils.DOUBLE_SUM, false)
                     .withConstantLabels(new Label("c1", "c1_v1"), new Label("c2", "c2_v1"))
                     .withDynamicLabelNames("d1", "d2")
                     .register(context.getRegistry());
 
             context.exportAndVerify(
                     """
-                            # TYPE only_name gauge
-                            # TYPE cnt:name_category gauge
-                            # TYPE max_reset:name_description gauge
-                            # HELP max_reset:name_description Double gauge with description
-                            # TYPE min:name_unit_requests gauge
-                            # UNIT min:name_unit_requests requests
-                            # TYPE agg:name_description_unit_requests gauge
-                            # UNIT agg:name_description_unit_requests requests
-                            # HELP agg:name_description_unit_requests Double gauge with description and unit
-                            # TYPE custom_init gauge
-                            # TYPE const_label gauge
-                            # TYPE dynamic_label gauge
-                            # TYPE many_labels gauge
-                            # EOF
-                            """);
+                    # TYPE only_name gauge
+                    # TYPE max_reset:name_description gauge
+                    # HELP max_reset:name_description Double gauge with description
+                    # TYPE min_reset:name_unit_currency gauge
+                    # UNIT min_reset:name_unit_currency currency
+                    # TYPE agg_no_reset:name_description_unit_currency gauge
+                    # UNIT agg_no_reset:name_description_unit_currency currency
+                    # HELP agg_no_reset:name_description_unit_currency Double gauge with description and unit
+                    # TYPE agg_reset:custom_init gauge
+                    # TYPE const_label gauge
+                    # TYPE sum_reset:dynamic_label gauge
+                    # TYPE sum_no_reset:many_labels gauge
+                    # EOF
+                    """);
+        }
+
+        @Test
+        @Order(2)
+        public void testObserve1() throws IOException {
+            onlyName.getOrCreateNotLabeled().update(0.0);
+            onlyName.getOrCreateNotLabeled().update(0.0); // stays 0.0
+
+            nameAndDescriptionMaxReset.getOrCreateNotLabeled().update(2.0);
+            nameAndDescriptionMaxReset.getOrCreateNotLabeled().update(3.0);
+            nameAndDescriptionMaxReset.getOrCreateNotLabeled().update(2.99); // becomes 3.0 (max)
+
+            nameAndUnitMinReset.getOrCreateNotLabeled().update(2.0);
+            nameAndUnitMinReset.getOrCreateNotLabeled().update(-1.01);
+            nameAndUnitMinReset.getOrCreateNotLabeled().update(-1.0); // becomes -1.01 (min)
+
+            nameDescriptionAndUnitAggNoReset.getOrCreateNotLabeled().update(0.0);
+            nameDescriptionAndUnitAggNoReset.getOrCreateNotLabeled().update(1.1);
+            nameDescriptionAndUnitAggNoReset.getOrCreateNotLabeled().update(0.1); // becomes 1.23
+
+            customInitAggReset.getOrCreateNotLabeled().update(0.0);
+            customInitAggReset.getOrCreateNotLabeled().update(1.1);
+            customInitAggReset.getOrCreateNotLabeled().update(0.1); // becomes 1.231
+
+            // no observation to constLabel - stays NaN and not reported
+
+            dynamicLabelSumReset.getOrCreateLabeled("d1", "d1_v1").update(); // new data point, changes to 1
+            dynamicLabelSumReset.getOrCreateLabeled("d1", "d1_v1").update(3.1); // changes to 4.1
+            dynamicLabelSumReset.getOrCreateLabeled("d1", "d1_v2").update(0); // new data point, stays 0
+
+            manyLabelsSumNoReset
+                    .getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v1")
+                    .update(2.1); // new data point, changes to 2.1
+            manyLabelsSumNoReset
+                    .getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v1")
+                    .update(2.9); // changes to 5
+            manyLabelsSumNoReset
+                    .getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v1")
+                    .update(); // changes to 6
+
+            context.exportAndVerify(
+                    """
+                    # TYPE only_name gauge
+                    only_name 0
+                    # TYPE max_reset:name_description gauge
+                    # HELP max_reset:name_description Double gauge with description
+                    max_reset:name_description 3
+                    # TYPE min_reset:name_unit_currency gauge
+                    # UNIT min_reset:name_unit_currency currency
+                    min_reset:name_unit_currency -1.01
+                    # TYPE agg_no_reset:name_description_unit_currency gauge
+                    # UNIT agg_no_reset:name_description_unit_currency currency
+                    # HELP agg_no_reset:name_description_unit_currency Double gauge with description and unit
+                    agg_no_reset:name_description_unit_currency 1.23
+                    # TYPE agg_reset:custom_init gauge
+                    agg_reset:custom_init 1.231
+                    # TYPE const_label gauge
+                    # TYPE sum_reset:dynamic_label gauge
+                    sum_reset:dynamic_label{d1="d1_v1"} 4.1
+                    sum_reset:dynamic_label{d1="d1_v2"} 0
+                    # TYPE sum_no_reset:many_labels gauge
+                    sum_no_reset:many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 6
+                    # EOF
+                    """);
+        }
+
+        @Test
+        @Order(2)
+        public void testObserve2() throws IOException {
+            onlyName.getOrCreateNotLabeled().update(1.1);
+            onlyName.getOrCreateNotLabeled().update(Double.NEGATIVE_INFINITY);
+
+            nameAndDescriptionMaxReset.getOrCreateNotLabeled().update(-2.1);
+            nameAndDescriptionMaxReset.getOrCreateNotLabeled().update(-1.01);
+            nameAndDescriptionMaxReset.getOrCreateNotLabeled().update(-1.02); // becomes -1.01 (max)
+
+            nameAndUnitMinReset.getOrCreateNotLabeled().update(2.6);
+            nameAndUnitMinReset.getOrCreateNotLabeled().update(2.5);
+            nameAndUnitMinReset.getOrCreateNotLabeled().update(2.51); // becomes 2.5 (min)
+
+            nameDescriptionAndUnitAggNoReset.getOrCreateNotLabeled().update(); // becomes 2.24
+            nameDescriptionAndUnitAggNoReset.getOrCreateNotLabeled().update(-1.1); // becomes 1.15
+
+            customInitAggReset.getOrCreateNotLabeled().update(); // becomes 1.011
+            customInitAggReset.getOrCreateNotLabeled().update(-1.011); // becomes 0.01
+
+            constLabel.getOrCreateNotLabeled().update(Double.POSITIVE_INFINITY);
+
+            dynamicLabelSumReset.getOrCreateLabeled("d1", "d1_v2").update(1.1); // changes to 1,1
+
+            manyLabelsSumNoReset
+                    .getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v1")
+                    .update(); // becomes 7
+            manyLabelsSumNoReset
+                    .getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v2")
+                    .update(Double.NaN); // new data point
+            manyLabelsSumNoReset
+                    .getOrCreateLabeled("d1", "d1_v2", "d2", "d2_v1")
+                    .update(Double.POSITIVE_INFINITY); // new data point
+            manyLabelsSumNoReset
+                    .getOrCreateLabeled("d1", "d1_v2", "d2", "d2_v2")
+                    .update(Double.NEGATIVE_INFINITY); // new data point
+            manyLabelsSumNoReset
+                    .getOrCreateLabeled("d1", "d1_v3", "d2", "d2_v1")
+                    .update(); // new data point
+
+            context.exportAndVerify(
+                    """
+                    # TYPE only_name gauge
+                    only_name -Inf
+                    # TYPE max_reset:name_description gauge
+                    # HELP max_reset:name_description Double gauge with description
+                    max_reset:name_description -1.01
+                    # TYPE min_reset:name_unit_currency gauge
+                    # UNIT min_reset:name_unit_currency currency
+                    min_reset:name_unit_currency 2.5
+                    # TYPE agg_no_reset:name_description_unit_currency gauge
+                    # UNIT agg_no_reset:name_description_unit_currency currency
+                    # HELP agg_no_reset:name_description_unit_currency Double gauge with description and unit
+                    agg_no_reset:name_description_unit_currency 1.15
+                    # TYPE agg_reset:custom_init gauge
+                    agg_reset:custom_init 0.01
+                    # TYPE const_label gauge
+                    const_label{c1="c1_v1"} +Inf
+                    # TYPE sum_reset:dynamic_label gauge
+                    sum_reset:dynamic_label{d1="d1_v1"} 0
+                    sum_reset:dynamic_label{d1="d1_v2"} 1.1
+                    # TYPE sum_no_reset:many_labels gauge
+                    sum_no_reset:many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 7
+                    sum_no_reset:many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} NaN
+                    sum_no_reset:many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v1"} +Inf
+                    sum_no_reset:many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v2"} -Inf
+                    sum_no_reset:many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v3",d2="d2_v1"} 1
+                    # EOF
+                    """);
+        }
+
+        @Test
+        @Order(4)
+        public void testChangesWithoutObservation() throws IOException {
+            // all aggregations expected to be reset where applicable
+            context.exportAndVerify(
+                    """
+                    # TYPE only_name gauge
+                    only_name -Inf
+                    # TYPE max_reset:name_description gauge
+                    # HELP max_reset:name_description Double gauge with description
+                    max_reset:name_description -Inf
+                    # TYPE min_reset:name_unit_currency gauge
+                    # UNIT min_reset:name_unit_currency currency
+                    min_reset:name_unit_currency +Inf
+                    # TYPE agg_no_reset:name_description_unit_currency gauge
+                    # UNIT agg_no_reset:name_description_unit_currency currency
+                    # HELP agg_no_reset:name_description_unit_currency Double gauge with description and unit
+                    agg_no_reset:name_description_unit_currency 1.15
+                    # TYPE agg_reset:custom_init gauge
+                    agg_reset:custom_init 0.001
+                    # TYPE const_label gauge
+                    const_label{c1="c1_v1"} +Inf
+                    # TYPE sum_reset:dynamic_label gauge
+                    sum_reset:dynamic_label{d1="d1_v1"} 0
+                    sum_reset:dynamic_label{d1="d1_v2"} 0
+                    # TYPE sum_no_reset:many_labels gauge
+                    sum_no_reset:many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 7
+                    sum_no_reset:many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} NaN
+                    sum_no_reset:many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v1"} +Inf
+                    sum_no_reset:many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v2"} -Inf
+                    sum_no_reset:many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v3",d2="d2_v1"} 1
+                    # EOF
+                    """);
+        }
+    }
+
+    @Nested
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class StatelessMetricTest {
+
+        private static final TestExporterContext context = new TestExporterContext(OpenMetricsSnapshotsWriter.DEFAULT);
+
+        private static StatelessMetric onlyName;
+        private static StatelessMetric constLabel;
+        private static StatelessMetric dynamicLabel;
+        private static StatelessMetric manyLabels;
+
+        private static AtomicDouble nameDescriptionAndUnitContainer = new AtomicDouble(0);
+        private static AtomicDouble dynamicLabelContainer1 = new AtomicDouble(0);
+        private static AtomicDouble dynamicLabelContainer2 = new AtomicDouble(0);
+        private static AtomicDouble manyLabelsContainer1 = new AtomicDouble(0);
+        private static AtomicDouble manyLabelsContainer2 = new AtomicDouble(0);
+
+        @Test
+        @Order(1)
+        public void testInitWithoutObservation() throws IOException {
+            onlyName = StatelessMetric.builder("only_name").register(context.getRegistry()); // no data points yet
+            StatelessMetric.builder(StatelessMetric.key("name_category").withCategory("cnt"))
+                    .registerDataPoint(() -> 1.0)
+                    .register(context.getRegistry());
+            StatelessMetric.builder("name_description")
+                    .withDescription("Stateless with description")
+                    .registerDataPoint(() -> 2.0)
+                    .register(context.getRegistry());
+            StatelessMetric.builder("name_unit")
+                    .withUnit("requests")
+                    .registerDataPoint(() -> 3.0)
+                    .register(context.getRegistry());
+            StatelessMetric.builder("name_description_unit")
+                    .withDescription("Stateless with description and unit")
+                    .withUnit("requests")
+                    .registerDataPoint(nameDescriptionAndUnitContainer)
+                    .register(context.getRegistry());
+            constLabel = StatelessMetric.builder("const_label")
+                    .withConstantLabel(new Label("c1", "c1_v1"))
+                    .register(context.getRegistry());
+            dynamicLabel = StatelessMetric.builder("dynamic_label")
+                    .withDynamicLabelNames("d1")
+                    .register(context.getRegistry());
+            manyLabels = StatelessMetric.builder("many_labels")
+                    .withConstantLabels(new Label("c1", "c1_v1"), new Label("c2", "c2_v1"))
+                    .withDynamicLabelNames("d1", "d2")
+                    .register(context.getRegistry());
+
+            context.exportAndVerify(
+                    """
+                    # TYPE only_name gauge
+                    # TYPE cnt:name_category gauge
+                    cnt:name_category 1
+                    # TYPE name_description gauge
+                    # HELP name_description Stateless with description
+                    name_description 2
+                    # TYPE name_unit_requests gauge
+                    # UNIT name_unit_requests requests
+                    name_unit_requests 3
+                    # TYPE name_description_unit_requests gauge
+                    # UNIT name_description_unit_requests requests
+                    # HELP name_description_unit_requests Stateless with description and unit
+                    name_description_unit_requests 0
+                    # TYPE const_label gauge
+                    # TYPE dynamic_label gauge
+                    # TYPE many_labels gauge
+                    # EOF
+                    """);
+        }
+
+        @Test
+        @Order(2)
+        public void testObserve1() throws IOException {
+            onlyName.registerDataPoint(() -> 1.1);
+
+            nameDescriptionAndUnitContainer.set(1.89);
+            nameDescriptionAndUnitContainer.set(1.99); // becomes 1.99
+
+            AtomicDouble constLabelContainer = new AtomicDouble(10.234);
+            constLabelContainer.set(0.01);
+            constLabel.registerDataPoint(constLabelContainer);
+
+            dynamicLabelContainer2.set(10);
+            dynamicLabel.registerDataPoint(dynamicLabelContainer1, "d1", "d1_v1");
+            dynamicLabel.registerDataPoint(dynamicLabelContainer2, "d1", "d1_v2");
+
+            manyLabels.registerDataPoint(manyLabelsContainer1, "d1", "d1_v1", "d2", "d2_v1");
+            manyLabelsContainer1.set(3.14);
+
+            context.exportAndVerify(
+                    """
+                        # TYPE only_name gauge
+                        only_name 1.1
+                        # TYPE cnt:name_category gauge
+                        cnt:name_category 1
+                        # TYPE name_description gauge
+                        # HELP name_description Stateless with description
+                        name_description 2
+                        # TYPE name_unit_requests gauge
+                        # UNIT name_unit_requests requests
+                        name_unit_requests 3
+                        # TYPE name_description_unit_requests gauge
+                        # UNIT name_description_unit_requests requests
+                        # HELP name_description_unit_requests Stateless with description and unit
+                        name_description_unit_requests 1.99
+                        # TYPE const_label gauge
+                        const_label{c1="c1_v1"} 0.01
+                        # TYPE dynamic_label gauge
+                        dynamic_label{d1="d1_v1"} 0
+                        dynamic_label{d1="d1_v2"} 10
+                        # TYPE many_labels gauge
+                        many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 3.14
+                        # EOF
+                        """);
+        }
+
+        @Test
+        @Order(3)
+        public void testObserve2() throws IOException {
+            nameDescriptionAndUnitContainer.set(-1.99); // becomes -1.99
+
+            dynamicLabelContainer1.set(0.01);
+            dynamicLabelContainer2.set(42);
+
+            manyLabels.registerDataPoint(manyLabelsContainer2, "d1", "d1_v1", "d2", "d2_v2");
+            manyLabelsContainer2.set(1.9);
+
+            context.exportAndVerify(
+                    """
+                    # TYPE only_name gauge
+                    only_name 1.1
+                    # TYPE cnt:name_category gauge
+                    cnt:name_category 1
+                    # TYPE name_description gauge
+                    # HELP name_description Stateless with description
+                    name_description 2
+                    # TYPE name_unit_requests gauge
+                    # UNIT name_unit_requests requests
+                    name_unit_requests 3
+                    # TYPE name_description_unit_requests gauge
+                    # UNIT name_description_unit_requests requests
+                    # HELP name_description_unit_requests Stateless with description and unit
+                    name_description_unit_requests -1.99
+                    # TYPE const_label gauge
+                    const_label{c1="c1_v1"} 0.01
+                    # TYPE dynamic_label gauge
+                    dynamic_label{d1="d1_v1"} 0.01
+                    dynamic_label{d1="d1_v2"} 42
+                    # TYPE many_labels gauge
+                    many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 3.14
+                    many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 1.9
+                    # EOF
+                    """);
+        }
+
+        @Test
+        @Order(4)
+        public void testNoChangeWithoutObservation() throws IOException {
+            context.exportAndVerify(
+                    """
+                    # TYPE only_name gauge
+                    only_name 1.1
+                    # TYPE cnt:name_category gauge
+                    cnt:name_category 1
+                    # TYPE name_description gauge
+                    # HELP name_description Stateless with description
+                    name_description 2
+                    # TYPE name_unit_requests gauge
+                    # UNIT name_unit_requests requests
+                    name_unit_requests 3
+                    # TYPE name_description_unit_requests gauge
+                    # UNIT name_description_unit_requests requests
+                    # HELP name_description_unit_requests Stateless with description and unit
+                    name_description_unit_requests -1.99
+                    # TYPE const_label gauge
+                    const_label{c1="c1_v1"} 0.01
+                    # TYPE dynamic_label gauge
+                    dynamic_label{d1="d1_v1"} 0.01
+                    dynamic_label{d1="d1_v2"} 42
+                    # TYPE many_labels gauge
+                    many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 3.14
+                    many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 1.9
+                    # EOF
+                    """);
         }
     }
 
