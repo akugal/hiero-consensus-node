@@ -58,7 +58,7 @@ public class CsvMetricsSnapshotsWriter
     protected void writeDataPoint(
             @NonNull Instant timestamp,
             @NonNull DataPointSnapshot dataPointSnapshot,
-            @NonNull TemplateByteArray template,
+            @NonNull ByteArrayTemplate template,
             @NonNull OutputStream output)
             throws IOException {
         byte[][] variables = new byte[3][]; // max 3 variables: timestamp, value, value type
@@ -90,7 +90,7 @@ public class CsvMetricsSnapshotsWriter
         }
     }
 
-    private void writeDataLine(TemplateByteArray template, int varCount, byte[][] variables, OutputStream output)
+    private void writeDataLine(ByteArrayTemplate template, int varCount, byte[][] variables, OutputStream output)
             throws IOException {
         Iterator<byte[]> iterator = template.iterator(varCount, variables);
         while (iterator.hasNext()) {
@@ -111,8 +111,8 @@ public class CsvMetricsSnapshotsWriter
         }
 
         @Override
-        protected TemplateByteArray buildDataPointExportTemplate(DataPointSnapshot dataPointSnapshot) {
-            TemplateByteArray.Builder builder = TemplateByteArray.builder()
+        protected ByteArrayTemplate buildDataPointExportTemplate(DataPointSnapshot dataPointSnapshot) {
+            ByteArrayTemplate.Builder builder = ByteArrayTemplate.builder()
                     .addPlaceholder() // timestamp
                     .append(COMMA)
                     .appendUtf8(metricSnapshot().metadata().name())
@@ -132,7 +132,7 @@ public class CsvMetricsSnapshotsWriter
             return builder.append(QUOTE).build();
         }
 
-        private void appendStateSetLabels(TemplateByteArray.Builder builder, boolean firstLabel) {
+        private void appendStateSetLabels(ByteArrayTemplate.Builder builder, boolean firstLabel) {
             if (!firstLabel) {
                 builder.append(COMMA);
             }
@@ -142,7 +142,7 @@ public class CsvMetricsSnapshotsWriter
         }
 
         private void appendGenericMultiValueLabels(
-                GenericMultiValueDataPointSnapshot snapshot, TemplateByteArray.Builder builder, boolean firstLabel) {
+                GenericMultiValueDataPointSnapshot snapshot, ByteArrayTemplate.Builder builder, boolean firstLabel) {
             if (!firstLabel) {
                 builder.append(COMMA);
             }
@@ -151,12 +151,12 @@ public class CsvMetricsSnapshotsWriter
                     .addPlaceholder(); // Placeholder for value type
         }
 
-        private boolean appendLabels(DataPointSnapshot dataPointSnapshot, TemplateByteArray.Builder builder) {
+        private boolean appendLabels(DataPointSnapshot dataPointSnapshot, ByteArrayTemplate.Builder builder) {
             boolean firstLabel = appendConstantLabels(builder);
             return appendDynamicLabels(dataPointSnapshot, builder, firstLabel);
         }
 
-        private boolean appendConstantLabels(TemplateByteArray.Builder builder) {
+        private boolean appendConstantLabels(ByteArrayTemplate.Builder builder) {
             boolean first = true;
             for (Label label : metricSnapshot().constantLabels()) {
                 if (!first) {
@@ -169,7 +169,7 @@ public class CsvMetricsSnapshotsWriter
         }
 
         private boolean appendDynamicLabels(
-                DataPointSnapshot dataPointSnapshot, TemplateByteArray.Builder builder, boolean firstLabel) {
+                DataPointSnapshot dataPointSnapshot, ByteArrayTemplate.Builder builder, boolean firstLabel) {
             List<String> labelNames = metricSnapshot().dynamicLabelNames();
             for (int i = 0; i < labelNames.size(); i++) {
                 String labelValue = dataPointSnapshot.labelValue(i);

@@ -13,8 +13,9 @@ import java.util.function.DoubleSupplier;
  * The value can be set to {@code true} or {@code false} using {@link #setTrue()} and {@link #setFalse()} methods,
  * or to an arbitrary {@code boolean} value using {@link #set(boolean)} method.
  * <p>
- * The current value can be retrieved using the {@link #getAsBoolean()} method inherited from
- * {@link BooleanSupplier}.
+ * The current value can be retrieved using the {@link #getAsBoolean()} or {@link #getAsDouble()}.
+ * <p>
+ * <b>All operations are thread-safe and atomic.</b>
  */
 public interface BooleanGaugeDataPoint extends BooleanSupplier, DoubleSupplier, DataPoint {
 
@@ -39,6 +40,12 @@ public interface BooleanGaugeDataPoint extends BooleanSupplier, DoubleSupplier, 
         set(false);
     }
 
+    /**
+     * Gets the current value of this data point as {@code double},
+     * where {@code true} is represented as {@code 1.0} and {@code false} as {@code 0.0}.
+     *
+     * @return the current {@code boolean} value converted to {@code double}
+     */
     @Override
     default double getAsDouble() {
         return getAsBoolean() ? ONE : ZERO;

@@ -20,7 +20,8 @@ import org.hiero.metrics.internal.datapoint.LongAccumulatorGaugeDataPoint;
 public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoint> {
 
     /**
-     * Create a metric key for a {@link LongGauge} with the given name.
+     * Create a metric key for a {@link LongGauge} with the given name. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @return the metric key
@@ -42,7 +43,8 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
     }
 
     /**
-     * Create a builder for a {@link LongGauge} with the given metric name.
+     * Create a builder for a {@link LongGauge} with the given metric name. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the metric name
      * @return the builder
@@ -50,47 +52,6 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
     @NonNull
     static Builder builder(@NonNull String name) {
         return builder(key(name));
-    }
-
-    /**
-     * Create a builder for a {@link LongGauge} with the given metric name that uses {@code sum}
-     * as the aggregation operator.
-     *
-     * @param name            the metric name
-     * @param resetOnExport if true, the gauge is reset to its initial value on export
-     * @return the builder
-     */
-    @NonNull
-    static Builder sumBuilder(@NonNull String name, boolean resetOnExport) {
-        return builder(name).withOperator(StatUtils.LONG_SUM, resetOnExport);
-    }
-
-    /**
-     * Create a builder for a {@link LongGauge} with the given metric name that uses {@code max}
-     * as the aggregation operator and initial value of {@link Long#MIN_VALUE},
-     * which won't be exported if not observed at least once.
-     *
-     * @param name            the metric name
-     * @param resetOnExport   if true, the gauge is reset to its initial value on export
-     * @return the builder
-     */
-    @NonNull
-    static Builder maxBuilder(@NonNull String name, boolean resetOnExport) {
-        return builder(name).withOperator(StatUtils.LONG_MAX, resetOnExport).withInitValue(Long.MIN_VALUE);
-    }
-
-    /**
-     * Create a builder for a {@link LongGauge} with the given metric name that uses {@code min}
-     * as the aggregation operator and initial value of {@link Long#MAX_VALUE},
-     * which won't be exported if not observed at least once.
-     *
-     * @param name            the metric name
-     * @param resetOnExport   if true, the gauge is reset to its initial value on export
-     * @return the builder
-     */
-    @NonNull
-    static Builder minBuilder(@NonNull String name, boolean resetOnExport) {
-        return builder(name).withOperator(StatUtils.LONG_MIN, resetOnExport).withInitValue(Long.MAX_VALUE);
     }
 
     /**
@@ -123,6 +84,28 @@ public interface LongGauge extends StatefulMetric<LongSupplier, LongGaugeDataPoi
         @NonNull
         public Builder withInitValue(long initValue) {
             return withDefaultInitializer(StatUtils.asInitializer(initValue));
+        }
+
+        /**
+         * Set the aggregation operator to {@code max} and initial value to {@link Long#MIN_VALUE},
+         * which won't be exported if not observed at least once.
+         * The gauge will be reset to its initial value after each export.
+         *
+         * @return this builder
+         */
+        public Builder withTrackingMaxSpike() {
+            return withOperator(StatUtils.LONG_MAX, true).withInitValue(Long.MIN_VALUE);
+        }
+
+        /**
+         * Set the aggregation operator to {@code min} and initial value to {@link Long#MAX_VALUE},
+         * which won't be exported if not observed at least once.
+         * The gauge will be reset to its initial value after each export.
+         *
+         * @return this builder
+         */
+        public Builder withTrackingMinSpike() {
+            return withOperator(StatUtils.LONG_MIN, true).withInitValue(Long.MAX_VALUE);
         }
 
         /**

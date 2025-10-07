@@ -3,7 +3,6 @@ package org.hiero.metrics.internal.datapoint;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import org.hiero.metrics.api.datapoint.BooleanGaugeDataPoint;
 import org.hiero.metrics.api.stat.StatUtils;
@@ -11,29 +10,29 @@ import org.hiero.metrics.api.stat.StatUtils;
 public final class AtomicBooleanGaugeDataPoint implements BooleanGaugeDataPoint {
 
     private final BooleanSupplier initializer;
-    private final AtomicBoolean container = new AtomicBoolean();
+    private volatile boolean value;
 
     public AtomicBooleanGaugeDataPoint() {
         this(StatUtils.BOOL_INIT_FALSE);
     }
 
     public AtomicBooleanGaugeDataPoint(@NonNull BooleanSupplier initializer) {
-        this.initializer = Objects.requireNonNull(initializer);
+        this.initializer = Objects.requireNonNull(initializer, "initializer must not be null");
         reset();
     }
 
     @Override
     public void set(boolean value) {
-        container.set(value);
+        this.value = value;
     }
 
     @Override
     public boolean getAsBoolean() {
-        return container.get();
+        return value;
     }
 
     @Override
     public void reset() {
-        container.set(initializer.getAsBoolean());
+        value = initializer.getAsBoolean();
     }
 }

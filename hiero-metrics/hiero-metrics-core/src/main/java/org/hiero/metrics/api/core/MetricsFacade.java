@@ -27,7 +27,7 @@ import org.hiero.metrics.internal.export.SinglePullingExporterMetricsExportManag
 /**
  * Facade for creating and managing metrics registries and export managers.
  * <p>
- * Here is production ready example of using the facade:
+ * Here is production-ready example of using the facade:
  * <pre>
  * {@code
  * Configuration configuration = ConfigurationBuilder.create()
@@ -36,7 +36,7 @@ import org.hiero.metrics.internal.export.SinglePullingExporterMetricsExportManag
  *
  * // create export manager named "my-app", that will discover all implementations
  * // of MetricsExporterFactory SPI and create exporters using the provided configuration.
- * // Scheduled thread executor would only be used if there is more than just
+ * // Scheduled thread executor will be only used if there is more than just
  * // a single pulling exporter to sync exports every 3 seconds.
  * MetricsExportManager exportManager = MetricsFacade.createExportManagerWithDiscoveredExporters(
  * 		"my-app", configuration, Executors::newSingleThreadScheduledExecutor, 3);
@@ -52,6 +52,11 @@ import org.hiero.metrics.internal.export.SinglePullingExporterMetricsExportManag
  * // Use IdempotentMetricsBinder to bind metrics registry in a thread-safe and idempotent way
  * }
  * </pre>
+ *
+ * @see MetricRegistry
+ * @see MetricsExportManager
+ * @see MetricsRegistrationProvider
+ * @see MetricsBinder
  */
 public final class MetricsFacade {
 
@@ -62,18 +67,19 @@ public final class MetricsFacade {
     }
 
     /**
-     * Creates a new {@link MetricRegistry} with the specified global labels.
+     * Creates a new thread-safe {@link MetricRegistry} with the specified global labels.
      *
      * @param globalLabels the global labels to apply to all metrics in the registry, may be empty but not {@code null}
      * @return a new {@link MetricRegistry} instance
      */
     @NonNull
     public static MetricRegistry createRegistry(@NonNull Label... globalLabels) {
+        Objects.requireNonNull(globalLabels, "global labels must not be null");
         return new DefaultMetricRegistry(globalLabels);
     }
 
     /**
-     * Creates a new {@link MetricRegistry} and automatically registers metrics from all discovered
+     * Creates a new thread-safe {@link MetricRegistry} and automatically registers metrics from all discovered
      * {@link MetricsRegistrationProvider} implementations using the Java {@link java.util.ServiceLoader} mechanism.
      *
      * @param globalLabels the global labels to apply to all metrics in the registry, may be empty but not {@code null}
@@ -96,7 +102,7 @@ public final class MetricsFacade {
         return registry;
     }
 
-    // TODO support only one pulling exporter to avoid different clocks and inaccurate data
+    // TODO support only one pulling exporter to avoid different clocks and inaccurate data ?
 
     /**
      * Creates a new {@link MetricsExportManager} using discovered via the Java {@link java.util.ServiceLoader}
@@ -111,6 +117,9 @@ public final class MetricsFacade {
      * <p>
      * Otherwise, a default export manager is created with scheduled task submitted to executor service to do
      * periodic snapshots on all managed {@link MetricRegistry} instances and propagating snapshots to all exporters.
+     * Only one snapshot at the time can be taken, so metric and its data point snapshots are reusable objects.
+     * Exporters may use metric and data point snapshots as a key for hash map to store some specific representation
+     * or template as a value.
      * <p>
      * Clients have to call {@link MetricsExportManager#manageMetricRegistry(MetricRegistry)}
      * to manage registries for exporting.

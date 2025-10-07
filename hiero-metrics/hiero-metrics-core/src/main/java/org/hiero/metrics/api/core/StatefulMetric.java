@@ -14,6 +14,11 @@ import java.util.function.Function;
  * Clients should pay attention the dynamic label values cardinality, as high cardinality can lead to
  * higher costs for metrics backends. <b>Do not use</b> labels with values having unbounded cardinality,
  * such as IDs or timestamps.
+ * <p>
+ * Data points are created lazily, when requested via {@link #getOrCreateLabeled(String...)},
+ * {@link #getOrCreateLabeled(Object, String...)} or {@link #getOrCreateNotLabeled()}, so no data point will be exported
+ * until at least one observation is made using these methods. If initial value of data point has to be exported
+ * even before observation, {@code getOrCreate} method can be called to instantiate datapoint.
  *
  * @param <I> the type of the initializer used to create new data points per label set
  * @param <D> the type of the data point
@@ -21,16 +26,47 @@ import java.util.function.Function;
 public interface StatefulMetric<I, D> extends Metric {
 
     /**
-     * Get the data point with no labels.
+     * Get or create the data point with no labels.
      *
      * @return the data point with no labels
      * @throws IllegalStateException if metric has dynamic labels specified during creation
      */
     @NonNull
-    D getNotLabeled();
+    D getOrCreateNotLabeled();
 
+    /**
+     * Get or create the data point with the specified labels, using the default initializer.
+     * <p>
+     * Provided label names must match the dynamic labels specified during metric creation.
+     * Constant labels should not be provided here, as they are already associated with the metric.
+     * Order doesn't matter, but for efficiency, it is recommended to provide label names in alphabetical order.
+     * Label names and values are used as is without array copying,
+     * so caller must not modify array after calling this method.
+     *
+     * @param namesAndValues - alternating label names and values, e.g. "label1", "value1", "label2", "value2"
+     * @return the data point with the specified labels
+     * @throws IllegalStateException if metric has no dynamic labels specified during creation
+     * @throws IllegalArgumentException if provided label names do not match {@link #dynamicLabelNames()}
+     */
+    @NonNull
     D getOrCreateLabeled(@NonNull String... namesAndValues);
 
+    /**
+     * Get or create the data point with the specified labels, using a custom initializer.
+     * <p>
+     * Provided label names must match the dynamic labels specified during metric creation.
+     * Constant labels should not be provided here, as they are already associated with the metric.
+     * Order doesn't matter, but for efficiency, it is recommended to provide label names in alphabetical order.
+     * Label names and values are used as is without array copying,
+     * so caller must not modify array after calling this method.
+     *
+     * @param initializer the initializer to create new data points, must not be {@code null}
+     * @param namesAndValues - alternating label names and values, e.g. "label1", "value1", "label2", "value2"
+     * @return the data point with the specified labels
+     * @throws IllegalStateException if metric has no dynamic labels specified during creation
+     * @throws IllegalArgumentException if provided label names do not match {@link #dynamicLabelNames()}
+     */
+    @NonNull
     D getOrCreateLabeled(@NonNull I initializer, @NonNull String... namesAndValues);
 
     /**

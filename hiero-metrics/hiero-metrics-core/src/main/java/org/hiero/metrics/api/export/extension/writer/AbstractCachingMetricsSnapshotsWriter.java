@@ -35,7 +35,7 @@ public abstract class AbstractCachingMetricsSnapshotsWriter<M extends BaseMetric
         beforeMetricWrite(metricExportData, output);
         for (int i = 0; i < metricSnapshot.size(); i++) {
             DataPointSnapshot dataPointSnapshot = metricSnapshot.get(i);
-            TemplateByteArray dataPointExportTemplate =
+            ByteArrayTemplate dataPointExportTemplate =
                     metricExportData.getOrCreateDatapointExportTemplate(dataPointSnapshot);
             writeDataPoint(timestamp, dataPointSnapshot, dataPointExportTemplate, output);
         }
@@ -53,7 +53,7 @@ public abstract class AbstractCachingMetricsSnapshotsWriter<M extends BaseMetric
     protected abstract void writeDataPoint(
             @NonNull Instant timestamp,
             @NonNull DataPointSnapshot dataPointSnapshot,
-            @NonNull TemplateByteArray dataPointExportTemplate,
+            @NonNull ByteArrayTemplate dataPointExportTemplate,
             @NonNull OutputStream output)
             throws IOException;
 

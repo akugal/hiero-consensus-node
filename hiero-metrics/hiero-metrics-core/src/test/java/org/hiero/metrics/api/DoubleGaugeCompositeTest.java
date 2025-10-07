@@ -33,7 +33,7 @@ public class DoubleGaugeCompositeTest {
                         DoubleGaugeComposite.key("singleSumStat"))
                 .withSumStat()
                 .build()
-                .getNotLabeled();
+                .getOrCreateNotLabeled();
 
         assertThat(dataPoint.size()).isEqualTo(1);
 
@@ -57,7 +57,7 @@ public class DoubleGaugeCompositeTest {
                 .withSumStat()
                 .withAccumulatorStat("sumPlusOne", (v1, v2) -> v1 + v2 + 1)
                 .build()
-                .getNotLabeled();
+                .getOrCreateNotLabeled();
 
         assertThat(dataPoint.size()).isEqualTo(2);
 

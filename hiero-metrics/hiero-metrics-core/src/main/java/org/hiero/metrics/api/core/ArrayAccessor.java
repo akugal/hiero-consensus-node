@@ -9,10 +9,12 @@ import java.util.Iterator;
  * It extends {@link Iterable} for easy iteration, but it is recommended to use indexed access using loop:
  * <br>
  * <pre>
- *     for (int i = 0; i &lt; arrayAccessor.size(); i++) {
- *          T element = arrayAccessor.get(i);
- *          // process element
- *     }
+ *  {@code
+ *      for (int i = 0; i &lt; arrayAccessor.size(); i++) {
+ *           T element = arrayAccessor.get(i);
+ *           // process element
+ *      }
+ *  }
  * </pre>
  *
  * @param <T> the type of elements in the array

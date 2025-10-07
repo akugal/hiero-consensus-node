@@ -5,10 +5,11 @@ import java.util.function.DoubleSupplier;
 import java.util.function.LongSupplier;
 
 /**
- * A data point representing a counter that holds a {@code long} value.
- * The counter can be incremented by a specified value or by {@code 1L}.
+ * A {@link DataPoint} representing a {@code long} counter that can only be incremented with non-negative value.
  * <p>
  * This interface extends {@link LongSupplier} to provide the current value of the counter.
+ * <p>
+ * <b>All operations are thread-safe and atomic.</b>
  */
 public interface LongCounterDataPoint extends LongSupplier, DoubleSupplier, DataPoint {
 

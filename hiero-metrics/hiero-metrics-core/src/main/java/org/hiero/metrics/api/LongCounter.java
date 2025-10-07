@@ -18,7 +18,8 @@ import org.hiero.metrics.internal.datapoint.LongAdderCounterDataPoint;
 public interface LongCounter extends StatefulMetric<LongSupplier, LongCounterDataPoint> {
 
     /**
-     * Create a metric key for a {@link LongCounter} with the given name.
+     * Create a metric key for a {@link LongCounter} with the given name. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @return the metric key
@@ -40,7 +41,8 @@ public interface LongCounter extends StatefulMetric<LongSupplier, LongCounterDat
     }
 
     /**
-     * Create a builder for a {@link LongCounter} with the given metric name.
+     * Create a builder for a {@link LongCounter} with the given metric name. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @return the builder

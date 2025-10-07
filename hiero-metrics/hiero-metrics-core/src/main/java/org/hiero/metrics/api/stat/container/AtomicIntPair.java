@@ -11,7 +11,7 @@ import java.util.function.LongBinaryOperator;
 import java.util.function.ToDoubleBiFunction;
 
 /**
- * Holds two integers that can be updated atomically
+ * Holds two integers that can be updated atomically.
  */
 public class AtomicIntPair {
 

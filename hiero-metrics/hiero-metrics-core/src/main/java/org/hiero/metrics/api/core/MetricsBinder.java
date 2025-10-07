@@ -14,7 +14,7 @@ public interface MetricsBinder {
      * Binds the provided {@link MetricRegistry}.
      * This method can be called during the initialization phase to register or retrieve metrics.
      *
-     * @param registry the {@link MetricRegistry} to bind
+     * @param registry the {@link MetricRegistry} to bind, must not be {@code null}
      */
     void bind(@NonNull MetricRegistry registry);
 }

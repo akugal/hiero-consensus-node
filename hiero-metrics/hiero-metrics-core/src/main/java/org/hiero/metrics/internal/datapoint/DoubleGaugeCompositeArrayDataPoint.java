@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal.datapoint;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
 import java.util.function.Supplier;
 import org.hiero.metrics.api.datapoint.DoubleGaugeCompositeDataPoint;
@@ -10,16 +11,9 @@ public class DoubleGaugeCompositeArrayDataPoint implements DoubleGaugeCompositeD
 
     private final DoubleGaugeDataPoint[] dataPoints;
 
-    public DoubleGaugeCompositeArrayDataPoint(Supplier<DoubleGaugeDataPoint[]> dataPointFactories) {
+    public DoubleGaugeCompositeArrayDataPoint(@NonNull Supplier<DoubleGaugeDataPoint[]> dataPointFactories) {
         Objects.requireNonNull(dataPointFactories, "Data point factories must not be null");
-        this.dataPoints = Objects.requireNonNull(dataPointFactories.get(), "Data point factories must not be null");
-    }
-
-    @Override
-    public void update(double value) {
-        for (DoubleGaugeDataPoint dataPoint : dataPoints) {
-            dataPoint.update(value);
-        }
+        this.dataPoints = Objects.requireNonNull(dataPointFactories.get(), "Data points array must not be null");
     }
 
     @Override

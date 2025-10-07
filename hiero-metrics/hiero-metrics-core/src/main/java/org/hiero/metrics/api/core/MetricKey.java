@@ -10,7 +10,6 @@ import org.hiero.metrics.api.utils.MetricUtils;
  * Key instance is immutable and can be used to retrieve a metric from a {@link MetricRegistry}.
  * <p>
  * Callers may additionally categorize the metric by calling {@link #withCategory(String)}.
- *
  */
 public final class MetricKey<M extends Metric> {
 

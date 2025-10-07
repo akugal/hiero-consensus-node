@@ -22,7 +22,8 @@ import org.hiero.metrics.internal.datapoint.DoubleAccumulatorGaugeDataPoint;
 public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeDataPoint> {
 
     /**
-     * Create a metric key for a {@link DoubleGauge} with the given name.
+     * Create a metric key for a {@link DoubleGauge} with the given name. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @return the metric key
@@ -44,7 +45,8 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
     }
 
     /**
-     * Create a builder for a {@link DoubleGauge} with the given metric name.
+     * Create a builder for a {@link DoubleGauge} with the given metric name.<br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the metric name
      * @return the builder
@@ -52,51 +54,6 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
     @NonNull
     static Builder builder(@NonNull String name) {
         return builder(key(name));
-    }
-
-    /**
-     * Create a builder for a {@link DoubleGauge} with the given metric name that uses {@code sum}
-     * as the aggregation operator.
-     *
-     * @param name          the metric name
-     * @param resetOnExport if true, the gauge will be reset to its initial value after each export
-     * @return the builder
-     */
-    @NonNull
-    static Builder sumBuilder(@NonNull String name, boolean resetOnExport) {
-        return builder(key(name)).withOperator(StatUtils.DOUBLE_SUM, resetOnExport);
-    }
-
-    /**
-     * Create a builder for a {@link DoubleGauge} with the given metric name that uses {@code max}
-     * as the aggregation operator and initial value of {@link Double#MIN_VALUE},
-     * which won't be exported if not observed at least once.
-     *
-     * @param name          the metric name
-     * @param resetOnExport if true, the gauge will be reset to its initial value after each export
-     * @return the builder
-     */
-    @NonNull
-    static Builder maxBuilder(@NonNull String name, boolean resetOnExport) {
-        return builder(key(name))
-                .withOperator(StatUtils.DOUBLE_MAX, resetOnExport)
-                .withInitValue(Double.NEGATIVE_INFINITY);
-    }
-
-    /**
-     * Create a builder for a {@link DoubleGauge} with the given metric name that uses {@code min}
-     * as the aggregation operator and initial value of {@link Double#MAX_VALUE},
-     * which won't be exported if not observed at least once.
-     *
-     * @param name          the metric name
-     * @param resetOnExport if true, the gauge will be reset to its initial value after each export
-     * @return the builder
-     */
-    @NonNull
-    static Builder minBuilder(@NonNull String name, boolean resetOnExport) {
-        return builder(key(name))
-                .withOperator(StatUtils.DOUBLE_MIN, resetOnExport)
-                .withInitValue(Double.POSITIVE_INFINITY);
     }
 
     /**
@@ -146,6 +103,28 @@ public interface DoubleGauge extends StatefulMetric<DoubleSupplier, DoubleGaugeD
             this.operator = Objects.requireNonNull(operator, "Operator must not be null");
             this.resetOnExport = resetOnExport;
             return this;
+        }
+
+        /**
+         * Set the aggregation operator to {@code min} and initial value to {@link Double#MAX_VALUE},
+         * which won't be exported if not observed at least once.
+         * The gauge will be reset to its initial value after each export.
+         *
+         * @return this builder
+         */
+        public Builder withTrackingMaxSpike() {
+            return withOperator(StatUtils.DOUBLE_MAX, true).withInitValue(Double.NEGATIVE_INFINITY);
+        }
+
+        /**
+         * Set the aggregation operator to {@code max} and initial value to {@link Double#MIN_VALUE},
+         * which won't be exported if not observed at least once.
+         * The gauge will be reset to its initial value after each export.
+         *
+         * @return this builder
+         */
+        public Builder withTrackingMinSpike() {
+            return withOperator(StatUtils.DOUBLE_MIN, true).withInitValue(Double.POSITIVE_INFINITY);
         }
 
         /**

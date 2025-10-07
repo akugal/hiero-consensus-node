@@ -122,7 +122,16 @@ public class DefaultMetricsExportManager extends AbstractMetricsExportManager {
                 try {
                     pullingExporter.close();
                 } catch (Exception ex) {
-                    logger.error("Error while shutting down pulling metrics exporter {}", pullingExporter.name(), ex);
+                    logger.error("Error closing pulling metrics exporter {}", pullingExporter.name(), ex);
+                    // ignore, we are stopping anyway
+                }
+            }
+
+            for (PushingMetricsExporter pushingExporter : pushingExporters) {
+                try {
+                    pushingExporter.close();
+                } catch (Exception ex) {
+                    logger.error("Error closing pushing metrics exporter {}", pushingExporter.name(), ex);
                     // ignore, we are stopping anyway
                 }
             }

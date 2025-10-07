@@ -7,6 +7,8 @@ import java.util.function.DoubleSupplier;
  * A gauge data point for a generic type that is converted to {@code double}.
  * <p>
  * This interface extends {@link DoubleSupplier} to provide the current converted value of the gauge.
+ * <p>
+ * <b>All operations are thread-safe and atomic.</b>
  *
  * @param <T> the type of value used to update the gauge
  */

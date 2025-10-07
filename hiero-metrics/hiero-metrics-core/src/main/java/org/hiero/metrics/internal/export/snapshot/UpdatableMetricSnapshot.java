@@ -18,10 +18,10 @@ public final class UpdatableMetricSnapshot<D, S extends DataPointSnapshot> imple
     private final Consumer<DataPointHolder<D, S>> snapshotUpdater;
     private final AppendArray<DataPointHolder<D, S>> dataPointHolders;
 
-    public UpdatableMetricSnapshot(Metric metric, Consumer<DataPointHolder<D, S>> snapshotUpdater, int capacity) {
+    public UpdatableMetricSnapshot(Metric metric, Consumer<DataPointHolder<D, S>> snapshotUpdater) {
         this.metric = metric;
         this.snapshotUpdater = snapshotUpdater;
-        this.dataPointHolders = new AppendArray<>(capacity);
+        this.dataPointHolders = new AppendArray<>(metric.dynamicLabelNames().isEmpty() ? 1 : 8);
     }
 
     public void addDataPointHolder(DataPointHolder<D, S> dataPoint) {

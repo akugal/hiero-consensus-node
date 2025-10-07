@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal.datapoint;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.Objects;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongSupplier;
 import org.hiero.metrics.api.stat.StatUtils;
@@ -14,8 +16,8 @@ public final class LongAdderCounterDataPoint extends AbstractLongCounterDataPoin
         this(StatUtils.LONG_INIT);
     }
 
-    public LongAdderCounterDataPoint(LongSupplier initializer) {
-        this.initializer = initializer;
+    public LongAdderCounterDataPoint(@NonNull LongSupplier initializer) {
+        this.initializer = Objects.requireNonNull(initializer, "initializer must not be null");
         reset();
     }
 

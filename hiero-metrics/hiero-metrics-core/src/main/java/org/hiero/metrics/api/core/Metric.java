@@ -12,39 +12,39 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.hiero.metrics.api.utils.MetricUtils;
-import org.hiero.metrics.internal.export.SnapshotableMetric;
 
 /**
  * Base interface for all metrics.
  * <p>
  * A metric is defined by its {@link MetricMetadata}, a {@link Label} set of
- * constant labels and a set of dynamic label names.
+ * constant labels and a set of dynamic label names (may have no labels at all).
  * <p>
  * Metrics are immutable and thread-safe, but they may hold mutable {@link org.hiero.metrics.api.datapoint.DataPoint}s
  * per dynamic labels set, that can be updated with new measurements.
  * Metrics can also be reset to their initial state, which resets all associated datapoints.
  * <p>
  * Since metric can support aggregations (like sum, min, max, avg, etc.), this interface doesn't expose
- * export or snapshot functionality, but usually each metric implementation will extend
- * {@link SnapshotableMetric} that is internal and used by
- * {@link org.hiero.metrics.api.export.MetricsExportManager} to export metrics.
+ * export or snapshot functionality - {@link org.hiero.metrics.api.export.MetricsExportManager} should be used
+ * to export metrics to different destinations.
  */
 public interface Metric {
 
     /**
-     * @return the immutable metadata associated with this metric.
+     * @return the immutable metadata associated with this metric, never {@code null}
      */
     @NonNull
     MetricMetadata metadata();
 
     /**
-     * @return the immutable list of constant labels associated with this metric and any of its data point.
+     * @return the immutable alphabetically ordered list of constant labels associated with this metric
+     * and any of its data point, may be empty but never {@code null}
      */
     @NonNull
     List<Label> constantLabels();
 
     /**
-     * @return the immutable ordered list of dynamic label names associated with this metric.
+     * @return the immutable alphabetically ordered list of dynamic label names associated with this metric,
+     * may be empty but never {@code null}
      */
     @NonNull
     List<String> dynamicLabelNames();

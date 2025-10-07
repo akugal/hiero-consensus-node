@@ -6,7 +6,10 @@ import java.util.Set;
 
 /**
  * A data point for holding {@code boolean} state of a set of values of enum type.
- * The state can be set to {@code true} or {@code false} for each value of key.
+ * The state can be set to {@code true} or {@code false} for each value of enum.
+ * <p>
+ * <b>Setting and getting value for enum state is thread-safe and atomic,
+ * but {@link #reset()} is not atomic while thread-safe</b>
  *
  * @param <E> the enum type of the states
  */

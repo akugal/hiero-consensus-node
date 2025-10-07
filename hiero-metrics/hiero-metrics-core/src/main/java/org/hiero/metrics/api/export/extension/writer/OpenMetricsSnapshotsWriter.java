@@ -85,7 +85,7 @@ public class OpenMetricsSnapshotsWriter
     protected void writeDataPoint(
             @NonNull Instant timestamp,
             @NonNull DataPointSnapshot dataPointSnapshot,
-            @NonNull TemplateByteArray template,
+            @NonNull ByteArrayTemplate template,
             @NonNull OutputStream output)
             throws IOException {
 
@@ -128,7 +128,7 @@ public class OpenMetricsSnapshotsWriter
         return varIdx;
     }
 
-    private void writeDataLine(TemplateByteArray template, int varCount, byte[][] variables, OutputStream output)
+    private void writeDataLine(ByteArrayTemplate template, int varCount, byte[][] variables, OutputStream output)
             throws IOException {
         Iterator<byte[]> iterator = template.iterator(varCount, variables);
         while (iterator.hasNext()) {
@@ -241,7 +241,7 @@ public class OpenMetricsSnapshotsWriter
         }
 
         @Override
-        protected TemplateByteArray buildDataPointExportTemplate(DataPointSnapshot dataPointSnapshot) {
+        protected ByteArrayTemplate buildDataPointExportTemplate(DataPointSnapshot dataPointSnapshot) {
             return switch (dataPointSnapshot) {
                 case SingleValueDataPointSnapshot snapshot -> buildSingleValueTemplate(snapshot);
                 case GenericMultiValueDataPointSnapshot snapshot -> buildGenericMultiValueTemplate(snapshot);
@@ -252,8 +252,8 @@ public class OpenMetricsSnapshotsWriter
             };
         }
 
-        private TemplateByteArray buildSingleValueTemplate(SingleValueDataPointSnapshot dataPointSnapshot) {
-            TemplateByteArray.Builder builder = TemplateByteArray.builder();
+        private ByteArrayTemplate buildSingleValueTemplate(SingleValueDataPointSnapshot dataPointSnapshot) {
+            ByteArrayTemplate.Builder builder = ByteArrayTemplate.builder();
 
             builder.append(metricNameBytes);
             if (metricSnapshot().metadata().metricType() == MetricType.COUNTER) {
@@ -272,9 +272,9 @@ public class OpenMetricsSnapshotsWriter
             return builder.build();
         }
 
-        private TemplateByteArray buildGenericMultiValueTemplate(GenericMultiValueDataPointSnapshot dataPointSnapshot) {
-            TemplateByteArray.Builder builder =
-                    TemplateByteArray.builder().append(metricNameBytes).append(OPEN_BRACKET);
+        private ByteArrayTemplate buildGenericMultiValueTemplate(GenericMultiValueDataPointSnapshot dataPointSnapshot) {
+            ByteArrayTemplate.Builder builder =
+                    ByteArrayTemplate.builder().append(metricNameBytes).append(OPEN_BRACKET);
 
             boolean firstLabel = appendLabels(dataPointSnapshot, builder);
             if (!firstLabel) {
@@ -291,8 +291,8 @@ public class OpenMetricsSnapshotsWriter
             return builder.build();
         }
 
-        private TemplateByteArray buildStateSetTemplate(StateSetDataPointSnapshot<?> dataPointSnapshot) {
-            TemplateByteArray.Builder builder = TemplateByteArray.builder().append(metricNameBytes);
+        private ByteArrayTemplate buildStateSetTemplate(StateSetDataPointSnapshot<?> dataPointSnapshot) {
+            ByteArrayTemplate.Builder builder = ByteArrayTemplate.builder().append(metricNameBytes);
 
             // state set requires an additional label with name equal to metric name and value equal to state name
             builder.append(OPEN_BRACKET);
@@ -311,7 +311,7 @@ public class OpenMetricsSnapshotsWriter
             return builder.build();
         }
 
-        private void appendValueAndTimestamp(TemplateByteArray.Builder builder) {
+        private void appendValueAndTimestamp(ByteArrayTemplate.Builder builder) {
             builder.append(SPACE).addPlaceholder(); // Placeholder for value
 
             if (writeTimestamp) {
@@ -319,12 +319,12 @@ public class OpenMetricsSnapshotsWriter
             }
         }
 
-        private boolean appendLabels(DataPointSnapshot dataPointSnapshot, TemplateByteArray.Builder builder) {
+        private boolean appendLabels(DataPointSnapshot dataPointSnapshot, ByteArrayTemplate.Builder builder) {
             boolean firstLabel = appendConstantLabels(builder);
             return appendDynamicLabels(dataPointSnapshot, builder, firstLabel);
         }
 
-        private boolean appendConstantLabels(TemplateByteArray.Builder builder) {
+        private boolean appendConstantLabels(ByteArrayTemplate.Builder builder) {
             boolean first = true;
             for (Label label : metricSnapshot().constantLabels()) {
                 if (!first) {
@@ -340,7 +340,7 @@ public class OpenMetricsSnapshotsWriter
         }
 
         private boolean appendDynamicLabels(
-                DataPointSnapshot dataPointSnapshot, TemplateByteArray.Builder builder, boolean firstLabel) {
+                DataPointSnapshot dataPointSnapshot, ByteArrayTemplate.Builder builder, boolean firstLabel) {
             List<String> labelNames = metricSnapshot().dynamicLabelNames();
             for (int i = 0; i < labelNames.size(); i++) {
                 String labelValue = dataPointSnapshot.labelValue(i);

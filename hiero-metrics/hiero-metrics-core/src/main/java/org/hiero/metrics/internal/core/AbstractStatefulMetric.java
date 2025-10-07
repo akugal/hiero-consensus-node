@@ -2,8 +2,9 @@
 package org.hiero.metrics.internal.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import edu.umd.cs.findbugs.annotations.Nullable;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import org.hiero.metrics.api.core.StatefulMetric;
 import org.hiero.metrics.api.export.snapshot.DataPointSnapshot;
@@ -15,8 +16,8 @@ public abstract class AbstractStatefulMetric<I, D, S extends DataPointSnapshot> 
     private final I defaultInitializer;
     private final Function<I, D> dataPointFactory;
 
-    @Nullable
-    private final DataPointHolder<D, S> noLabelsDataPoint;
+    private D noLabelsDataPoint;
+    private final Map<LabelValues, DataPointHolder<D, S>> dataPoints;
 
     protected AbstractStatefulMetric(StatefulMetric.Builder<I, D, ?, ?> builder) {
         super(builder);
@@ -25,9 +26,9 @@ public abstract class AbstractStatefulMetric<I, D, S extends DataPointSnapshot> 
         defaultInitializer = builder.getDefaultInitializer();
 
         if (dynamicLabelNames().isEmpty()) {
-            noLabelsDataPoint = createDataPointHolder(dataPointFactory.apply(defaultInitializer), LabelValues.empty());
+            dataPoints = null;
         } else {
-            noLabelsDataPoint = null;
+            dataPoints = new ConcurrentHashMap<>();
         }
     }
 
@@ -35,8 +36,10 @@ public abstract class AbstractStatefulMetric<I, D, S extends DataPointSnapshot> 
 
     @Override
     public final void reset() {
-        if (noLabelsDataPoint != null) {
-            reset(noLabelsDataPoint.dataPoint());
+        if (dynamicLabelNames().isEmpty()) {
+            if (noLabelsDataPoint != null) {
+                reset(noLabelsDataPoint);
+            }
         } else {
             dataPoints.values().stream().map(DataPointHolder::dataPoint).forEach(this::reset);
         }
@@ -44,41 +47,52 @@ public abstract class AbstractStatefulMetric<I, D, S extends DataPointSnapshot> 
 
     @NonNull
     @Override
-    public final D getNotLabeled() {
-        if (noLabelsDataPoint == null) {
+    public final D getOrCreateNotLabeled() {
+        if (!dynamicLabelNames().isEmpty()) {
             throw new IllegalStateException("This metric has dynamic labels, so you must call getOrCreateLabeled()");
         }
-        return noLabelsDataPoint.dataPoint();
+        // lazy init of no labels data point
+        if (noLabelsDataPoint == null) {
+            synchronized (this) {
+                if (noLabelsDataPoint == null) {
+                    noLabelsDataPoint =
+                            createAndTrackDataPointHolder(LabelValues.empty()).dataPoint();
+                }
+            }
+        }
+        return noLabelsDataPoint;
     }
 
+    @NonNull
     @Override
     public D getOrCreateLabeled(@NonNull String... namesAndValues) {
-        if (noLabelsDataPoint != null) {
+        if (dynamicLabelNames().isEmpty()) {
             throw new IllegalStateException("This metric has no dynamic labels, so you must call getNotLabeled()");
         }
         return dataPoints
-                .computeIfAbsent(createLabelValues(namesAndValues), this::createDataPointHolder)
+                .computeIfAbsent(createLabelValues(namesAndValues), this::createAndTrackDataPointHolder)
                 .dataPoint();
     }
 
+    @NonNull
     @Override
     public D getOrCreateLabeled(@NonNull I initializer, @NonNull String... namesAndValues) {
-        if (noLabelsDataPoint != null) {
+        if (dynamicLabelNames().isEmpty()) {
             throw new IllegalStateException("This metric has no dynamic labels, so you must call getNotLabeled()");
         }
         Objects.requireNonNull(initializer);
         return dataPoints
                 .computeIfAbsent(
                         createLabelValues(namesAndValues),
-                        labelValues -> createDataPointHolder(labelValues, initializer))
+                        labelValues -> createAndTrackDataPointHolder(labelValues, initializer))
                 .dataPoint();
     }
 
-    private DataPointHolder<D, S> createDataPointHolder(LabelValues labelValues) {
-        return createDataPointHolder(labelValues, defaultInitializer);
+    private DataPointHolder<D, S> createAndTrackDataPointHolder(LabelValues labelValues) {
+        return createAndTrackDataPointHolder(labelValues, defaultInitializer);
     }
 
-    private DataPointHolder<D, S> createDataPointHolder(LabelValues labelValues, @NonNull I initializer) {
-        return createDataPointHolder(dataPointFactory.apply(initializer), labelValues);
+    private DataPointHolder<D, S> createAndTrackDataPointHolder(LabelValues labelValues, @NonNull I initializer) {
+        return createAndTrackDataPointHolder(dataPointFactory.apply(initializer), labelValues);
     }
 }

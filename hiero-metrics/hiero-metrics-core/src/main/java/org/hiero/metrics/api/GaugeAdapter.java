@@ -27,7 +27,8 @@ import org.hiero.metrics.internal.DefaultGaugeAdapter;
 public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
 
     /**
-     * Create a metric key for a {@link GaugeAdapter} with the given name.
+     * Create a metric key for a {@link GaugeAdapter} with the given name.<br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @param <I>  the type of the initializer used to create the data point
@@ -60,7 +61,8 @@ public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
     }
 
     /**
-     * Create a builder for a {@link GaugeAdapter} with the given metric name.
+     * Create a builder for a {@link GaugeAdapter} with the given metric name.<br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name               the metric name
      * @param defaultInitializer the default initializer used to create the data point
@@ -99,7 +101,8 @@ public interface GaugeAdapter<I, D> extends StatefulMetric<I, D> {
 
     /**
      * Create a builder for a {@link GaugeAdapter} with the given metric name.
-     * The data point will be created using the given factory function without any initializer.
+     * The data point will be created using the given factory function without any initializer.<br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name             the metric name
      * @param dataPointFactory the factory function to create the data point

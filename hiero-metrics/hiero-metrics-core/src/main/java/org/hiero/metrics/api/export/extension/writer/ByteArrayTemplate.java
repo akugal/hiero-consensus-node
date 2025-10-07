@@ -7,26 +7,27 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A template for byte arrays with placeholders that can be replaced with variable byte arrays.
- * The template is built using a builder pattern ({@link #builder()}), allowing to append fixed byte arrays and add
+ * A template for byte array with placeholders that can be replaced with variable byte arrays.
+ * <p>
+ * Template can be constructed using builder pattern ({@link #builder()}), allowing to append fixed byte arrays and add
  * placeholders. When iterating over the template, the placeholders are replaced with the provided
  * variable byte arrays.
  * <p>
- * Internally the template is represented as a array of byte array chunks, where each chunk is either
+ * Internally the template is represented as an array of byte array chunks, where each chunk is either
  * a fixed/static byte array or a {@code null} representing a placeholder.
  */
-public final class TemplateByteArray {
+public final class ByteArrayTemplate {
 
     private final byte[][] chunks;
     private final int placeholdersCount;
 
-    private TemplateByteArray(Builder builder) {
+    private ByteArrayTemplate(Builder builder) {
         chunks = builder.chunks.toArray(new byte[0][]);
         placeholdersCount = builder.placeholdersCount;
     }
 
     /**
-     * @return a new builder for {@link TemplateByteArray}.
+     * @return a new builder for {@link ByteArrayTemplate}.
      */
     public static Builder builder() {
         return new Builder();
@@ -89,7 +90,7 @@ public final class TemplateByteArray {
     }
 
     /**
-     * A builder for {@link TemplateByteArray}.
+     * A builder for {@link ByteArrayTemplate}.
      */
     public static final class Builder {
 
@@ -151,13 +152,13 @@ public final class TemplateByteArray {
         }
 
         /**
-         * Builds the {@link TemplateByteArray} from the appended fixed byte arrays and placeholders.
+         * Builds the {@link ByteArrayTemplate} from the appended fixed byte arrays and placeholders.
          *
-         * @return the built {@link TemplateByteArray}
+         * @return the built {@link ByteArrayTemplate}
          */
-        public TemplateByteArray build() {
+        public ByteArrayTemplate build() {
             finalizeBuilderChunk();
-            return new TemplateByteArray(this);
+            return new ByteArrayTemplate(this);
         }
     }
 }

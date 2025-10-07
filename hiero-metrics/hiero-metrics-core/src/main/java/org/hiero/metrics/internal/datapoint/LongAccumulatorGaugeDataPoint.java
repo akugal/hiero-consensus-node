@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal.datapoint;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.Objects;
 import java.util.function.LongBinaryOperator;
 import java.util.function.LongSupplier;
 
@@ -8,9 +10,9 @@ public final class LongAccumulatorGaugeDataPoint extends AtomicLongGaugeDataPoin
 
     private final LongBinaryOperator operator;
 
-    public LongAccumulatorGaugeDataPoint(LongBinaryOperator operator, LongSupplier initializer) {
+    public LongAccumulatorGaugeDataPoint(@NonNull LongBinaryOperator operator, @NonNull LongSupplier initializer) {
         super(initializer);
-        this.operator = operator;
+        this.operator = Objects.requireNonNull(operator, "operator must not be null");
     }
 
     @Override

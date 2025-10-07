@@ -85,23 +85,16 @@ public class OpenMetricsExportComprehensiveTest {
             context.exportAndVerify(
                     """
                 # TYPE only_name gauge
-                only_name 0
                 # TYPE bool:name_category gauge
-                bool:name_category 0
                 # TYPE name_description gauge
                 # HELP name_description Boolean gauge with description
-                name_description 0
                 # TYPE name_unit_bool_unit gauge
                 # UNIT name_unit_bool_unit bool_unit
-                name_unit_bool_unit 0
                 # TYPE name_description_unit_bool_unit gauge
                 # UNIT name_description_unit_bool_unit bool_unit
                 # HELP name_description_unit_bool_unit Boolean gauge with description and unit
-                name_description_unit_bool_unit 0
                 # TYPE true_init gauge
-                true_init 1
                 # TYPE const_label gauge
-                const_label{c1="c1_v1"} 0
                 # TYPE dynamic_label gauge
                 # TYPE many_labels gauge
                 # EOF
@@ -111,23 +104,23 @@ public class OpenMetricsExportComprehensiveTest {
         @Test
         @Order(2)
         public void testObserve1() throws IOException {
-            onlyName.getNotLabeled().setTrue();
-            onlyName.getNotLabeled().setFalse(); // back to false
+            onlyName.getOrCreateNotLabeled().setTrue();
+            onlyName.getOrCreateNotLabeled().setFalse(); // back to false
 
-            nameAndCategory.getNotLabeled().setFalse();
-            nameAndCategory.getNotLabeled().setFalse(); // stays false
+            nameAndCategory.getOrCreateNotLabeled().setFalse();
+            nameAndCategory.getOrCreateNotLabeled().setFalse(); // stays false
 
-            nameAndDescription.getNotLabeled().setFalse();
-            nameAndDescription.getNotLabeled().setTrue(); // changes to true
+            nameAndDescription.getOrCreateNotLabeled().setFalse();
+            nameAndDescription.getOrCreateNotLabeled().setTrue(); // changes to true
 
-            // nameAndUnit - no observation, stays false
+            // nameAndUnit - no observation, stays false and not reported
 
-            nameAndDescriptionAndUnit.getNotLabeled().setTrue();
-            nameAndDescriptionAndUnit.getNotLabeled().setTrue(); // changes to true
+            nameAndDescriptionAndUnit.getOrCreateNotLabeled().setTrue();
+            nameAndDescriptionAndUnit.getOrCreateNotLabeled().setTrue(); // changes to true
 
-            // trueInit - no observation, stays true
+            // trueInit - no observation, stays true and to be reported
 
-            constLabel.getNotLabeled().setTrue(); // changes to true
+            constLabel.getOrCreateNotLabeled().setTrue(); // changes to true
 
             dynamicLabel.getOrCreateLabeled("d1", "d1_v1").setTrue(); // new data point
             dynamicLabel.getOrCreateLabeled("d1", "d1_v1").setTrue(); // stays true
@@ -147,13 +140,11 @@ public class OpenMetricsExportComprehensiveTest {
                 name_description 1
                 # TYPE name_unit_bool_unit gauge
                 # UNIT name_unit_bool_unit bool_unit
-                name_unit_bool_unit 0
                 # TYPE name_description_unit_bool_unit gauge
                 # UNIT name_description_unit_bool_unit bool_unit
                 # HELP name_description_unit_bool_unit Boolean gauge with description and unit
                 name_description_unit_bool_unit 1
                 # TYPE true_init gauge
-                true_init 1
                 # TYPE const_label gauge
                 const_label{c1="c1_v1"} 1
                 # TYPE dynamic_label gauge
@@ -168,19 +159,19 @@ public class OpenMetricsExportComprehensiveTest {
         @Test
         @Order(3)
         public void testObserve2() throws IOException {
-            onlyName.getNotLabeled().setTrue(); // changes to true
+            onlyName.getOrCreateNotLabeled().setTrue(); // changes to true
 
-            nameAndCategory.getNotLabeled().setTrue(); // changes to true
+            nameAndCategory.getOrCreateNotLabeled().setTrue(); // changes to true
 
-            nameAndDescription.getNotLabeled().setFalse(); // changes to false
+            nameAndDescription.getOrCreateNotLabeled().setFalse(); // changes to false
 
-            nameAndUnit.getNotLabeled().setTrue(); // changes to true
+            nameAndUnit.getOrCreateNotLabeled().setTrue(); // changes to true
 
             // nameAndDescriptionAndUnit - no observation, stays true
 
-            trueInit.getNotLabeled().setFalse();
-            trueInit.getNotLabeled().setTrue();
-            trueInit.getNotLabeled().setFalse(); // changes to false
+            trueInit.getOrCreateNotLabeled().setFalse();
+            trueInit.getOrCreateNotLabeled().setTrue();
+            trueInit.getOrCreateNotLabeled().setFalse(); // changes to false
 
             // constLabel - no observation, stays true
 
@@ -310,23 +301,16 @@ public class OpenMetricsExportComprehensiveTest {
             context.exportAndVerify(
                     """
                 # TYPE only_name counter
-                only_name_total 0
                 # TYPE cnt:name_category counter
-                cnt:name_category_total 0
                 # TYPE name_description counter
                 # HELP name_description Double counter with description
-                name_description_total 0
                 # TYPE name_unit_requests counter
                 # UNIT name_unit_requests requests
-                name_unit_requests_total 0
                 # TYPE name_description_unit_requests counter
                 # UNIT name_description_unit_requests requests
                 # HELP name_description_unit_requests Double counter with description and unit
-                name_description_unit_requests_total 0
                 # TYPE custom_init counter
-                custom_init_total 1.1
                 # TYPE const_label counter
-                const_label_total{c1="c1_v1"} 0
                 # TYPE dynamic_label counter
                 # TYPE many_labels counter
                 # EOF
@@ -336,21 +320,21 @@ public class OpenMetricsExportComprehensiveTest {
         @Test
         @Order(2)
         public void testObserve1() throws IOException {
-            onlyName.getNotLabeled().increment(0.0); // stays 0
+            onlyName.getOrCreateNotLabeled().increment(0.0); // stays 0
 
-            nameAndCategory.getNotLabeled().increment(); // +1, changes to 1
+            nameAndCategory.getOrCreateNotLabeled().increment(); // +1, changes to 1
 
-            nameAndDescription.getNotLabeled().increment(1.75); // +1.75, changes to 1.75
+            nameAndDescription.getOrCreateNotLabeled().increment(1.75); // +1.75, changes to 1.75
 
-            // nameAndUnit - no observation, stays 0
+            // nameAndUnit - no observation, stays 0 and not reported
 
-            nameAndDescriptionAndUnit.getNotLabeled().increment();
-            nameAndDescriptionAndUnit.getNotLabeled().increment(1.123); // +2.123, changes to 2.123
+            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment();
+            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(1.123); // +2.123, changes to 2.123
 
-            // customInit - no observation, stays 1.1
+            // customInit - no observation, stays 1.1 and not reported
 
-            constLabel.getNotLabeled().increment(10.234);
-            constLabel.getNotLabeled().increment(); // +11.234, changes to 10.234
+            constLabel.getOrCreateNotLabeled().increment(10.234);
+            constLabel.getOrCreateNotLabeled().increment(); // +11.234, changes to 10.234
 
             dynamicLabel.getOrCreateLabeled("d1", "d1_v1").increment(); // new data point, changes to 1
             dynamicLabel.getOrCreateLabeled("d1", "d1_v1").increment(0.01); // changes to 1.01
@@ -372,13 +356,11 @@ public class OpenMetricsExportComprehensiveTest {
                 name_description_total 1.75
                 # TYPE name_unit_requests counter
                 # UNIT name_unit_requests requests
-                name_unit_requests_total 0
                 # TYPE name_description_unit_requests counter
                 # UNIT name_description_unit_requests requests
                 # HELP name_description_unit_requests Double counter with description and unit
                 name_description_unit_requests_total 2.123
                 # TYPE custom_init counter
-                custom_init_total 1.1
                 # TYPE const_label counter
                 const_label_total{c1="c1_v1"} 11.234
                 # TYPE dynamic_label counter
@@ -390,97 +372,375 @@ public class OpenMetricsExportComprehensiveTest {
                 """);
         }
 
-        /**@Test
-         * @Order(3)
-         * public void testObserve2() throws IOException {
-         * onlyName.getNotLabeled().setTrue(); // changes to true
-         *
-         * nameAndCategory.getNotLabeled().setTrue(); // changes to true
-         *
-         * nameAndDescription.getNotLabeled().setFalse(); // changes to false
-         *
-         * nameAndUnit.getNotLabeled().setTrue(); // changes to true
-         *
-         * // nameAndDescriptionAndUnit - no observation, stays true
-         *
-         * trueInit.getNotLabeled().setFalse();
-         * trueInit.getNotLabeled().setTrue();
-         * trueInit.getNotLabeled().setFalse(); // changes to false
-         *
-         * // constLabel - no observation, stays true
-         *
-         * dynamicLabel.getOrCreateLabeled("d1", "d1_v1").setFalse();
-         * // no change for d1_v2, stays false
-         * dynamicLabel.getOrCreateLabeled("d1", "d1_v3").setTrue(); // new vdata point
-         *
-         * // no changes for d1_v1, d2_v1
-         * manyLabels.getOrCreateLabeled("d1", "d1_v2", "d2", "d2_v1").setTrue(); // new data point
-         * manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v2").setFalse(); // new data point
-         *
-         * context.exportAndVerify("""
-         * # TYPE only_name gauge
-         * only_name 1
-         * # TYPE bool:name_category gauge
-         * bool:name_category 1
-         * # TYPE name_description gauge
-         * # HELP name_description Boolean gauge with description
-         * name_description 0
-         * # TYPE name_unit_bool_unit gauge
-         * # UNIT name_unit_bool_unit bool_unit
-         * name_unit_bool_unit 1
-         * # TYPE name_description_unit_bool_unit gauge
-         * # UNIT name_description_unit_bool_unit bool_unit
-         * # HELP name_description_unit_bool_unit Boolean gauge with description and unit
-         * name_description_unit_bool_unit 1
-         * # TYPE true_init gauge
-         * true_init 0
-         * # TYPE const_label gauge
-         * const_label{c1="c1_v1"} 1
-         * # TYPE dynamic_label gauge
-         * dynamic_label{d1="d1_v1"} 0
-         * dynamic_label{d1="d1_v2"} 0
-         * dynamic_label{d1="d1_v3"} 1
-         * # TYPE many_labels gauge
-         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 1
-         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v1"} 1
-         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 0
-         * # EOF
-         * """);
-         * }
-         *
-         * @Test
-         * @Order(4)
-         * public void testNoChangesWithoutObservation() throws IOException {
-         * context.exportAndVerify("""
-         * # TYPE only_name gauge
-         * only_name 1
-         * # TYPE bool:name_category gauge
-         * bool:name_category 1
-         * # TYPE name_description gauge
-         * # HELP name_description Boolean gauge with description
-         * name_description 0
-         * # TYPE name_unit_bool_unit gauge
-         * # UNIT name_unit_bool_unit bool_unit
-         * name_unit_bool_unit 1
-         * # TYPE name_description_unit_bool_unit gauge
-         * # UNIT name_description_unit_bool_unit bool_unit
-         * # HELP name_description_unit_bool_unit Boolean gauge with description and unit
-         * name_description_unit_bool_unit 1
-         * # TYPE true_init gauge
-         * true_init 0
-         * # TYPE const_label gauge
-         * const_label{c1="c1_v1"} 1
-         * # TYPE dynamic_label gauge
-         * dynamic_label{d1="d1_v1"} 0
-         * dynamic_label{d1="d1_v2"} 0
-         * dynamic_label{d1="d1_v3"} 1
-         * # TYPE many_labels gauge
-         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 1
-         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v1"} 1
-         * many_labels{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 0
-         * # EOF
-         * """);
-         * }*/
+        @Test
+        @Order(3)
+        public void testObserve2() throws IOException {
+            onlyName.getOrCreateNotLabeled().increment(0.001); // changes to 0.001
+
+            nameAndCategory.getOrCreateNotLabeled().increment(0.001); // changes to 1.001
+
+            // no observation to nameAndDescription - stays 1.75
+
+            nameAndUnit.getOrCreateNotLabeled().increment(1.123);
+            nameAndUnit.getOrCreateNotLabeled().increment(1.123);
+
+            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(1.123);
+            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(); // +2.123, changes to 4.246
+
+            customInit.getOrCreateNotLabeled().increment(0.001); // changes to 1.101
+
+            // no observation to constLabel - stays 11.234
+
+            dynamicLabel.getOrCreateLabeled("d1", "d1_v2").increment(0.01); // changes to 0.01
+            dynamicLabel.getOrCreateLabeled("d1", "d1_v2").increment(0.04); // changes to 0.05
+            dynamicLabel.getOrCreateLabeled("d1", "d1_v3").increment(0); // new data point, stays 0
+            dynamicLabel.getOrCreateLabeled("d1", "d1_v3").increment(0); // stays 0
+
+            manyLabels
+                    .getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v2")
+                    .increment(1.9); // new data point, changes to 1.9
+
+            context.exportAndVerify(
+                    """
+                 # TYPE only_name counter
+                 only_name_total 0.001
+                 # TYPE cnt:name_category counter
+                 cnt:name_category_total 1.001
+                 # TYPE name_description counter
+                 # HELP name_description Double counter with description
+                 name_description_total 1.75
+                 # TYPE name_unit_requests counter
+                 # UNIT name_unit_requests requests
+                 name_unit_requests_total 2.246
+                 # TYPE name_description_unit_requests counter
+                 # UNIT name_description_unit_requests requests
+                 # HELP name_description_unit_requests Double counter with description and unit
+                 name_description_unit_requests_total 4.246
+                 # TYPE custom_init counter
+                 custom_init_total 1.101
+                 # TYPE const_label counter
+                 const_label_total{c1="c1_v1"} 11.234
+                 # TYPE dynamic_label counter
+                 dynamic_label_total{d1="d1_v1"} 1.01
+                 dynamic_label_total{d1="d1_v2"} 0.05
+                 dynamic_label_total{d1="d1_v3"} 0
+                 # TYPE many_labels counter
+                 many_labels_total{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 3
+                 many_labels_total{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 1.9
+                 # EOF
+                 """);
+        }
+
+        @Test
+        @Order(4)
+        public void testNoChangesWithoutObservation() throws IOException {
+            context.exportAndVerify(
+                    """
+                 # TYPE only_name counter
+                 only_name_total 0.001
+                 # TYPE cnt:name_category counter
+                 cnt:name_category_total 1.001
+                 # TYPE name_description counter
+                 # HELP name_description Double counter with description
+                 name_description_total 1.75
+                 # TYPE name_unit_requests counter
+                 # UNIT name_unit_requests requests
+                 name_unit_requests_total 2.246
+                 # TYPE name_description_unit_requests counter
+                 # UNIT name_description_unit_requests requests
+                 # HELP name_description_unit_requests Double counter with description and unit
+                 name_description_unit_requests_total 4.246
+                 # TYPE custom_init counter
+                 custom_init_total 1.101
+                 # TYPE const_label counter
+                 const_label_total{c1="c1_v1"} 11.234
+                 # TYPE dynamic_label counter
+                 dynamic_label_total{d1="d1_v1"} 1.01
+                 dynamic_label_total{d1="d1_v2"} 0.05
+                 dynamic_label_total{d1="d1_v3"} 0
+                 # TYPE many_labels counter
+                 many_labels_total{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 3
+                 many_labels_total{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 1.9
+                 # EOF
+                 """);
+        }
+    }
+
+    @Nested
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class LongCounterTest {
+
+        static final TestExporterContext context = new TestExporterContext(OpenMetricsSnapshotsWriter.DEFAULT);
+
+        static LongCounter onlyName;
+        static LongCounter nameAndCategory;
+        static LongCounter nameAndDescription;
+        static LongCounter nameAndUnit;
+        static LongCounter nameAndDescriptionAndUnit;
+        static LongCounter customInit;
+        static LongCounter constLabel;
+        static LongCounter dynamicLabel;
+        static LongCounter manyLabels;
+
+        @Test
+        @Order(1)
+        public void testInitWithoutObservation() throws IOException {
+            onlyName = LongCounter.builder("only_name").register(context.getRegistry());
+            nameAndCategory = LongCounter.builder(
+                            LongCounter.key("name_category").withCategory("cnt"))
+                    .register(context.getRegistry());
+            nameAndDescription = LongCounter.builder("name_description")
+                    .withDescription("Double counter with description")
+                    .register(context.getRegistry());
+            nameAndUnit = LongCounter.builder("name_unit").withUnit("requests").register(context.getRegistry());
+            nameAndDescriptionAndUnit = LongCounter.builder("name_description_unit")
+                    .withDescription("Double counter with description and unit")
+                    .withUnit("requests")
+                    .register(context.getRegistry());
+            customInit = LongCounter.builder("custom_init").withInitValue(10).register(context.getRegistry());
+            constLabel = LongCounter.builder("const_label")
+                    .withConstantLabel(new Label("c1", "c1_v1"))
+                    .register(context.getRegistry());
+            dynamicLabel = LongCounter.builder("dynamic_label")
+                    .withDynamicLabelNames("d1")
+                    .register(context.getRegistry());
+            manyLabels = LongCounter.builder("many_labels")
+                    .withConstantLabels(new Label("c1", "c1_v1"), new Label("c2", "c2_v1"))
+                    .withDynamicLabelNames("d1", "d2")
+                    .register(context.getRegistry());
+
+            context.exportAndVerify(
+                    """
+                # TYPE only_name counter
+                # TYPE cnt:name_category counter
+                # TYPE name_description counter
+                # HELP name_description Long counter with description
+                # TYPE name_unit_requests counter
+                # UNIT name_unit_requests requests
+                # TYPE name_description_unit_requests counter
+                # UNIT name_description_unit_requests requests
+                # HELP name_description_unit_requests Long counter with description and unit
+                # TYPE custom_init counter
+                # TYPE const_label counter
+                # TYPE dynamic_label counter
+                # TYPE many_labels counter
+                # EOF
+                """);
+        }
+
+        @Test
+        @Order(2)
+        public void testObserve1() throws IOException {
+            onlyName.getOrCreateNotLabeled().increment(0); // stays 0
+
+            nameAndCategory.getOrCreateNotLabeled().increment(); // +1, changes to 1
+
+            nameAndDescription.getOrCreateNotLabeled().increment(2); // +2 changes to 2
+
+            // nameAndUnit - no observation, stays 0 and not reported
+
+            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment();
+            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(4); // +5, changes to 5
+
+            // customInit - no observation, stays 10 and not reported
+
+            constLabel.getOrCreateNotLabeled().increment(10);
+            constLabel.getOrCreateNotLabeled().increment(); // +11, changes to 11
+
+            dynamicLabel.getOrCreateLabeled("d1", "d1_v1").increment(); // new data point, changes to 1
+            dynamicLabel.getOrCreateLabeled("d1", "d1_v1").increment(3); // changes to 4
+            dynamicLabel.getOrCreateLabeled("d1", "d1_v2").increment(0); // new data point, stays 0
+
+            manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v1").increment(2); // new data point, changes to 2
+            manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v1").increment(1); // changes to 3
+
+            context.exportAndVerify(
+                    """
+                # TYPE only_name counter
+                only_name_total 0
+                # TYPE cnt:name_category counter
+                cnt:name_category_total 1
+                # TYPE name_description counter
+                # HELP name_description Long counter with description
+                name_description_total 2
+                # TYPE name_unit_requests counter
+                # UNIT name_unit_requests requests
+                # TYPE name_description_unit_requests counter
+                # UNIT name_description_unit_requests requests
+                # HELP name_description_unit_requests Long counter with description and unit
+                name_description_unit_requests_total 5
+                # TYPE custom_init counter
+                # TYPE const_label counter
+                const_label_total{c1="c1_v1"} 11
+                # TYPE dynamic_label counter
+                dynamic_label_total{d1="d1_v1"} 4
+                dynamic_label_total{d1="d1_v2"} 0
+                # TYPE many_labels counter
+                many_labels_total{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 3
+                # EOF
+                """);
+        }
+
+        @Test
+        @Order(3)
+        public void testObserve2() throws IOException {
+            onlyName.getOrCreateNotLabeled().increment(); // changes to 1
+
+            nameAndCategory.getOrCreateNotLabeled().increment(3); // changes to 4
+
+            // no observation to nameAndDescription - stays 5
+
+            nameAndUnit.getOrCreateNotLabeled().increment(2);
+            nameAndUnit.getOrCreateNotLabeled().increment(8); // +10, changes to 10
+
+            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(1);
+            nameAndDescriptionAndUnit.getOrCreateNotLabeled().increment(); // +2 changes to 7
+
+            customInit.getOrCreateNotLabeled().increment(); // changes to 11
+
+            // no observation to constLabel - stays 11
+
+            dynamicLabel.getOrCreateLabeled("d1", "d1_v2").increment(1); // changes to 1
+            dynamicLabel.getOrCreateLabeled("d1", "d1_v2").increment(); // changes to 2
+            dynamicLabel.getOrCreateLabeled("d1", "d1_v3").increment(0); // new data point, stays 0
+            dynamicLabel.getOrCreateLabeled("d1", "d1_v3").increment(0); // stays 0
+
+            manyLabels.getOrCreateLabeled("d1", "d1_v1", "d2", "d2_v2").increment(2); // new data point, changes to 2
+            manyLabels.getOrCreateLabeled("d1", "d1_v2", "d2", "d2_v1").increment(); // new data point, changes to 1
+
+            context.exportAndVerify(
+                    """
+                # TYPE only_name counter
+                only_name_total 1
+                # TYPE cnt:name_category counter
+                cnt:name_category_total 4
+                # TYPE name_description counter
+                # HELP name_description Long counter with description
+                name_description_total 2
+                # TYPE name_unit_requests counter
+                # UNIT name_unit_requests requests
+                name_unit_requests_total 10
+                # TYPE name_description_unit_requests counter
+                # UNIT name_description_unit_requests requests
+                # HELP name_description_unit_requests Long counter with description and unit
+                name_description_unit_requests_total 7
+                # TYPE custom_init counter
+                custom_init_total 11
+                # TYPE const_label counter
+                const_label_total{c1="c1_v1"} 11
+                # TYPE dynamic_label counter
+                dynamic_label_total{d1="d1_v1"} 4
+                dynamic_label_total{d1="d1_v2"} 2
+                dynamic_label_total{d1="d1_v3"} 0
+                # TYPE many_labels counter
+                many_labels_total{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 3
+                many_labels_total{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 2
+                many_labels_total{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v1"} 1
+                # EOF
+                """);
+        }
+
+        @Test
+        @Order(4)
+        public void testNoChangesWithoutObservation() throws IOException {
+            context.exportAndVerify(
+                    """
+                # TYPE only_name counter
+                only_name_total 1
+                # TYPE cnt:name_category counter
+                cnt:name_category_total 4
+                # TYPE name_description counter
+                # HELP name_description Long counter with description
+                name_description_total 2
+                # TYPE name_unit_requests counter
+                # UNIT name_unit_requests requests
+                name_unit_requests_total 10
+                # TYPE name_description_unit_requests counter
+                # UNIT name_description_unit_requests requests
+                # HELP name_description_unit_requests Long counter with description and unit
+                name_description_unit_requests_total 7
+                # TYPE custom_init counter
+                custom_init_total 11
+                # TYPE const_label counter
+                const_label_total{c1="c1_v1"} 11
+                # TYPE dynamic_label counter
+                dynamic_label_total{d1="d1_v1"} 4
+                dynamic_label_total{d1="d1_v2"} 2
+                dynamic_label_total{d1="d1_v3"} 0
+                # TYPE many_labels counter
+                many_labels_total{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v1"} 3
+                many_labels_total{c1="c1_v1",c2="c2_v1",d1="d1_v1",d2="d2_v2"} 2
+                many_labels_total{c1="c1_v1",c2="c2_v1",d1="d1_v2",d2="d2_v1"} 1
+                # EOF
+                """);
+        }
+    }
+
+    @Nested
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class DoubleGaugeTest {
+
+        static final TestExporterContext context = new TestExporterContext(OpenMetricsSnapshotsWriter.DEFAULT);
+
+        static DoubleGauge onlyName;
+        static DoubleGauge nameAndCategory;
+        static DoubleGauge nameAndDescription;
+        static DoubleGauge nameAndUnit;
+        static DoubleGauge nameAndDescriptionAndUnit;
+        static DoubleGauge customInit;
+        static DoubleGauge constLabel;
+        static DoubleGauge dynamicLabel;
+        static DoubleGauge manyLabels;
+
+        @Test
+        @Order(1)
+        public void testInitWithoutObservation() throws IOException {
+            onlyName = DoubleGauge.builder("only_name").register(context.getRegistry());
+            nameAndCategory = DoubleGauge.builder(
+                            DoubleGauge.key("name_category").withCategory("cnt"))
+                    .register(context.getRegistry());
+            nameAndDescription = DoubleGauge.builder(
+                            DoubleGauge.key("name_description").withCategory("max_reset"))
+                    .withDescription("Double gauge with description")
+                    .register(context.getRegistry());
+            nameAndUnit = DoubleGauge.builder(DoubleGauge.key("name_unit").withCategory("min"))
+                    .withUnit("requests")
+                    .register(context.getRegistry());
+            nameAndDescriptionAndUnit = DoubleGauge.builder(
+                            DoubleGauge.key("name_description_unit").withCategory("agg"))
+                    .withDescription("Double gauge with description and unit")
+                    .withUnit("requests")
+                    .register(context.getRegistry());
+            customInit = DoubleGauge.builder("custom_init").withInitValue(0.001).register(context.getRegistry());
+            constLabel = DoubleGauge.builder("const_label")
+                    .withConstantLabel(new Label("c1", "c1_v1"))
+                    .register(context.getRegistry());
+            dynamicLabel = DoubleGauge.builder("dynamic_label")
+                    .withDynamicLabelNames("d1")
+                    .register(context.getRegistry());
+            manyLabels = DoubleGauge.builder("many_labels")
+                    .withConstantLabels(new Label("c1", "c1_v1"), new Label("c2", "c2_v1"))
+                    .withDynamicLabelNames("d1", "d2")
+                    .register(context.getRegistry());
+
+            context.exportAndVerify(
+                    """
+                            # TYPE only_name counter
+                            # TYPE cnt:name_category counter
+                            # TYPE name_description counter
+                            # HELP name_description Double gauge with description
+                            # TYPE name_unit_requests counter
+                            # UNIT name_unit_requests requests
+                            # TYPE name_description_unit_requests counter
+                            # UNIT name_description_unit_requests requests
+                            # HELP name_description_unit_requests Double gauge with description and unit
+                            # TYPE custom_init counter
+                            # TYPE const_label counter
+                            # TYPE dynamic_label counter
+                            # TYPE many_labels counter
+                            # EOF
+                            """);
+        }
     }
 
     @Test
@@ -493,7 +753,7 @@ public class OpenMetricsExportComprehensiveTest {
         BooleanGauge booleanGauge = BooleanGauge.builder("boolean_gauge")
                 .withDescription("A test boolean gauge without labels")
                 .register(registry);
-        booleanGauge.getNotLabeled().setTrue();
+        booleanGauge.getOrCreateNotLabeled().setTrue();
 
         StatelessMetric.builder(StatelessMetric.key("memory").withCategory("jvm"))
                 .withDynamicLabelNames("type")

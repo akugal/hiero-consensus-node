@@ -9,7 +9,7 @@ import org.hiero.metrics.api.export.snapshot.MetricSnapshot;
 public abstract class BaseMetricExportData {
 
     private final MetricSnapshot metricSnapshot;
-    private final Map<DataPointSnapshot, TemplateByteArray> dataPointCache = new HashMap<>();
+    private final Map<DataPointSnapshot, ByteArrayTemplate> dataPointCache = new HashMap<>();
 
     protected BaseMetricExportData(MetricSnapshot metricSnapshot) {
         this.metricSnapshot = metricSnapshot;
@@ -23,9 +23,9 @@ public abstract class BaseMetricExportData {
         dataPointCache.clear();
     }
 
-    public final TemplateByteArray getOrCreateDatapointExportTemplate(DataPointSnapshot dataPointSnapshot) {
+    public final ByteArrayTemplate getOrCreateDatapointExportTemplate(DataPointSnapshot dataPointSnapshot) {
         return dataPointCache.computeIfAbsent(dataPointSnapshot, this::buildDataPointExportTemplate);
     }
 
-    protected abstract TemplateByteArray buildDataPointExportTemplate(DataPointSnapshot dataPointSnapshot);
+    protected abstract ByteArrayTemplate buildDataPointExportTemplate(DataPointSnapshot dataPointSnapshot);
 }

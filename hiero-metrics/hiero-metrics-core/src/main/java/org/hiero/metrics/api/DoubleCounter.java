@@ -17,7 +17,8 @@ import org.hiero.metrics.internal.datapoint.DoubleAdderCounterDataPoint;
 public interface DoubleCounter extends StatefulMetric<DoubleSupplier, DoubleCounterDataPoint> {
 
     /**
-     * Create a metric key for a {@link DoubleCounter} with the given name.
+     * Create a metric key for a {@link DoubleCounter} with the given name.<br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @return the metric key
@@ -39,7 +40,8 @@ public interface DoubleCounter extends StatefulMetric<DoubleSupplier, DoubleCoun
     }
 
     /**
-     * Create a builder for a {@link DoubleCounter} with the given metric name.
+     * Create a builder for a {@link DoubleCounter} with the given metric name. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @return the builder

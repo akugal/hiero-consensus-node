@@ -16,7 +16,7 @@ public interface MetricRegistry {
     /**
      * Returns an unmodifiable list of global labels that are applied to all metrics in this registry.
      *
-     * @return the global labels, never {@code null}
+     * @return the global labels, may be empty but never {@code null}
      */
     @NonNull
     List<Label> globalLabels();
@@ -25,7 +25,7 @@ public interface MetricRegistry {
      * Returns an unmodifiable collection of all registered metrics.
      * Order of the metrics is not guaranteed and can change over time as new metrics are registered.
      *
-     * @return the registered metrics, never {@code null}
+     * @return the registered metrics, may be empty but never {@code null}
      */
     @NonNull
     Collection<Metric> metrics();
@@ -40,7 +40,7 @@ public interface MetricRegistry {
     /**
      * Registers a metric using the given builder.
      * <p>
-     * This method is <b>not idempotent</b> and must throw an exception if metrics with same name already registered.
+     * This method is <b>not idempotent</b> and throws an exception if metrics with same name already registered.
      *
      * @param builder the metric builder, must not be {@code null}
      * @param <M>     the type of the metric
@@ -80,7 +80,7 @@ public interface MetricRegistry {
 
     /**
      * Resets all registered metrics to their initial state.
-     * This is a default method that iterates over all metrics and calls their {@link Metric#reset()} method.
+     * Default implementation iterates over all metrics and calls their {@link Metric#reset()} method.
      */
     default void reset() {
         metrics().forEach(Metric::reset);

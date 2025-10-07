@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.metrics.internal.datapoint;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.Objects;
 import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.datapoint.DoubleGaugeDataPoint;
 import org.hiero.metrics.api.stat.container.AtomicDouble;
@@ -9,7 +11,8 @@ public class AtomicDoubleGaugeDataPoint implements DoubleGaugeDataPoint {
 
     protected final AtomicDouble container;
 
-    public AtomicDoubleGaugeDataPoint(DoubleSupplier initializer) {
+    public AtomicDoubleGaugeDataPoint(@NonNull DoubleSupplier initializer) {
+        Objects.requireNonNull(initializer, "initializer must not be null");
         container = new AtomicDouble(initializer);
     }
 

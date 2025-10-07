@@ -13,11 +13,12 @@ import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
  *
  * @see PullingMetricsExporter
  * @see PushingMetricsExporter
+ * @see MetricsSnapshot
  */
 public interface MetricsExporter extends Closeable {
 
     /**
-     * @return the name of the exporter, never {@code null}
+     * @return the name of the exporter, never {@code null} or blank
      */
     @NonNull
     String name();

@@ -31,8 +31,8 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
      * @throws IllegalArgumentException if the specified capacity is negative
      */
     public UnsynchronizedByteArrayOutputStream(int capacity) {
-        if (capacity <= 0) {
-            throw new IllegalArgumentException("Capacity must be positive");
+        if (capacity < 0) {
+            throw new IllegalArgumentException("Capacity must not be negative");
         }
         buffer = new byte[capacity];
     }
@@ -129,7 +129,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 
     private void ensureCapacity(int requiredCapacity) {
         if (requiredCapacity >= buffer.length) {
-            byte[] copy = new byte[Integer.max(2 * buffer.length, requiredCapacity)];
+            byte[] copy = new byte[Math.max(2 * buffer.length, requiredCapacity)];
             System.arraycopy(buffer, 0, copy, 0, size);
             buffer = copy;
         }

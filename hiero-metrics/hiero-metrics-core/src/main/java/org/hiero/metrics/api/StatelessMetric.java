@@ -17,7 +17,8 @@ import org.hiero.metrics.internal.DefaultStatelessMetric;
 public interface StatelessMetric extends Metric {
 
     /**
-     * Create a metric key for a {@link StatelessMetric} with the given name.
+     * Create a metric key for a {@link StatelessMetric} with the given name. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @return the metric key
@@ -39,7 +40,8 @@ public interface StatelessMetric extends Metric {
     }
 
     /**
-     * Create a builder for a {@link StatelessMetric} with the given metric name.
+     * Create a builder for a {@link StatelessMetric} with the given metric name. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the metric name
      * @return the builder

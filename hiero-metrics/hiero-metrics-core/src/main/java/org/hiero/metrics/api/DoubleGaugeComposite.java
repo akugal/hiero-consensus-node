@@ -36,7 +36,8 @@ import org.hiero.metrics.internal.datapoint.DoubleGaugeCompositeArrayDataPoint;
 public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGaugeCompositeDataPoint> {
 
     /**
-     * Create a metric key for a {@link DoubleGaugeComposite} with the given name.
+     * Create a metric key for a {@link DoubleGaugeComposite} with the given name.<br>
+     * See {@link MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @return the metric key
@@ -58,7 +59,8 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
     }
 
     /**
-     * Create a builder for a {@link DoubleGaugeComposite} with the given metric name.
+     * Create a builder for a {@link DoubleGaugeComposite} with the given metric name. <br>
+     * See {@link MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the metric name
      * @return the builder
@@ -129,7 +131,7 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
          */
         @NonNull
         public Builder withStatLabel(@NonNull String statLabel) {
-            this.statLabel = ArgumentUtils.throwArgBlank(statLabel, "stat label");
+            this.statLabel = MetricUtils.validateNameCharacters(statLabel);
             return this;
         }
 
@@ -223,7 +225,8 @@ public interface DoubleGaugeComposite extends StatefulMetric<Object, DoubleGauge
 
         /**
          * Configure this composite gauge to reset all stats to their initial values after each export.
-         * Default is {@code false}.
+         * Default is {@code false}. <br>
+         * Due to performance reasons reset is <b>not atomic</b> across all stats.
          *
          * @return this builder
          */

@@ -19,7 +19,8 @@ import org.hiero.metrics.internal.datapoint.EnumStateSetDataPoint;
 public interface StateSet<E extends Enum<E>> extends StatefulMetric<List<E>, StateSetDataPoint<E>> {
 
     /**
-     * Create a metric key for a {@link StateSet} with the given name.
+     * Create a metric key for a {@link StateSet} with the given name. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @param <E>  the type of enum representing states in the set
@@ -44,7 +45,8 @@ public interface StateSet<E extends Enum<E>> extends StatefulMetric<List<E>, Sta
     }
 
     /**
-     * Create a builder for a {@link StateSet} with the given metric name for given enum type.
+     * Create a builder for a {@link StateSet} with the given metric name for given enum type. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the metric name
      * @param enumClass the enum type representing the states in the set

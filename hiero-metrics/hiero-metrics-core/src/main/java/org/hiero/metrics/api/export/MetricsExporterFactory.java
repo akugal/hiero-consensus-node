@@ -6,7 +6,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * A factory for creating {@link MetricsExporter} instances based on the provided configuration.
- * Exporters created by this factory should be either {@link PullingMetricsExporter} or {@link PushingMetricsExporter}.
+ * Exporters created by this factory must be either {@link PullingMetricsExporter} or {@link PushingMetricsExporter}.
  */
 public interface MetricsExporterFactory {
 

@@ -3,9 +3,7 @@ package org.hiero.metrics.internal.core;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import org.hiero.metrics.api.core.Label;
 import org.hiero.metrics.api.core.Metric;
 import org.hiero.metrics.api.core.MetricMetadata;
@@ -17,13 +15,12 @@ import org.hiero.metrics.internal.export.snapshot.UpdatableMetricSnapshot;
 /**
  * Base class for all metric implementations requiring {@link Metric.Builder} for construction.
  */
-public abstract class AbstractMetric<D, S extends DataPointSnapshot> implements SnapshotableMetric {
+public abstract class AbstractMetric<D, S extends DataPointSnapshot> implements SnapshotableMetric<S> {
 
     private final MetricMetadata metadata;
     private final List<Label> constantLabels;
     private final List<String> dynamicLabelNames;
 
-    protected final Map<LabelValues, DataPointHolder<D, S>> dataPoints;
     private final UpdatableMetricSnapshot<D, S> metricSnapshot;
 
     protected AbstractMetric(Builder<?, ?> builder) {
@@ -32,19 +29,10 @@ public abstract class AbstractMetric<D, S extends DataPointSnapshot> implements 
 
         constantLabels = builder.getConstantLabels().stream().sorted().toList();
         dynamicLabelNames = builder.getDynamicLabelNames().stream().sorted().toList();
-
-        int dataPointsCapacity;
-        if (dynamicLabelNames.isEmpty()) {
-            dataPoints = null;
-            dataPointsCapacity = 1;
-        } else {
-            dataPoints = new ConcurrentHashMap<>();
-            dataPointsCapacity = 8;
-        }
-        metricSnapshot = new UpdatableMetricSnapshot<>(this, this::updateDatapointSnapshot, dataPointsCapacity);
+        metricSnapshot = new UpdatableMetricSnapshot<>(this, this::updateDatapointSnapshot);
     }
 
-    protected final DataPointHolder<D, S> createDataPointHolder(D datapoint, LabelValues dynamicLabelValues) {
+    protected final DataPointHolder<D, S> createAndTrackDataPointHolder(D datapoint, LabelValues dynamicLabelValues) {
         DataPointHolder<D, S> dataPointHolder =
                 new DataPointHolder<>(datapoint, createDataPointSnapshot(dynamicLabelValues));
         metricSnapshot.addDataPointHolder(dataPointHolder);

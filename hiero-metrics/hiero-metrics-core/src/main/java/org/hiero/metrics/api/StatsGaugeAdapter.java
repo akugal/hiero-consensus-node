@@ -32,7 +32,8 @@ import org.hiero.metrics.internal.DefaultStatsGaugeAdapter;
 public interface StatsGaugeAdapter<I, D> extends StatefulMetric<I, D> {
 
     /**
-     * Create a metric key for a {@link StatsGaugeAdapter} with the given name.
+     * Create a metric key for a {@link StatsGaugeAdapter} with the given name. <br>
+     * See {@link MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @param <I>  the type of the initializer used to create the data point

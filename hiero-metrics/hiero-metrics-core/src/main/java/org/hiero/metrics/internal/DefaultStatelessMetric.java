@@ -3,6 +3,8 @@ package org.hiero.metrics.internal;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.DoubleSupplier;
 import org.hiero.metrics.api.StatelessMetric;
 import org.hiero.metrics.internal.core.AbstractMetric;
@@ -12,6 +14,8 @@ import org.hiero.metrics.internal.export.snapshot.DefaultSingleValueDataPointSna
 
 public final class DefaultStatelessMetric extends AbstractMetric<DoubleSupplier, DefaultSingleValueDataPointSnapshot>
         implements StatelessMetric {
+
+    private final Set<LabelValues> labelValuesSet = ConcurrentHashMap.newKeySet();
 
     public DefaultStatelessMetric(StatelessMetric.Builder builder) {
         super(builder);
@@ -40,13 +44,12 @@ public final class DefaultStatelessMetric extends AbstractMetric<DoubleSupplier,
         Objects.requireNonNull(valueSupplier, "Value supplier must not be null");
 
         LabelValues labelValues = createLabelValues(labelNamesAndValues);
-        DataPointHolder<DoubleSupplier, DefaultSingleValueDataPointSnapshot> dataPointHolder =
-                createDataPointHolder(valueSupplier, labelValues);
-        if (dataPoints.putIfAbsent(labelValues, dataPointHolder) != null) {
+        if (!labelValuesSet.add(labelValues)) {
             throw new IllegalArgumentException(
                     "A data point with the same label values already exists: " + labelValues);
         }
 
+        createAndTrackDataPointHolder(valueSupplier, labelValues);
         return this;
     }
 }

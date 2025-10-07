@@ -4,8 +4,8 @@ package org.hiero.metrics.api.export.snapshot;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
- * A {@link DataPointSnapshot} that contains multiple double values, each identified by a type string.
- * Value types are classified by a common classifier string accessible via {@link #valueClassifier()}, e.g. "stat".
+ * A {@link DataPointSnapshot} that contains multiple {@code double} values, each identified by a type as string.
+ * Value types are classified by a common string classifier accessible via {@link #valueClassifier()}, e.g. "stat".
  */
 public interface GenericMultiValueDataPointSnapshot extends DataPointSnapshot {
 

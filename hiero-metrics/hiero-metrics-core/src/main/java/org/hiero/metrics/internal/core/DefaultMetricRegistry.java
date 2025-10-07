@@ -49,7 +49,10 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
     public void registerMetrics(@NonNull MetricsRegistrationProvider provider) {
         Objects.requireNonNull(provider, "metrics registration provider must not be null");
 
-        for (Metric.Builder<?, ?> builder : provider.getMetricsToRegister()) {
+        Collection<Metric.Builder<?, ?>> metricsToRegister = provider.getMetricsToRegister();
+        Objects.requireNonNull(metricsToRegister, "metrics collection must not be null");
+
+        for (Metric.Builder<?, ?> builder : metricsToRegister) {
             register(builder);
         }
     }
@@ -58,7 +61,7 @@ public class DefaultMetricRegistry implements SnapshotableMetricsRegistry {
     @Override
     @SuppressWarnings("unchecked")
     public <M extends Metric, B extends Metric.Builder<?, M>> M register(final @NonNull B builder) {
-        Objects.requireNonNull(builder, "builder must not be null");
+        Objects.requireNonNull(builder, "metric builder must not be null");
 
         final MetricKey<M> metricKey = builder.key();
 

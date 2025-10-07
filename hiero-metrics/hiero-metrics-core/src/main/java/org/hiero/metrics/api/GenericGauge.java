@@ -25,7 +25,8 @@ import org.hiero.metrics.internal.datapoint.AtomicReferenceGaugeDataPoint;
 public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPoint<T>> {
 
     /**
-     * Create a metric key for a {@link GenericGauge} with the given name.
+     * Create a metric key for a {@link GenericGauge} with the given name.<br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the name of the metric
      * @param <T>  the type of value used to observe/update the gauge
@@ -51,7 +52,8 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
     }
 
     /**
-     * Create a builder for a {@link GenericGauge} with the given name and value converter.
+     * Create a builder for a {@link GenericGauge} with the given name and value converter. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name           the name of the metric
      * @param valueConverter the function to convert the value to double for export
@@ -65,7 +67,8 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
 
     /**
      * Create a builder for a {@link GenericGauge} with the given metric key for {@link Duration} values.
-     * The duration will be converted to double using the specified {@link ChronoUnit}.
+     * The duration will be converted to double using the specified {@link ChronoUnit}.<br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name  the metric name
      * @param unit the chrono unit to convert the duration to double for export
@@ -80,7 +83,8 @@ public interface GenericGauge<T> extends StatefulMetric<Supplier<T>, GaugeDataPo
 
     /**
      * Create a builder for a {@link GenericGauge} with the given metric key for {@link Enum} values.
-     * The enum will be converted to double using its ordinal value.
+     * The enum will be converted to double using its ordinal value. <br>
+     * See {@link org.hiero.metrics.api.utils.MetricUtils#validateNameCharacters(String)} for name requirements.
      *
      * @param name the metric name
      * @param <E>  the type of the enum
