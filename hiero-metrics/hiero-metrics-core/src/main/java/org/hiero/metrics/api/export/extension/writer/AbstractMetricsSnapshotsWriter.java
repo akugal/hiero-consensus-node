@@ -29,6 +29,14 @@ public abstract class AbstractMetricsSnapshotsWriter implements MetricsSnapshots
         this.formatter = builder.formatter;
     }
 
+    /**
+     * Writes a single metric snapshot to the output stream.
+     *
+     * @param timestamp      the timestamp of the snapshot
+     * @param metricSnapshot the metric snapshot to write
+     * @param output         the output stream to write to
+     * @throws IOException if an I/O error occurs
+     */
     protected abstract void writeMetricSnapshot(Instant timestamp, MetricSnapshot metricSnapshot, OutputStream output)
             throws IOException;
 
@@ -45,15 +53,35 @@ public abstract class AbstractMetricsSnapshotsWriter implements MetricsSnapshots
         afterSnapshotsWrite(snapshots, output);
     }
 
+    /**
+     * Called before writing any snapshots. Subclasses can override to perform setup actions.
+     *
+     * @param snapshots the metrics snapshot to be written
+     * @param output    the output stream
+     */
     protected void beforeSnapshotsWrite(@NonNull MetricsSnapshot snapshots, @NonNull OutputStream output) {
         // nothing by default
     }
 
+    /**
+     * Called after writing all snapshots. Subclasses can override to perform cleanup actions.
+     * By default, it flushes the output stream.
+     *
+     * @param snapshots the metrics snapshot that was written
+     * @param output    the output stream
+     * @throws IOException if an I/O error occurs
+     */
     protected void afterSnapshotsWrite(@NonNull MetricsSnapshot snapshots, @NonNull OutputStream output)
             throws IOException {
         output.flush();
     }
 
+    /**
+     * Formats a double value using the configured decimal format.
+     *
+     * @param value the value to format
+     * @return the formatted string
+     */
     protected final String format(double value) {
         return formatter.format(value);
     }

@@ -8,6 +8,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
@@ -50,6 +51,8 @@ import org.hiero.metrics.internal.export.SinglePullingExporterMetricsExportManag
  *
  * // pass metrics registry to required classes to retrieve or register metrics
  * // Use IdempotentMetricsBinder to bind metrics registry in a thread-safe and idempotent way
+ * MetricsBinder service = new MyService();
+ * service.bindMetrics(metricRegistry);
  * }
  * </pre>
  *
@@ -140,15 +143,20 @@ public final class MetricsFacade {
         List<PullingMetricsExporter> pullingExporters = new ArrayList<>();
         List<PushingMetricsExporter> pushingExporters = new ArrayList<>();
 
+        Optional<MetricsExporter> optionalExporter;
         for (MetricsExporterFactory exporterFactory : exporterFactories) {
-            MetricsExporter exporter;
             try {
-                exporter = exporterFactory.createExporter(configuration);
+                optionalExporter = exporterFactory.createExporter(configuration);
             } catch (Exception e) {
                 logger.error("Failed to create metrics exporter from factory: {}", exporterFactory.getClass(), e);
                 continue;
             }
 
+            if (optionalExporter.isEmpty()) {
+                continue;
+            }
+
+            MetricsExporter exporter = optionalExporter.get();
             if (exporter instanceof PullingMetricsExporter pullingExporter) {
                 pullingExporters.add(pullingExporter);
             } else if (exporter instanceof PushingMetricsExporter pushingExporter) {

@@ -4,9 +4,18 @@ package org.hiero.metrics.api.core;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
- * Interface for binding a {@link MetricRegistry} for metrics registration or retrieval.
+ * Interface for binding a {@link MetricRegistry} for metrics registration or retrieval. <br>
+ * Implementation can also propagate registry to other places where metrics are used (calling other binders).
  * <p>
- * Use {@link IdempotentMetricsBinder} abstract class for an idempotent and thread-safe implementation.
+ * Use {@link IdempotentMetricsBinder} abstract class for an idempotent and thread-safe binding, if necessary.
+ * <p>
+ * If you know that your implementation would be the only place where metric is observed,
+ * metric can be registered and cached for observation in local field.<br>
+ * If metric is observed in multiple places, use {@link MetricsRegistrationProvider} to register the metric
+ * and save {@link MetricKey} in a {@code public static final} field
+ * to retrieve the metric from the registry while binding.
+ *
+ * @see MetricsRegistrationProvider
  */
 public interface MetricsBinder {
 

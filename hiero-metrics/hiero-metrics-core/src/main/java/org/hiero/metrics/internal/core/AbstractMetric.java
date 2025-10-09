@@ -60,7 +60,7 @@ public abstract class AbstractMetric<D, S extends DataPointSnapshot> implements 
             throw new IllegalArgumentException("Label names and values must be in pairs");
         }
 
-        List<String> labelNames = dynamicLabelNames();
+        final List<String> labelNames = dynamicLabelNames();
 
         if (namesAndValues.length / 2 != labelNames.size()) {
             throw new IllegalArgumentException(
@@ -71,13 +71,17 @@ public abstract class AbstractMetric<D, S extends DataPointSnapshot> implements 
             return LabelValues.empty();
         }
 
+        // Defensive copy to avoid external modifications; cheap for few elements as typical use case fo labels
+        final String[] nv = namesAndValues.clone();
+
+        // sort names and values according to labelNames order
         for (int i = 0; i < labelNames.size(); i++) {
             String labelName = labelNames.get(i);
 
             int j = 2 * i;
-            while (j < namesAndValues.length) {
-                if (labelName.equals(namesAndValues[j])) {
-                    if (namesAndValues[j + 1] == null) {
+            while (j < nv.length) {
+                if (labelName.equals(nv[j])) {
+                    if (nv[j + 1] == null) {
                         throw new IllegalArgumentException("Label value must not be null for label: " + labelName);
                     }
                     break;
@@ -85,22 +89,22 @@ public abstract class AbstractMetric<D, S extends DataPointSnapshot> implements 
                 j += 2;
             }
 
-            if (j >= namesAndValues.length) {
+            if (j >= nv.length) {
                 throw new IllegalArgumentException("Missing label name: " + labelName);
             }
 
             // swap only if not already on its place
             if (j > 2 * i) {
-                String tmpName = namesAndValues[2 * i];
-                String tmpValue = namesAndValues[2 * i + 1];
-                namesAndValues[2 * i] = namesAndValues[j];
-                namesAndValues[2 * i + 1] = namesAndValues[j + 1];
-                namesAndValues[j] = tmpName;
-                namesAndValues[j + 1] = tmpValue;
+                String tmpName = nv[2 * i];
+                String tmpValue = nv[2 * i + 1];
+                nv[2 * i] = nv[j];
+                nv[2 * i + 1] = nv[j + 1];
+                nv[j] = tmpName;
+                nv[j + 1] = tmpValue;
             }
         }
 
-        return new LabelNamesAndValues(namesAndValues);
+        return new LabelNamesAndValues(nv);
     }
 
     @NonNull

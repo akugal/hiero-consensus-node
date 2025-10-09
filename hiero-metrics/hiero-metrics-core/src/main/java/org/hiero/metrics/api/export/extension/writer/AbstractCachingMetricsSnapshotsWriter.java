@@ -11,18 +11,26 @@ import org.hiero.metrics.api.export.snapshot.DataPointSnapshot;
 import org.hiero.metrics.api.export.snapshot.MetricSnapshot;
 
 /**
- * Abstract base class for {@link MetricsSnapshotsWriter} implementations.
- * Provides common functionality such as metric filtering and number formatting.
+ * A base class for {@link MetricsSnapshotsWriter} implementations that cache metric export data
+ * between writes to optimize performance.
+ * <p>
+ * Subclasses must implement the abstract methods to define
+ * how individual data points are written and how metric export data is constructed.
+ *
+ * @param <M> the type of metric export data used for caching
  */
 public abstract class AbstractCachingMetricsSnapshotsWriter<M extends BaseMetricExportData>
         extends AbstractMetricsSnapshotsWriter {
 
     private final Map<MetricSnapshot, M> metricCache = new HashMap<>();
 
-    public AbstractCachingMetricsSnapshotsWriter(Builder<?, ?> builder) {
+    protected AbstractCachingMetricsSnapshotsWriter(Builder<?, ?> builder) {
         super(builder);
     }
 
+    /**
+     * Clears the cache of metrics export data.
+     */
     public void clearCache() {
         metricCache.clear();
     }
@@ -42,14 +50,39 @@ public abstract class AbstractCachingMetricsSnapshotsWriter<M extends BaseMetric
         afterMetricWrite(metricExportData, output);
     }
 
+    /**
+     * Called before writing each metric and its data points.
+     *
+     * @param metricExportData the metric export data
+     * @param output the output stream to write to
+     * @throws IOException if an I/O error occurs
+     */
     protected void beforeMetricWrite(@NonNull M metricExportData, @NonNull OutputStream output) throws IOException {
         // nothing by default
     }
 
+    /**
+     * Called after writing each metric and its data points.
+     *
+     * @param metricExportData the metric export data
+     * @param output the output stream to write to
+     * @throws IOException if an I/O error occurs
+     */
     protected void afterMetricWrite(@NonNull M metricExportData, @NonNull OutputStream output) throws IOException {
         // nothing by default
     }
 
+    /**
+     * Writes a single data point to the output stream using the provided export template. <br>
+     * Usually implementation defines variables that datapoint snapshot can provide and uses them to
+     * fill the template.
+     *
+     * @param timestamp the timestamp of the data point
+     * @param dataPointSnapshot the data point snapshot to write
+     * @param dataPointExportTemplate the export template for the datapoint
+     * @param output the output stream to write to
+     * @throws IOException if an I/O error occurs
+     */
     protected abstract void writeDataPoint(
             @NonNull Instant timestamp,
             @NonNull DataPointSnapshot dataPointSnapshot,
@@ -57,5 +90,12 @@ public abstract class AbstractCachingMetricsSnapshotsWriter<M extends BaseMetric
             @NonNull OutputStream output)
             throws IOException;
 
+    /**
+     * Builds the metric export data for the given metric snapshot.
+     * Subclasses must implement this method to define how the metric export data is constructed.
+     *
+     * @param metricSnapshot the metric snapshot
+     * @return the constructed metric export data
+     */
     protected abstract M buildMetricExportData(MetricSnapshot metricSnapshot);
 }
