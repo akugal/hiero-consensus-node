@@ -12,15 +12,24 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
 import org.hiero.metrics.api.export.extension.PullingMetricsExporterAdapter;
 import org.hiero.metrics.api.export.extension.writer.OpenMetricsSnapshotsWriter;
 import org.hiero.metrics.api.export.extension.writer.UnsynchronizedByteArrayOutputStream;
+import org.hiero.metrics.api.export.snapshot.MetricsSnapshot;
 import org.hiero.metrics.openmetrics.config.OpenMetricsHttpEndpointConfig;
 
+/**
+ * An HTTP server that exposes metrics in the OpenMetrics format.
+ * <p>
+ * The server listens on a configurable port and path, and serves metrics snapshots
+ * in response to HTTP GET requests. It supports gzip compression if the client
+ * indicates support for it via the "Accept-Encoding" header.
+ * <p>
+ * This class extends {@link PullingMetricsExporterAdapter} to periodically pull
+ * metrics snapshots for export.
+ */
 public class OpenMetricsHttpEndpoint extends PullingMetricsExporterAdapter {
 
     private static final Logger logger = LogManager.getLogger(OpenMetricsHttpEndpoint.class);
