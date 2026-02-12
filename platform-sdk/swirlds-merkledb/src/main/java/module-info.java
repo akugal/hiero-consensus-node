@@ -18,6 +18,7 @@ open module com.swirlds.merkledb {
     requires transitive org.hiero.base.concurrent;
     requires transitive org.hiero.base.crypto;
     requires transitive org.hiero.base.utility;
+    requires transitive org.hiero.metrics;
     requires com.swirlds.base;
     requires com.swirlds.common;
     requires com.swirlds.config.extensions;
@@ -31,4 +32,7 @@ open module com.swirlds.merkledb {
     requires org.eclipse.collections.api;
     requires org.eclipse.collections.impl;
     requires static transitive com.github.spotbugs.annotations;
+
+    provides org.hiero.metrics.core.MetricsRegistrationProvider with
+            com.swirlds.merkledb.MerkleDbMetricsRegistrationProvider;
 }

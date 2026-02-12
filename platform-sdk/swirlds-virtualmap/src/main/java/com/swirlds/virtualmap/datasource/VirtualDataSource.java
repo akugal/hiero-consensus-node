@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 import org.hiero.base.crypto.Hash;
 import org.hiero.base.io.streams.SerializableDataOutputStream;
+import org.hiero.metrics.core.MetricsBinder;
 
 /**
  * Defines a data source, used with {@code VirtualMap}, to implement a virtual tree. Both in-memory and
@@ -26,7 +27,7 @@ import org.hiero.base.io.streams.SerializableDataOutputStream;
  * very strange exceptions. This is deemed acceptable because guarding against it would require obnoxious
  * performance degradation.
  */
-public interface VirtualDataSource {
+public interface VirtualDataSource extends MetricsBinder {
 
     /** nominal value for a invalid path */
     int INVALID_PATH = -1;

@@ -7,8 +7,10 @@ import com.swirlds.virtualmap.datasource.VirtualDataSource;
 import com.swirlds.virtualmap.datasource.VirtualHashRecord;
 import com.swirlds.virtualmap.datasource.VirtualLeafBytes;
 import com.swirlds.virtualmap.internal.Path;
+import com.swirlds.virtualmap.internal.merkle.VirtualMapMetrics;
 import com.swirlds.virtualmap.internal.merkle.VirtualMapStatistics;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -59,6 +61,8 @@ public class ReconnectHashLeafFlusher {
 
     private final VirtualMapStatistics statistics;
 
+    private VirtualMapMetrics metrics;
+
     public ReconnectHashLeafFlusher(
             @NonNull final VirtualDataSource dataSource,
             final int flushInterval,
@@ -66,6 +70,11 @@ public class ReconnectHashLeafFlusher {
         this.dataSource = Objects.requireNonNull(dataSource);
         this.flushInterval = flushInterval;
         this.statistics = Objects.requireNonNull(statistics);
+    }
+
+    public ReconnectHashLeafFlusher setMetrics(@Nullable VirtualMapMetrics metrics) {
+        this.metrics = metrics;
+        return this;
     }
 
     synchronized void start(final long firstLeafPath, final long lastLeafPath) {
@@ -183,6 +192,9 @@ public class ReconnectHashLeafFlusher {
                         true);
                 final long end = System.currentTimeMillis();
                 statistics.recordFlush(end - start);
+                if (metrics != null) {
+                    metrics.recordFlush(end - start);
+                }
                 logger.debug(VIRTUAL_MERKLE_STATS.getMarker(), "Flushed in {} ms", end - start);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);

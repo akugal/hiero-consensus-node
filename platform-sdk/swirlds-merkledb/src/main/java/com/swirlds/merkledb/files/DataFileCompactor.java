@@ -11,6 +11,8 @@ import static com.swirlds.merkledb.files.DataFileCommon.logCompactStats;
 import com.hedera.pbj.runtime.io.buffer.BufferedData;
 import com.swirlds.base.units.UnitConstants;
 import com.swirlds.merkledb.KeyRange;
+import com.swirlds.merkledb.MerkelDbMetrics;
+import com.swirlds.merkledb.MerkleDbDataSource;
 import com.swirlds.merkledb.collections.CASableLongIndex;
 import com.swirlds.merkledb.config.MerkleDbConfig;
 import edu.umd.cs.findbugs.annotations.Nullable;
@@ -139,6 +141,10 @@ public class DataFileCompactor {
      */
     private volatile boolean interruptFlag = false;
 
+    private MerkelDbMetrics.CompactionStat compactionStat;
+    private MerkelDbMetrics.StoreFileStat storeFileStat;
+    private MerkleDbDataSource dataSource;
+
     /**
      * @param dbConfig                       MerkleDb config
      * @param storeName                      name of the store to compact
@@ -166,6 +172,16 @@ public class DataFileCompactor {
         this.reportSavedSpaceMetricFunction = reportSavedSpaceMetricFunction;
         this.reportFileSizeByLevelMetricFunction = reportFileSizeByLevelMetricFunction;
         this.updateTotalStatsFunction = updateTotalStatsFunction;
+    }
+
+    public DataFileCompactor setCompactionStat(
+            MerkelDbMetrics.CompactionStat compactionStat,
+            MerkelDbMetrics.StoreFileStat storeFileStat,
+            MerkleDbDataSource dataSource) {
+        this.compactionStat = compactionStat;
+        this.storeFileStat = storeFileStat;
+        this.dataSource = dataSource;
+        return this;
     }
 
     /**
@@ -498,6 +514,20 @@ public class DataFileCompactor {
         }
 
         reportFileSizeByLevel(dataFileCollection.getAllCompletedFiles());
+
+        if (storeFileStat != null) {
+            storeFileStat.updateStats(dataSource);
+        }
+        if (compactionStat != null) {
+            compactionStat.setDuration(targetCompactionLevel, tookMillis);
+            compactionStat.setSavedSpace(targetCompactionLevel, filesToCompactSize - compactedFilesSize);
+
+            final Map<Integer, List<DataFileReader>> readersByLevel =
+                    getReadersByLevel(dataFileCollection.getAllCompletedFiles());
+            for (int i = 0; i < readersByLevel.size(); i++) {
+                compactionStat.setFileSize(i, getSizeOfFiles(readersByLevel.get(i)));
+            }
+        }
 
         logCompactStats(
                 storeName,

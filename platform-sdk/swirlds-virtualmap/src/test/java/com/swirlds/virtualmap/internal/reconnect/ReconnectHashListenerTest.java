@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 import org.hiero.base.crypto.Cryptography;
 import org.hiero.base.crypto.CryptographyProvider;
 import org.hiero.base.crypto.Hash;
+import org.hiero.metrics.core.MetricRegistry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -196,6 +197,11 @@ class ReconnectHashListenerTest {
         @Override
         public void registerMetrics(final Metrics metrics) {
             // this database has no statistics
+        }
+
+        @Override
+        public void bind(@NonNull MetricRegistry registry) {
+            // noop
         }
 
         @Override

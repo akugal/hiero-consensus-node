@@ -107,6 +107,7 @@ public abstract class VirtualMapBaseBench extends BaseBench {
             virtualMap = createEmptyMap();
         }
         BenchmarkMetrics.register(virtualMap::registerMetrics);
+        BenchmarkMetrics.bindRegistry(virtualMap);
         return virtualMap;
     }
 

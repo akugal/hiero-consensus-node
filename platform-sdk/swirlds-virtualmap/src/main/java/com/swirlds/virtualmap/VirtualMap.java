@@ -42,6 +42,7 @@ import com.swirlds.virtualmap.internal.cache.VirtualNodeCache;
 import com.swirlds.virtualmap.internal.hash.VirtualHashListener;
 import com.swirlds.virtualmap.internal.hash.VirtualHasher;
 import com.swirlds.virtualmap.internal.merkle.VirtualMapMetadata;
+import com.swirlds.virtualmap.internal.merkle.VirtualMapMetrics;
 import com.swirlds.virtualmap.internal.merkle.VirtualMapStatistics;
 import com.swirlds.virtualmap.internal.pipeline.VirtualPipeline;
 import com.swirlds.virtualmap.internal.reconnect.ConcurrentBlockingIterator;
@@ -77,6 +78,8 @@ import org.hiero.base.constructable.RuntimeConstructable;
 import org.hiero.base.crypto.Hash;
 import org.hiero.consensus.concurrent.framework.config.ThreadConfiguration;
 import org.hiero.consensus.reconnect.config.ReconnectConfig;
+import org.hiero.metrics.core.MetricRegistry;
+import org.hiero.metrics.core.MetricsBinder;
 
 /**
  * A Merkle tree that virtualizes all of its children, such that the child nodes
@@ -141,7 +144,7 @@ import org.hiero.consensus.reconnect.config.ReconnectConfig;
  * through the map-like methods.
  */
 @ConstructableIgnored
-public final class VirtualMap extends AbstractVirtualRoot implements Labeled, VirtualRoot {
+public final class VirtualMap extends AbstractVirtualRoot implements Labeled, VirtualRoot, MetricsBinder {
 
     private static final int MAX_PBJ_RECORD_SIZE = 33554432;
 
@@ -328,6 +331,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
 
     private VirtualMapStatistics statistics;
 
+    @Nullable
+    private VirtualMapMetrics metrics;
+
     /**
      * This reference is used to assert that there is only one thread modifying the VM at a time.
      * NOTE: This field is used *only* if assertions are enabled, otherwise it always has null value.
@@ -414,6 +420,7 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
         pipeline = source.pipeline;
         flushCandidateThreshold.set(source.flushCandidateThreshold.get());
         statistics = source.statistics;
+        metrics = source.metrics;
         virtualMapConfig = source.virtualMapConfig;
 
         if (this.pipeline.isTerminated()) {
@@ -504,6 +511,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
         requireNonNull(key, NO_NULL_KEYS_ALLOWED_MESSAGE);
         final long path = records.findPath(key);
         statistics.countReadEntities();
+        if (metrics != null) {
+            metrics.countReadEntities();
+        }
         return path != INVALID_PATH;
     }
 
@@ -518,6 +528,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
         requireNonNull(key, NO_NULL_KEYS_ALLOWED_MESSAGE);
         final VirtualLeafBytes<V> rec = records.findLeafRecord(key);
         statistics.countReadEntities();
+        if (metrics != null) {
+            metrics.countReadEntities();
+        }
         return rec == null ? null : rec.value(valueCodec);
     }
 
@@ -534,6 +547,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
         requireNonNull(key, NO_NULL_KEYS_ALLOWED_MESSAGE);
         final VirtualLeafBytes rec = records.findLeafRecord(key);
         statistics.countReadEntities();
+        if (metrics != null) {
+            metrics.countReadEntities();
+        }
         return rec == null ? null : rec.valueBytes();
     }
 
@@ -576,6 +592,10 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
                 add(key, value, valueCodec, valueBytes);
                 statistics.countAddedEntities();
                 statistics.setSize(metadata.getSize());
+                if (metrics != null) {
+                    metrics.countAddedEntities();
+                    metrics.setSize(metadata.getSize());
+                }
                 return;
             }
 
@@ -585,6 +605,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
                     : new VirtualLeafBytes<>(path, key, valueBytes);
             cache.putLeaf(leaf);
             statistics.countUpdatedEntities();
+            if (metrics != null) {
+                metrics.countUpdatedEntities();
+            }
         } finally {
             assert currentModifyingThreadRef.compareAndSet(Thread.currentThread(), null);
         }
@@ -635,6 +658,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
             // Mark the leaf as being deleted.
             cache.deleteLeaf(leafToDelete);
             statistics.countRemovedEntities();
+            if (metrics != null) {
+                metrics.countRemovedEntities();
+            }
 
             // We're going to need these
             final long lastLeafPath = metadata.getLastLeafPath();
@@ -684,6 +710,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
             }
             if (statistics != null) {
                 statistics.setSize(metadata.getSize());
+            }
+            if (metrics != null) {
+                metrics.setSize(metadata.getSize());
             }
 
             // Get the value and return it, if requested
@@ -753,6 +782,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
 
         final long end = System.currentTimeMillis();
         statistics.recordMerge(end - start);
+        if (metrics != null) {
+            metrics.recordMerge(end - start);
+        }
         logger.debug(VIRTUAL_MERKLE_STATS.getMarker(), "Merged in {} ms", end - start);
     }
 
@@ -857,6 +889,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
         flushed.set(true);
         flushLatch.countDown();
         statistics.recordFlush(end - start);
+        if (metrics != null) {
+            metrics.recordFlush(end - start);
+        }
         logger.debug(
                 VIRTUAL_MERKLE_STATS.getMarker(),
                 "Flushed {} v{} in {} ms",
@@ -1047,6 +1082,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
 
         final long end = System.currentTimeMillis();
         statistics.recordHash(end - start);
+        if (metrics != null) {
+            metrics.recordHash(end - start);
+        }
     }
 
     /*
@@ -1159,6 +1197,7 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
         // objects to be passed from version to version of the state.
         dataSource.copyStatisticsFrom(originalMap.dataSource);
         statistics = originalMap.statistics;
+        metrics = originalMap.metrics;
     }
 
     /**
@@ -1188,8 +1227,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
         assert originalMap != null;
         // During reconnect we want to look up state from the original records
         final VirtualMapMetadata originalState = originalMap.getMetadata();
-        reconnectFlusher =
-                new ReconnectHashLeafFlusher(dataSource, virtualMapConfig.reconnectFlushInterval(), statistics);
+        reconnectFlusher = new ReconnectHashLeafFlusher(
+                        dataSource, virtualMapConfig.reconnectFlushInterval(), statistics)
+                .setMetrics(metrics);
         nodeRemover = new ReconnectNodeRemover(
                 originalMap.getRecords(),
                 originalState.getFirstLeafPath(),
@@ -1244,6 +1284,15 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
         statistics.registerMetrics(metrics);
         pipeline.registerMetrics(metrics);
         dataSource.registerMetrics(metrics);
+    }
+
+    @Override
+    public void bind(@NonNull MetricRegistry registry) {
+        metrics = new VirtualMapMetrics(registry);
+        dataSource.bind(registry);
+        pipeline.bind(registry);
+
+        metrics.setSize(size());
     }
 
     /**
@@ -1403,6 +1452,9 @@ public final class VirtualMap extends AbstractVirtualRoot implements Labeled, Vi
             metadata.setFirstLeafPath(nextFirstLeafPath);
         }
         statistics.setSize(metadata.getSize());
+        if (metrics != null) {
+            metrics.setSize(metadata.getSize());
+        }
 
         // FUTURE WORK: make VirtualLeafBytes.<init>(path, key, value, codec, bytes) public?
         final VirtualLeafBytes<V> newLeaf = valueCodec != null

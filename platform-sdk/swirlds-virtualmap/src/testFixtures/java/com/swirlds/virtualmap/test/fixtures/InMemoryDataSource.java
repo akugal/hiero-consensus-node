@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import org.hiero.base.crypto.Hash;
+import org.hiero.metrics.core.MetricRegistry;
 
 /**
  * In memory implementation of VirtualDataSource for use in testing.
@@ -218,6 +219,11 @@ public class InMemoryDataSource implements VirtualDataSource {
     @Override
     public void registerMetrics(final Metrics metrics) {
         // nop
+    }
+
+    @Override
+    public void bind(@NonNull MetricRegistry registry) {
+        // noop
     }
 
     // =================================================================================================================

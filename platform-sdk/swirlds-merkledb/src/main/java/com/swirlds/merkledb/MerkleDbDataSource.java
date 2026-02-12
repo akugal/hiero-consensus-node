@@ -60,6 +60,7 @@ import org.apache.logging.log4j.Logger;
 import org.hiero.base.crypto.Hash;
 import org.hiero.base.io.streams.SerializableDataOutputStream;
 import org.hiero.consensus.concurrent.framework.config.ThreadConfiguration;
+import org.hiero.metrics.core.MetricRegistry;
 
 public final class MerkleDbDataSource implements VirtualDataSource {
 
@@ -121,6 +122,7 @@ public final class MerkleDbDataSource implements VirtualDataSource {
      * tableConfig.hashesRamToDiskThreshold to Long.MAX_VALUE. Stores {@link VirtualHashRecord}
      * objects as bytes.
      */
+    @Nullable
     private final MemoryIndexDiskKeyValueStore hashStoreDisk;
 
     /** True when hashesRamToDiskThreshold is less than Long.MAX_VALUE */
@@ -176,6 +178,7 @@ public final class MerkleDbDataSource implements VirtualDataSource {
     final MerkleDbCompactionCoordinator compactionCoordinator;
 
     private MerkleDbStatisticsUpdater statisticsUpdater;
+    private MerkelDbMetrics metrics;
 
     /**
      * Creates a new MerkleDb data source. The specified storage dir must exist and contain valid
@@ -599,6 +602,10 @@ public final class MerkleDbDataSource implements VirtualDataSource {
             statisticsUpdater.updateStoreFileStats(this);
             // update off-heap stats
             statisticsUpdater.updateOffHeapStats(this);
+
+            if (metrics != null) {
+                metrics.getStoreFileStat().updateStats(this);
+            }
         }
     }
 
@@ -640,6 +647,9 @@ public final class MerkleDbDataSource implements VirtualDataSource {
             cached = null;
             statisticsUpdater.countLeafKeyReads();
             path = keyToPath.get(keyBytes, INVALID_PATH);
+            if (metrics != null) {
+                metrics.countLeafKeyReads();
+            }
         }
 
         // If the key didn't map to anything, we just return null
@@ -659,6 +669,9 @@ public final class MerkleDbDataSource implements VirtualDataSource {
         }
 
         statisticsUpdater.countLeafReads();
+        if (metrics != null) {
+            metrics.countLeafReads();
+        }
         // Go ahead and lookup the value.
         VirtualLeafBytes<?> leafBytes = VirtualLeafBytes.parseFrom(pathToKeyValue.get(path));
         assert leafBytes != null && leafBytes.keyBytes().equals(keyBytes);
@@ -690,6 +703,9 @@ public final class MerkleDbDataSource implements VirtualDataSource {
             return null;
         }
         statisticsUpdater.countLeafReads();
+        if (metrics != null) {
+            metrics.countLeafReads();
+        }
         return VirtualLeafBytes.parseFrom(pathToKeyValue.get(path));
     }
 
@@ -718,6 +734,9 @@ public final class MerkleDbDataSource implements VirtualDataSource {
         }
 
         statisticsUpdater.countLeafKeyReads();
+        if (metrics != null) {
+            metrics.countLeafKeyReads();
+        }
         final long path = keyToPath.get(keyBytes, INVALID_PATH);
 
         if (leafRecordCache != null) {
@@ -755,6 +774,9 @@ public final class MerkleDbDataSource implements VirtualDataSource {
             final VirtualHashRecord rec = VirtualHashRecord.parseFrom(hashStoreDisk.get(path));
             hash = (rec != null) ? rec.hash() : null;
             statisticsUpdater.countHashReads();
+            if (metrics != null) {
+                metrics.countHashReads();
+            }
         }
 
         return hash;
@@ -1027,6 +1049,11 @@ public final class MerkleDbDataSource implements VirtualDataSource {
         statisticsUpdater.registerMetrics(metrics);
     }
 
+    @Override
+    public void bind(@NonNull MetricRegistry registry) {
+        metrics = new MerkelDbMetrics(registry);
+    }
+
     /** {@inheritDoc} */
     @Override
     public void copyStatisticsFrom(final VirtualDataSource that) {
@@ -1035,6 +1062,7 @@ public final class MerkleDbDataSource implements VirtualDataSource {
             return;
         }
         statisticsUpdater = thatDataSource.statisticsUpdater;
+        metrics = thatDataSource.metrics;
     }
 
     // ==================================================================================================================
@@ -1130,6 +1158,9 @@ public final class MerkleDbDataSource implements VirtualDataSource {
 
         dirtyHashes.forEach(rec -> {
             statisticsUpdater.countFlushHashesWritten();
+            if (metrics != null) {
+                metrics.countFlushHashesWritten();
+            }
             if (rec.path() < hashesRamToDiskThreshold) {
                 hashStoreRam.put(rec.path(), rec.hash());
             } else {
@@ -1145,6 +1176,9 @@ public final class MerkleDbDataSource implements VirtualDataSource {
         if (hasDiskStoreForHashes) {
             final DataFileReader newHashesFile = hashStoreDisk.endWriting();
             statisticsUpdater.setFlushHashesStoreFileSize(newHashesFile);
+            if (metrics != null) {
+                metrics.setFlushHashesStoreFileSize(newHashesFile);
+            }
             runHashStoreCompaction();
         }
     }
@@ -1182,6 +1216,11 @@ public final class MerkleDbDataSource implements VirtualDataSource {
         // end writing
         final DataFileReader pathToKeyValueReader = pathToKeyValue.endWriting();
         statisticsUpdater.setFlushLeavesStoreFileSize(pathToKeyValueReader);
+
+        if (metrics != null) {
+            metrics.setFlushLeavesStoreFileSize(pathToKeyValueReader);
+            metrics.countFlushLeavesWritten(sortedDirtyLeaves.size());
+        }
 
         runPathToKeyStoreCompaction();
     }
@@ -1241,6 +1280,12 @@ public final class MerkleDbDataSource implements VirtualDataSource {
         final DataFileReader keyToPathReader = keyToPath.endWriting();
         statisticsUpdater.setFlushLeafKeysStoreFileSize(keyToPathReader);
 
+        if (metrics != null) {
+            metrics.countFlushLeafKeysWritten(sortedDirtyLeaves.size());
+            metrics.countFlushLeavesDeleted(deletedLeaves.size());
+            metrics.setFlushLeafKeysStoreFileSize(keyToPathReader);
+        }
+
         if (!compactionCoordinator.isCompactionRunning(DataFileCompactor.OBJECT_KEY_TO_PATH)) {
             keyToPath.resizeIfNeeded(firstLeafPath, lastLeafPath);
         }
@@ -1252,7 +1297,7 @@ public final class MerkleDbDataSource implements VirtualDataSource {
      * Creates a new data file compactor for hashStoreDisk file collection.
      */
     DataFileCompactor newHashStoreDiskCompactor() {
-        return new DataFileCompactor(
+        DataFileCompactor compactor = new DataFileCompactor(
                 merkleDbConfig,
                 tableName + "_" + DataFileCompactor.HASH_STORE_DISK,
                 hashStoreDisk.getFileCollection(),
@@ -1264,13 +1309,17 @@ public final class MerkleDbDataSource implements VirtualDataSource {
                     statisticsUpdater.updateStoreFileStats(this);
                     statisticsUpdater.updateOffHeapStats(this);
                 });
+        if (metrics != null) {
+            compactor.setCompactionStat(metrics.getHashesCompactionStat(), metrics.getStoreFileStat(), this);
+        }
+        return compactor;
     }
 
     /**
      * Creates a new data file compactor for pathToKeyValue file collection.
      */
     DataFileCompactor newPathToKeyValueCompactor() {
-        return new DataFileCompactor(
+        DataFileCompactor compactor = new DataFileCompactor(
                 merkleDbConfig,
                 tableName + "_" + DataFileCompactor.PATH_TO_KEY_VALUE,
                 pathToKeyValue.getFileCollection(),
@@ -1282,13 +1331,17 @@ public final class MerkleDbDataSource implements VirtualDataSource {
                     statisticsUpdater.updateStoreFileStats(this);
                     statisticsUpdater.updateOffHeapStats(this);
                 });
+        if (metrics != null) {
+            compactor.setCompactionStat(metrics.getLeavesCompactionStat(), metrics.getStoreFileStat(), this);
+        }
+        return compactor;
     }
 
     /**
      * Creates a new data file compactor for keyToPath file collection.
      */
     DataFileCompactor newKeyToPathCompactor() {
-        return new DataFileCompactor(
+        DataFileCompactor compactor = new DataFileCompactor(
                 merkleDbConfig,
                 tableName + "_" + DataFileCompactor.OBJECT_KEY_TO_PATH,
                 keyToPath.getFileCollection(),
@@ -1300,6 +1353,10 @@ public final class MerkleDbDataSource implements VirtualDataSource {
                     statisticsUpdater.updateStoreFileStats(this);
                     statisticsUpdater.updateOffHeapStats(this);
                 });
+        if (metrics != null) {
+            compactor.setCompactionStat(metrics.getLeafKeysCompactionStat(), metrics.getStoreFileStat(), this);
+        }
+        return compactor;
     }
 
     /**
@@ -1342,14 +1399,17 @@ public final class MerkleDbDataSource implements VirtualDataSource {
         compactionCoordinator.awaitForCurrentCompactionsToComplete(timeoutMillis);
     }
 
+    @Nullable
     public MemoryIndexDiskKeyValueStore getHashStoreDisk() {
         return hashStoreDisk;
     }
 
+    @NonNull
     public HalfDiskHashMap getKeyToPath() {
         return keyToPath;
     }
 
+    @NonNull
     public MemoryIndexDiskKeyValueStore getPathToKeyValue() {
         return pathToKeyValue;
     }
@@ -1358,6 +1418,7 @@ public final class MerkleDbDataSource implements VirtualDataSource {
         return compactionCoordinator;
     }
 
+    @Nullable
     public HashList getHashStoreRam() {
         return hashStoreRam;
     }

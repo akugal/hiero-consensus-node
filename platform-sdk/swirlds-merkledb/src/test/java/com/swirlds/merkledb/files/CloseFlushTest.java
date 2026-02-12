@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.hiero.base.crypto.Hash;
+import org.hiero.metrics.core.MetricRegistry;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -191,6 +192,11 @@ public class CloseFlushTest {
                 @Override
                 public void registerMetrics(final Metrics metrics) {
                     delegate.registerMetrics(metrics);
+                }
+
+                @Override
+                public void bind(@NonNull MetricRegistry registry) {
+                    delegate.bind(registry);
                 }
 
                 public long getFirstLeafPath() {

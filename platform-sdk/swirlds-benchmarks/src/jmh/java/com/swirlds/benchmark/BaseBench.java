@@ -70,15 +70,15 @@ public abstract class BaseBench {
     protected static Configuration configuration;
 
     private static void loadConfig() throws IOException {
-        ConfigurationBuilder configurationBuilder = ConfigurationBuilder.create()
+        configuration = ConfigurationBuilder.create()
                 .autoDiscoverExtensions()
                 .withSource(new LegacyFileConfigSource(Path.of(".", "settings.txt")))
                 .withConfigDataType(BenchmarkConfig.class)
                 .withConfigDataType(VirtualMapConfig.class)
                 .withConfigDataType(MerkleDbConfig.class)
                 .withConfigDataType(MetricsConfig.class)
-                .withConfigDataType(CryptoConfig.class);
-        configuration = configurationBuilder.build();
+                .withConfigDataType(CryptoConfig.class)
+                .build();
 
         final StringBuilder settingsUsed = new StringBuilder();
         ConfigExport.addConfigContents(configuration, settingsUsed);
@@ -129,11 +129,11 @@ public abstract class BaseBench {
         }
 
         // Setup metrics system
-        BenchmarkMetrics.start(benchmarkConfig);
+        BenchmarkMetrics.start(configuration);
     }
 
     @TearDown
-    public void destroy() {
+    public void destroy() throws IOException {
         BenchmarkMetrics.stop();
         if (!getBenchmarkConfig().saveDataDirectory()) {
             Utils.deleteRecursively(benchDir);

@@ -258,8 +258,10 @@ public final class DataFileCommon {
      */
     public static long getSizeOfFiles(final Iterable<? extends DataFileReader> fileReaders) {
         long totalSize = 0;
-        for (final DataFileReader dataFileReader : fileReaders) {
-            totalSize += dataFileReader.getSize();
+        if (fileReaders != null) {
+            for (final DataFileReader dataFileReader : fileReaders) {
+                totalSize += dataFileReader.getSize();
+            }
         }
         return totalSize;
     }

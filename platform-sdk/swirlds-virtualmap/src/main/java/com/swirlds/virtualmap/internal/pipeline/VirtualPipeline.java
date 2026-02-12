@@ -12,6 +12,7 @@ import com.swirlds.virtualmap.config.VirtualMapConfig;
 import com.swirlds.virtualmap.internal.VirtualRoot;
 import com.swirlds.virtualmap.internal.merkle.VirtualMapStatistics;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
@@ -24,6 +25,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hiero.consensus.concurrent.framework.config.ThreadConfiguration;
+import org.hiero.metrics.core.MetricRegistry;
+import org.hiero.metrics.core.MetricsBinder;
 
 /**
  * <p>
@@ -93,7 +96,7 @@ import org.hiero.consensus.concurrent.framework.config.ThreadConfiguration;
  * 		calls that race with this one and come after will not execute.</li>
  * </ul>
  */
-public class VirtualPipeline {
+public class VirtualPipeline implements MetricsBinder {
 
     private static final String PIPELINE_COMPONENT = "virtual-pipeline";
     private static final String PIPELINE_THREAD_NAME = "lifecycle";
@@ -147,6 +150,9 @@ public class VirtualPipeline {
     private final VirtualMapConfig config;
 
     private final VirtualMapStatistics statistics;
+
+    @Nullable
+    private VirtualPipelineMetrics metrics;
 
     /**
      * Create a new pipeline for a family of fast copies on a virtual root.
@@ -217,6 +223,9 @@ public class VirtualPipeline {
             // Record actual sleep time
             logger.warn(VIRTUAL_MERKLE_STATS.getMarker(), "Total size backpressure: {} ms", timeSleptSoFar);
             statistics.recordFamilySizeBackpressureMs((int) timeSleptSoFar);
+            if (metrics != null) {
+                metrics.recordFamilySizeBackpressureMs(timeSleptSoFar);
+            }
         } catch (final InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
@@ -270,6 +279,9 @@ public class VirtualPipeline {
         mostRecentCopy.set(copy);
 
         statistics.setPipelineSize(copies.getSize());
+        if (metrics != null) {
+            metrics.setPipelineSize(copies.getSize());
+        }
 
         applyFamilySizeBackpressure();
     }
@@ -494,6 +506,11 @@ public class VirtualPipeline {
             final long totalSize = currentTotalSize();
             logger.debug(VIRTUAL_MERKLE_STATS.getMarker(), "Total size {}", totalSize);
             statistics.setNodeCacheSize(totalSize);
+
+            if (metrics != null) {
+                metrics.setPipelineSize(copies.getSize());
+                metrics.setNodeCacheSize(totalSize);
+            }
             next = next.getNext();
         }
     }
@@ -642,5 +659,10 @@ public class VirtualPipeline {
      */
     private boolean isAlreadyRegistered(final VirtualRoot copy) {
         return !copies.testAll(c -> !copy.equals(c));
+    }
+
+    @Override
+    public void bind(@NonNull MetricRegistry registry) {
+        metrics = new VirtualPipelineMetrics(registry);
     }
 }

@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import org.hiero.base.crypto.Cryptography;
 import org.hiero.base.crypto.CryptographyProvider;
 import org.hiero.base.crypto.Hash;
+import org.hiero.metrics.core.MetricRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -345,6 +346,11 @@ public class RecordAccessorTest {
         @Override
         public void registerMetrics(final Metrics metrics) {
             // this database has no statistics
+        }
+
+        @Override
+        public void bind(@NonNull MetricRegistry registry) {
+            // noop
         }
 
         @Override

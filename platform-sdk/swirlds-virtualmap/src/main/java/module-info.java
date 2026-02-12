@@ -39,8 +39,12 @@ open module com.swirlds.virtualmap {
     requires transitive org.hiero.base.utility;
     requires transitive org.hiero.consensus.concurrent;
     requires transitive org.hiero.consensus.reconnect;
+    requires transitive org.hiero.metrics;
     requires com.swirlds.logging;
     requires java.management; // Test dependency
     requires org.apache.logging.log4j;
     requires static transitive com.github.spotbugs.annotations;
+
+    provides org.hiero.metrics.core.MetricsRegistrationProvider with
+            com.swirlds.virtualmap.VirtualMapMetricsRegistrationProvider;
 }
